@@ -18,24 +18,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # full history for page dates
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: .quartz/plugins
           key: ${{ runner.os }}-plugins-${{ hashFiles('quartz.config.yaml') }}
       - run: npm ci
       - run: npx quartz plugin install --from-config # no lockfile: install what quartz.config.yaml lists
       - run: npx quartz build
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: public
 
@@ -47,4 +47,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
