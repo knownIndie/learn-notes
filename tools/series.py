@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Apply each subject's reading order to the sidebar and to every page.
+
+The reading order lives in one place: the numbered list of [[wikilinks]] in
+content/<subject>/index.md. Subjects are ordered by the [[<subject>/index]] links
+in content/index.md. Running this script:
+
+  1. writes the explorer `sortFn` in quartz.config.yaml, so the sidebar follows that order;
+  2. writes a "<Subject> · N of M" block (a quiet `series` callout) at the top of each listed page (the whole
+     order, current page in bold) and previous/next links at the bottom.
+
+Run it after adding a page or changing an order:  python3 tools/series.py
+"""
+import json
+import pathlib
+import re
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+CONTENT = ROOT / "content"
+CONFIG = ROOT / "quartz.config.yaml"
+
+TOP_START, TOP_END = "<!-- series:start -->", "<!-- series:end -->"
+BOTTOM_START, BOTTOM_END = "<!-- series-nav:start -->", "<!-- series-nav:end -->"
+NUMBERED_LINK = re.compile(r"^\s*\d+\.\s.*?\[\[([^\]|#]+)")
+SUBJECT_LINK = re.compile(r"\[\[([^\]|#]+)/index")
+
+
+def frontmatter(path):
+    text = path.read_text()
+    m = re.match(r"---\n(.*?)\n---\n", text, re.S)
+    fields = {}
+    for line in (m.group(1).splitlines() if m else []):
+        if ":" in line and not line.startswith(" "):
+            key, value = line.split(":", 1)
+            fields[key.strip()] = value.strip().strip('"')
+    return fields
+
+
+def label(path):
+    """Short name for lists: frontmatter `short`, else the title without its parenthesis."""
+    fm = frontmatter(path)
+    return fm.get("short") or re.sub(r"\s*\(.*\)$", "", fm.get("title", path.stem))
+
+
+def subjects():
+    """[(subject, [page stems in reading order])], in home-page order."""
+    home = (CONTENT / "index.md").read_text()
+    names = list(dict.fromkeys(SUBJECT_LINK.findall(home)))
+    names += sorted(p.parent.name for p in CONTENT.glob("*/index.md") if p.parent.name not in names + ["templates"])
+    out = []
+    for name in names:
+        index = CONTENT / name / "index.md"
+        stems = [m.group(1).split("/")[-1] for line in index.read_text().splitlines() if (m := NUMBERED_LINK.match(line))]
+        out.append((name, [s for s in stems if (CONTENT / name / f"{s}.md").exists()]))
+    return out
+
+
+def replace_block(text, start, end, block, where):
+    pattern = re.compile(re.escape(start) + r".*?" + re.escape(end) + r"\n*", re.S)
+    if pattern.search(text):
+        return pattern.sub(block, text, count=1)
+    if where == "top":
+        m = re.match(r"---\n.*?\n---\n\n?", text, re.S)
+        cut = m.end() if m else 0
+        return text[:cut] + block + text[cut:]
+    return text.rstrip("\n") + "\n\n" + block
+
+
+def write_page_blocks(subject, stems):
+    title = frontmatter(CONTENT / subject / "index.md").get("title", subject.title())
+    names = {s: label(CONTENT / subject / f"{s}.md") for s in stems}
+    for i, stem in enumerate(stems):
+        path = CONTENT / subject / f"{stem}.md"
+        rows = [
+            f"> {n}. **{names[s]}** · you are here" if s == stem else f"> {n}. [[{subject}/{s}|{names[s]}]]"
+            for n, s in enumerate(stems, 1)
+        ]
+        top = (
+            f"{TOP_START}\n> [!series]- {title} · {i + 1} of {len(stems)}\n"
+            + "\n".join(rows)
+            + f"\n{TOP_END}\n\n"
+        )
+        prev_link = f"← [[{subject}/{stems[i - 1]}|{names[stems[i - 1]]}]]" if i > 0 else f"← [[{subject}/index|{title}]]"
+        next_link = f"[[{subject}/{stems[i + 1]}|{names[stems[i + 1]]}]] →" if i + 1 < len(stems) else f"[[{subject}/index|Back to {title}]] →"
+        bottom = f"{BOTTOM_START}\n---\n\n{prev_link} · {next_link}\n{BOTTOM_END}\n"
+        text = path.read_text()
+        text = replace_block(text, TOP_START, TOP_END, top, "top")
+        text = replace_block(text, BOTTOM_START, BOTTOM_END, bottom, "bottom")
+        path.write_text(text)
+
+
+def write_sort_fn(order):
+    rank = {}
+    for i, (subject, stems) in enumerate(order):
+        rank[f"{subject}/index"] = i
+        rank.update({f"{subject}/{s}": n for n, s in enumerate(stems)})
+    # The explorer runs this in the browser from its source text, so it must be self-contained.
+    fn = (
+        "(a, b) => { const R = " + json.dumps(rank, separators=(",", ":")) + "; "
+        "const ra = R[a.slug] ?? 1e9, rb = R[b.slug] ?? 1e9; if (ra !== rb) return ra - rb; "
+        "if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1; "
+        "return a.displayName.localeCompare(b.displayName, undefined, { numeric: true, sensitivity: 'base' }) }"
+    )
+    text = CONFIG.read_text()
+    block = re.search(r'  - source: "@quartz-community/explorer"\n(?:    .*\n)*', text).group(0)
+    new = re.sub(r"    options:\n(?:      .*\n)*", "", block)
+    opts = (
+        "    options:\n"
+        "      folderDefaultState: open\n"
+        "      folderClickBehavior: link\n"
+        "      sortFn: " + json.dumps(fn) + " # generated by tools/series.py\n"
+    )
+    new = new.replace("    enabled: true\n", "    enabled: true\n" + opts, 1)
+    CONFIG.write_text(text.replace(block, new))
+
+
+def main():
+    order = subjects()
+    for subject, stems in order:
+        write_page_blocks(subject, stems)
+        print(f"{subject}: {len(stems)} pages")
+    write_sort_fn(order)
+
+
+if __name__ == "__main__":
+    main()

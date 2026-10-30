@@ -6,15 +6,32 @@ aliases: [CORS credentials, credentials include, SameSite]
 created: 2026-10-30
 updated: 2026-10-30
 status: draft
-sources: ["Prep 1 networking session 2026-10-30", "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS", "https://fetch.spec.whatwg.org/", "https://www.rfc-editor.org/rfc/rfc6265"]
+sources: ["study session 2026-10-30", "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS", "https://fetch.spec.whatwg.org/", "https://www.rfc-editor.org/rfc/rfc6265"]
 ---
+
+<!-- series:start -->
+> [!series]- Networking · 9 of 11
+> 1. [[networking/http-message|HTTP message]]
+> 2. [[networking/request-lifecycle|Request lifecycle]]
+> 3. [[networking/dns|DNS]]
+> 4. [[networking/tcp|TCP]]
+> 5. [[networking/tls|TLS]]
+> 6. [[networking/http-caching|HTTP caching]]
+> 7. [[networking/origin|Origin]]
+> 8. [[networking/cors|CORS]]
+> 9. **CORS and credentials** · you are here
+> 10. [[networking/cors-expose-headers|CORS exposed headers]]
+> 11. [[networking/cors-lab|CORS lab]]
+<!-- series:end -->
 
 > [!tldr] In three lines
 > Credentials are the things that prove who you are to a server: cookies, HTTP auth, and client certificates. A cross-origin `fetch` sends them only when the page asks with `credentials: 'include'`, and the server must answer with `Access-Control-Allow-Credentials: true` and an exact origin (never `*`). You meet this when a logged-in app calls its API from another port or domain.
+>
+> [[#Interview questions|→ Self-test: 5 questions]]
 
 ## Why it exists
 
-The [[cors]] page showed that a server can let other origins read its replies. That is not enough for logged-in apps. The API needs to know **who** is asking, so the request must carry the session cookie. Yet the browser should not send that cookie for every cross-origin call, because then any page could make your browser act as you.
+The [[networking/cors|CORS]] page showed that a server can let other origins read its replies. That is not enough for logged-in apps. The API needs to know **who** is asking, so the request must carry the session cookie. Yet the browser should not send that cookie for every cross-origin call, because then any page could make your browser act as you.
 
 So there are two separate decisions, and each side has to agree:
 
@@ -27,11 +44,11 @@ Both must agree, or the request either sends no cookie or the reply stays hidden
 
 <iframe src="/static/widgets/fetch-credentials-include-vs-default.html" width="100%" height="460" style="border:0" loading="lazy"></iframe>
 
-Two `fetch` calls from the lab page, and the raw request each one produces. Click button 2 (default) and button 5 (`credentials: 'include'`) to compare: only the `include` call sends a `Cookie` line.
+*Two `fetch` calls from the lab page: click button 2 (default) and button 5 (include). Only the include call sends a `Cookie` line.*
 
 <iframe src="/static/widgets/origin-vs-user-and-allow-credentials.html" width="100%" height="620" style="border:0" loading="lazy"></iframe>
 
-Read Part A to see that `Origin` names the page and `Cookie` names the person. Then check the grid in Part B for each credentials mode and header combination.
+*Part A: `Origin` names the page, `Cookie` names the person. Part B: the grid for each credentials mode and header combination.*
 
 ## Plain version
 
@@ -256,24 +273,6 @@ This matters for security. Another app on a different port of the same host also
 
 If the API is on a different site from the page, a `SameSite=Lax` cookie is not sent on the `fetch`, so credentialed calls quietly fail to carry the login. The fix is `SameSite=None; Secure` on the cookie, plus the CORS headers.
 
-## Where it's used
-
-- Logged-in web apps whose frontend and API are on different origins, for example a single-page app on `app.example` calling `api.example`.
-- Single sign-on flows that keep the session in a cookie and call the API with `credentials: 'include'`.
-- Login forms that POST to an API on another origin and rely on the response to set the session cookie.
-- Browser libraries and HTTP clients that expose a `withCredentials` option (XMLHttpRequest) or `credentials` option (`fetch`) to switch this on.
-- Not relevant to `curl` without a cookie jar, or to server-to-server calls, which do not use browser cookie rules.
-
-## Compared with
-
-| | `credentials: 'omit'` | `credentials: 'same-origin'` (default) | `credentials: 'include'` |
-|---|---|---|---|
-| Cookie sent to same origin | No | Yes | Yes |
-| Cookie sent cross-origin | No | No | Yes, if the call is allowed |
-| Needs `Allow-Credentials: true` from server | No | No | Yes, for cross-origin reads |
-| Needs exact `Allow-Origin` (no `*`) | No | No | Yes |
-| Typical use | Public API, no login | Calls to your own origin | Logged-in calls to another origin |
-
 ## Common misconceptions
 
 - **Wrong:** `Access-Control-Allow-Credentials: true` means the caller must already be logged in.
@@ -309,17 +308,32 @@ If the API is on a different site from the page, a `SameSite=Lax` cookie is not 
 
 > [!example] When I see a credentialed call fail with a CORS error, it means the page asked for cookies but the server did not answer with an exact origin and `Access-Control-Allow-Credentials: true`, because the browser only sends and reads credentials when both sides agree.
 
-## Related
+## Compared with
 
-- [[cors]] - the base rules: origin check, preflight, and the header table.
-- [[cors-expose-headers]] - which response headers the page can read.
-- [[cors-lab]] - run the lab and click the steps in order.
-- [[origin]] - scheme, host, and port, and why ports matter for origin but not for cookies.
-- [[http-message]] - the `Cookie` and `Set-Cookie` header format.
+| | `credentials: 'omit'` | `credentials: 'same-origin'` (default) | `credentials: 'include'` |
+|---|---|---|---|
+| Cookie sent to same origin | No | Yes | Yes |
+| Cookie sent cross-origin | No | No | Yes, if the call is allowed |
+| Needs `Allow-Credentials: true` from server | No | No | Yes, for cross-origin reads |
+| Needs exact `Allow-Origin` (no `*`) | No | No | Yes |
+| Typical use | Public API, no login | Calls to your own origin | Logged-in calls to another origin |
 
-## Sources
+## Where it's used
 
-- Prep 1 networking session, 2026-10-30.
-- MDN, [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) (credentialed requests section).
-- WHATWG, [Fetch Standard](https://fetch.spec.whatwg.org/) (credentials mode and CORS protocol).
-- RFC 6265, [HTTP State Management Mechanism (cookies)](https://www.rfc-editor.org/rfc/rfc6265).
+- Logged-in web apps whose frontend and API are on different origins, for example a single-page app on `app.example` calling `api.example`.
+- Single sign-on flows that keep the session in a cookie and call the API with `credentials: 'include'`.
+- Login forms that POST to an API on another origin and rely on the response to set the session cookie.
+- Browser libraries and HTTP clients that expose a `withCredentials` option (XMLHttpRequest) or `credentials` option (`fetch`) to switch this on.
+- Not relevant to `curl` without a cookie jar, or to server-to-server calls, which do not use browser cookie rules.
+
+> [!info]- Sources
+> - Study session, 2026-10-30.
+> - MDN, [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) (credentialed requests section).
+> - WHATWG, [Fetch Standard](https://fetch.spec.whatwg.org/) (credentials mode and CORS protocol).
+> - RFC 6265, [HTTP State Management Mechanism (cookies)](https://www.rfc-editor.org/rfc/rfc6265).
+
+<!-- series-nav:start -->
+---
+
+← [[networking/cors|CORS]] · [[networking/cors-expose-headers|CORS exposed headers]] →
+<!-- series-nav:end -->

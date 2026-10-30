@@ -2,17 +2,34 @@
 title: HTTP caching
 subject: networking
 tags: [networking, http, caching, performance]
-aliases: [HTTP cache, Cache-Control, revalidation, ETag, 304 Not Modified]
+aliases: [HTTP cache, Cache-Control, revalidation, ETag, 304 Not Modified, HyperText Transfer Protocol caching]
 created: 2026-10-30
 updated: 2026-10-30
 status: draft
-sources: ["Prep 1 networking session 2026-10-30", "https://www.rfc-editor.org/rfc/rfc9111", "https://www.rfc-editor.org/rfc/rfc9110", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching"]
+sources: ["study session 2026-10-30", "https://www.rfc-editor.org/rfc/rfc9111", "https://www.rfc-editor.org/rfc/rfc9110", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching"]
 ---
 
+<!-- series:start -->
+> [!series]- Networking · 6 of 11
+> 1. [[networking/http-message|HTTP message]]
+> 2. [[networking/request-lifecycle|Request lifecycle]]
+> 3. [[networking/dns|DNS]]
+> 4. [[networking/tcp|TCP]]
+> 5. [[networking/tls|TLS]]
+> 6. **HTTP caching** · you are here
+> 7. [[networking/origin|Origin]]
+> 8. [[networking/cors|CORS]]
+> 9. [[networking/cors-credentials|CORS and credentials]]
+> 10. [[networking/cors-expose-headers|CORS exposed headers]]
+> 11. [[networking/cors-lab|CORS lab]]
+<!-- series:end -->
+
 > [!tldr] In three lines
-> A cache keeps a copy of a response so the next request can skip the network or ask only "is my copy still good?".
+> HTTP caching is the set of rules (RFC 9111, for HyperText Transfer Protocol responses) that lets a cache keep a copy of a response, so the next request can skip the network or ask only "is my copy still good?".
 > It solves the problem of paying the full download cost for files that have not changed.
 > You meet it in every browser reload, every CDN-served image, and every `304` in DevTools.
+>
+> [[#Interview questions|→ Self-test: 5 questions]]
 
 ## Why it exists
 
@@ -29,7 +46,7 @@ HTTP defines the rules through headers, so every cache along the path can follow
 
 ![First visit vs second visit: DNS, TCP and TLS are skipped on the second visit, and HTTP can be skipped or shortened by the cache](../assets/diagrams/first-vs-second-visit-timeline.svg)
 
-The top row is a first visit: DNS, TCP, TLS, then HTTP, each waiting for the one before. The bottom row is a second visit. The connection setup is saved, and the cache decides whether HTTP is still needed. The cache part is covered on this page; the connection setup part is covered in [[tcp]] and [[tls]].
+The top row is a first visit: DNS, TCP, TLS, then HTTP, each waiting for the one before. The bottom row is a second visit. The connection setup is saved, and the cache decides whether HTTP is still needed. The cache part is covered on this page; the connection setup part is covered in [[networking/tcp|TCP]] and [[networking/tls|TLS]].
 
 ## Plain version
 
@@ -63,16 +80,17 @@ Age is how long the response has been stored, counted from the `Date` header or 
 
 `Cache-Control` is the header that tells every cache what it may do. Several directives can be combined with commas.
 
-| Directive | Meaning | Who may store it |
-|---|---|---|
-| `max-age=N` | Fresh for N seconds after it was received | Any cache allowed to store the response |
-| `no-cache` | Store it, but check with the server before every reuse | Any cache (stored, always revalidated) |
-| `no-store` | Do not store it at all. Fetch the full response every time | Nobody |
-| `private` | Only the user's own browser may store it. Shared caches (CDN, proxy) must not | Browser only |
-| `public` | Any cache may store it, even when the request had cookies or auth | Any cache |
-| `s-maxage=N` | Like `max-age`, but only for shared caches (CDN, proxy). Overrides `max-age` there | Shared caches |
-| `must-revalidate` | Once stale, do not use the copy without checking the server | Any cache |
-| `immutable` | The content never changes for this URL; do not revalidate during the lifetime | Browser |
+> [!info]- Cache-Control reference
+> | Directive | Meaning | Who may store it |
+> |---|---|---|
+> | `max-age=N` | Fresh for N seconds after it was received | Any cache allowed to store the response |
+> | `no-cache` | Store it, but check with the server before every reuse | Any cache (stored, always revalidated) |
+> | `no-store` | Do not store it at all. Fetch the full response every time | Nobody |
+> | `private` | Only the user's own browser may store it. Shared caches (CDN, proxy) must not | Browser only |
+> | `public` | Any cache may store it, even when the request had cookies or auth | Any cache |
+> | `s-maxage=N` | Like `max-age`, but only for shared caches (CDN, proxy). Overrides `max-age` there | Shared caches |
+> | `must-revalidate` | Once stale, do not use the copy without checking the server | Any cache |
+> | `immutable` | The content never changes for this URL; do not revalidate during the lifetime | Browser |
 
 Two common mistakes with these:
 
@@ -240,23 +258,6 @@ In DevTools, open the **Network** tab. Tick **Disable cache** only when you want
 
 Reloading with Cmd+R and hard reloading with Cmd+Shift+R behave differently. A normal reload revalidates the main document. A hard reload asks the browser to skip the cache for the main resources.
 
-## Where it's used
-
-- **Browsers** store static files and API responses, and revalidate them on reload.
-- **CDNs** (for example Cloudflare, Fastly, CloudFront) cache images and scripts at edge locations. They read `s-maxage` and `public`, and they usually ignore `private`.
-- **Proxies** in companies and ISPs cache public files to save bandwidth.
-- **Frameworks** set long `max-age` plus a hash in the file name (`app.3f9c1a.js`), so a changed file gets a new URL and the old one can be cached forever with `immutable`.
-- **API servers** return `ETag` on resources so clients can avoid re-downloading large JSON.
-
-## Compared with
-
-| | Fresh hit (`max-age`) | Revalidation (`ETag`) | Full fetch |
-|---|---|---|---|
-| Network request | None | Yes, small one | Yes, full body |
-| Body transferred | None | None if unchanged | Always |
-| Server work | None | A comparison | Build and send |
-| Good for | Files that rarely change, or hashed file names | Files that change sometimes | Responses that must never be stored (`no-store`) |
-
 ## Common misconceptions
 
 - **Wrong:** A `304 Not Modified` means the server sent the file again.
@@ -286,17 +287,31 @@ Reloading with Cmd+R and hard reloading with Cmd+Shift+R behave differently. A n
 
 > [!example] When I see a `304` with no body in DevTools, it means the stored copy is still valid, because the browser sent `If-None-Match` and the server's ETag matched.
 
-## Related
+## Compared with
 
-- [[http-message]] - the headers used here (`Cache-Control`, `ETag`, `If-None-Match`) and the status codes
-- [[origin]] - the `Vary: Origin` header and why CORS responses must not be cached for the wrong origin
-- [[cors]] - cross-origin responses that a cache could serve to the wrong page
-- [[tcp]] - the connection setup skipped on a second visit when the connection is reused
-- [[tls]] - the encryption setup skipped on the same second visit
+| | Fresh hit (`max-age`) | Revalidation (`ETag`) | Full fetch |
+|---|---|---|---|
+| Network request | None | Yes, small one | Yes, full body |
+| Body transferred | None | None if unchanged | Always |
+| Server work | None | A comparison | Build and send |
+| Good for | Files that rarely change, or hashed file names | Files that change sometimes | Responses that must never be stored (`no-store`) |
 
-## Sources
+## Where it's used
 
-- Prep 1 networking session 2026-10-30
-- RFC 9111 - HTTP Caching: https://www.rfc-editor.org/rfc/rfc9111
-- RFC 9110 - HTTP Semantics (conditional requests): https://www.rfc-editor.org/rfc/rfc9110
-- MDN - HTTP caching: https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
+- **Browsers** store static files and API responses, and revalidate them on reload.
+- **CDNs** (for example Cloudflare, Fastly, CloudFront) cache images and scripts at edge locations. They read `s-maxage` and `public`, and they usually ignore `private`.
+- **Proxies** in companies and ISPs cache public files to save bandwidth.
+- **Frameworks** set long `max-age` plus a hash in the file name (`app.3f9c1a.js`), so a changed file gets a new URL and the old one can be cached forever with `immutable`.
+- **API servers** return `ETag` on resources so clients can avoid re-downloading large JSON.
+
+> [!info]- Sources
+> - study session 2026-10-30
+> - RFC 9111 - HTTP Caching: https://www.rfc-editor.org/rfc/rfc9111
+> - RFC 9110 - HTTP Semantics (conditional requests): https://www.rfc-editor.org/rfc/rfc9110
+> - MDN - HTTP caching: https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
+
+<!-- series-nav:start -->
+---
+
+← [[networking/tls|TLS]] · [[networking/origin|Origin]] →
+<!-- series-nav:end -->

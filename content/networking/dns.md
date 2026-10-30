@@ -1,26 +1,39 @@
 ---
-title: DNS (Domain Name System)
+title: DNS
 subject: networking
 tags: [networking, dns]
-aliases: [Domain Name System, name resolution, resolver]
+aliases: [DNS (Domain Name System), Domain Name System, name resolution, resolver]
 created: 2026-10-30
 updated: 2026-10-30
 status: draft
-sources: ["Prep 1 networking session 2026-10-30", "RFC 1034 (DNS concepts)", "RFC 1035 (DNS implementation)", "RFC 2308 (negative caching)", "RFC 7858 (DNS over TLS)", "RFC 8484 (DNS over HTTPS)"]
+sources: ["study session 2026-10-30", "RFC 1034 (DNS concepts)", "RFC 1035 (DNS implementation)", "RFC 2308 (negative caching)", "RFC 7858 (DNS over TLS)", "RFC 8484 (DNS over HTTPS)"]
 ---
 
+<!-- series:start -->
+> [!series]- Networking · 3 of 11
+> 1. [[networking/http-message|HTTP message]]
+> 2. [[networking/request-lifecycle|Request lifecycle]]
+> 3. **DNS** · you are here
+> 4. [[networking/tcp|TCP]]
+> 5. [[networking/tls|TLS]]
+> 6. [[networking/http-caching|HTTP caching]]
+> 7. [[networking/origin|Origin]]
+> 8. [[networking/cors|CORS]]
+> 9. [[networking/cors-credentials|CORS and credentials]]
+> 10. [[networking/cors-expose-headers|CORS exposed headers]]
+> 11. [[networking/cors-lab|CORS lab]]
+<!-- series:end -->
+
 > [!tldr] In three lines
-> DNS turns a name such as `example.com` into an IP address such as `203.0.113.10`. A recursive resolver does the lookup work for the client, and it walks a chain of servers if its cache is empty. Answers are cached for their TTL, which is why a changed record can take time to appear everywhere.
+> The Domain Name System (DNS) turns a name such as `example.com` into an IP address such as `203.0.113.10`. A recursive resolver does the lookup work for the client, and it walks a chain of servers if its cache is empty. Answers are cached for their TTL, which is why a changed record can take time to appear everywhere.
+>
+> [[#Interview questions|→ Self-test: 6 questions]]
 
 ## Why it exists
 
 Machines find each other by IP address. People remember names. Early networks kept a single shared text file that mapped names to addresses, and every machine downloaded a new copy when hosts changed. That broke down as the network grew.
 
 DNS replaced the file with a distributed database. Each organization runs the servers for its own names. Clients ask a chain of servers, and the answers are cached so the whole system does not have to answer every question each time.
-
-## Picture
-
-No diagram is assigned for this page yet. The sequence diagram in "How it works" shows the lookup.
 
 ## Plain version
 
@@ -30,18 +43,21 @@ You ask a helpful friend who knows where to look. The friend checks what they re
 
 ## Precise definition
 
-| Term | Definition | Where it's used |
-|---|---|---|
-| DNS | A distributed, hierarchical database that maps names to records | Every connection that starts from a name |
-| Stub resolver | The small DNS client in the operating system or browser that sends queries | `getaddrinfo()` and similar calls |
-| Recursive resolver | A server that accepts a query and does all the steps to find the final answer, then caches it | ISP resolvers, `1.1.1.1`, `8.8.8.8`, company resolvers |
-| Authoritative name server | The server that holds the real records for a zone and answers for them | Run by the domain owner or a DNS host |
-| Root server | The top of the hierarchy. It refers queries to the right top-level domain servers | Step 2 of an uncached lookup |
-| TLD server | Serves a top-level domain such as `.com`. It refers queries to the domain's authoritative servers | Step 3 of an uncached lookup |
-| Zone | The part of the name space that one set of authoritative servers manages | `example.com` is one zone |
-| Record | One entry in a zone, such as an A record or MX record | The answer to a query |
-| TTL (time to live) | How many seconds an answer may be cached | Resolvers, operating systems, browsers |
-| Negative caching | Caching the fact that a name does not exist | `NXDOMAIN` answers, per RFC 2308 |
+DNS is the distributed, hierarchical database that maps names to records. The terms it uses are listed below.
+
+> [!info]- Terms reference
+> | Term | Definition | Where it's used |
+> |---|---|---|
+> | DNS | A distributed, hierarchical database that maps names to records | Every connection that starts from a name |
+> | Stub resolver | The small DNS client in the operating system or browser that sends queries | `getaddrinfo()` and similar calls |
+> | Recursive resolver | A server that accepts a query and does all the steps to find the final answer, then caches it | ISP resolvers, `1.1.1.1`, `8.8.8.8`, company resolvers |
+> | Authoritative name server | The server that holds the real records for a zone and answers for them | Run by the domain owner or a DNS host |
+> | Root server | The top of the hierarchy. It refers queries to the right top-level domain servers | Step 2 of an uncached lookup |
+> | TLD server | Serves a top-level domain such as `.com`. It refers queries to the domain's authoritative servers | Step 3 of an uncached lookup |
+> | Zone | The part of the name space that one set of authoritative servers manages | `example.com` is one zone |
+> | Record | One entry in a zone, such as an A record or MX record | The answer to a query |
+> | TTL (time to live) | How many seconds an answer may be cached | Resolvers, operating systems, browsers |
+> | Negative caching | Caching the fact that a name does not exist | `NXDOMAIN` answers, per RFC 2308 |
 
 ## How it works
 
@@ -108,22 +124,23 @@ example.com.            3600    IN      A       203.0.113.10
 ;; MSG SIZE  rcvd: 56
 ```
 
-| Field | Value in the example | What it means |
-|---|---|---|
-| `; <<>> DiG 9.18.28` | Tool name and version | The `dig` client that printed the output |
-| `opcode: QUERY` | Message type | A normal query. Other opcodes include NOTIFY and UPDATE |
-| `status: NOERROR` | Result code | The query worked. A name that does not exist returns `NXDOMAIN` instead |
-| `id: 41237` | Transaction ID | A 16-bit number that matches the answer to the query. Used to block spoofed replies |
-| `flags: qr rd ra` | Header flags | `qr`: this is a response. `rd`: recursion was desired. `ra`: recursion is available on the server that answered |
-| `QUERY: 1, ANSWER: 1` | Section counts | One question was asked and one answer came back |
-| `AUTHORITY: 0` | Count of NS records | Empty here, because the answer came from a cache. An authoritative reply would often include NS records |
-| `ADDITIONAL: 1` | Count of extra records | The OPT record that carries EDNS options |
-| `OPT PSEUDOSECTION`, `udp: 1232` | EDNS0 option | The client says it can accept UDP replies up to 1232 bytes. Larger replies use TCP |
-| `QUESTION SECTION` | The question | Asks for the `A` record of `example.com.`, class `IN` (Internet) |
-| `ANSWER SECTION` | The answer record | `example.com.` is the name. `3600` is the TTL in seconds. `IN A` is the class and type. `203.0.113.10` is the address |
-| `Query time: 12 msec` | Round trip | Time from sending the query to reading the reply. Mostly the RTT to the resolver |
-| `SERVER: 192.168.1.1#53` | Responder | The server that answered, here a local router, on port 53 over UDP |
-| `MSG SIZE rcvd: 56` | Reply size | The reply was 56 bytes, which fits in one UDP packet |
+> [!info]- dig field reference
+> | Field | Value in the example | What it means |
+> |---|---|---|
+> | `; <<>> DiG 9.18.28` | Tool name and version | The `dig` client that printed the output |
+> | `opcode: QUERY` | Message type | A normal query. Other opcodes include NOTIFY and UPDATE |
+> | `status: NOERROR` | Result code | The query worked. A name that does not exist returns `NXDOMAIN` instead |
+> | `id: 41237` | Transaction ID | A 16-bit number that matches the answer to the query. Used to block spoofed replies |
+> | `flags: qr rd ra` | Header flags | `qr`: this is a response. `rd`: recursion was desired. `ra`: recursion is available on the server that answered |
+> | `QUERY: 1, ANSWER: 1` | Section counts | One question was asked and one answer came back |
+> | `AUTHORITY: 0` | Count of NS records | Empty here, because the answer came from a cache. An authoritative reply would often include NS records |
+> | `ADDITIONAL: 1` | Count of extra records | The OPT record that carries EDNS options |
+> | `OPT PSEUDOSECTION`, `udp: 1232` | EDNS0 option | The client says it can accept UDP replies up to 1232 bytes. Larger replies use TCP |
+> | `QUESTION SECTION` | The question | Asks for the `A` record of `example.com.`, class `IN` (Internet) |
+> | `ANSWER SECTION` | The answer record | `example.com.` is the name. `3600` is the TTL in seconds. `IN A` is the class and type. `203.0.113.10` is the address |
+> | `Query time: 12 msec` | Round trip | Time from sending the query to reading the reply. Mostly the RTT to the resolver |
+> | `SERVER: 192.168.1.1#53` | Responder | The server that answered, here a local router, on port 53 over UDP |
+> | `MSG SIZE rcvd: 56` | Reply size | The reply was 56 bytes, which fits in one UDP packet |
 
 A tip for learning: `dig +trace example.com` skips the cache and prints each step of the walk from the root down to the authoritative server.
 
@@ -133,31 +150,6 @@ A tip for learning: `dig +trace example.com` skips the cache and prints each ste
 - **Plain DNS is readable.** Anyone on the path can see the names being looked up and the answers, and a forged reply can be inserted unless the resolver validates DNSSEC. Plain DNS does not encrypt the query.
 - **DoT (DNS over TLS).** RFC 7858. Queries run over TLS on TCP port 853. The content is encrypted, but a separate port makes the traffic easy to spot.
 - **DoH (DNS over HTTPS).** RFC 8484. Queries are HTTP requests, usually on port 443, inside TLS. Network observers see ordinary HTTPS traffic to the resolver.
-
-## Where it's used
-
-- **Every network request by name.** A browser, `curl`, a mobile app or a server making an API call all start with a DNS lookup unless they already have the IP address.
-- **Email.** Mail servers look up MX records to find where to deliver a message, and TXT records for SPF, DKIM and DMARC checks.
-- **CDNs and load balancers.** A CDN can return a different IP address to each client, chosen by location or load. The record TTL is often short so that the CDN can change its answers quickly.
-- **Certificate issuance and domain verification.** Some certificate authorities and cloud services ask the domain owner to publish a specific TXT record to prove control.
-- **Service discovery.** Inside a cluster, names resolve to service addresses, so applications do not need fixed IPs.
-
-## Compared with
-
-| | Recursive resolver | Authoritative name server |
-|---|---|---|
-| Job | Answers any client, does the walk, caches | Holds the records for one zone |
-| Who runs it | ISP, company, public resolver service | The domain owner or a DNS hosting provider |
-| Answers from | Cache, or the chain of servers | Its own zone data |
-| Client sees it as | The DNS server in the network settings | Not contacted by clients directly |
-
-| | UDP 53 | DoT | DoH |
-|---|---|---|---|
-| Transport | UDP | TCP and TLS | HTTP/2 or HTTP/3 over TLS |
-| Port | 53 | 853 | 443 |
-| Encrypted | No | Yes | Yes |
-| Handshake cost | None | TCP plus TLS | TCP plus TLS, usually reused |
-| Looks like | DNS traffic | DNS on a special port | Ordinary web traffic |
 
 ## Common misconceptions
 
@@ -190,21 +182,46 @@ A tip for learning: `dig +trace example.com` skips the cache and prints each ste
 > [!question]- Q6. What does the `NXDOMAIN` status mean, and is it cached?
 > `NXDOMAIN` means the name does not exist. Resolvers can cache this fact for a period taken from the zone's SOA record, which is called negative caching in RFC 2308. A new name that was looked up too early can therefore stay missing for a while.
 
+## Trigger card
+
 > [!example] When I see a "could not resolve host" error, it means the lookup failed before any TCP connection, because the client never received an IP address to connect to.
 
-## Related
+## Compared with
 
-- [[request-lifecycle]]
-- [[tcp]]
-- [[tls]]
-- [[http-message]]
+| | Recursive resolver | Authoritative name server |
+|---|---|---|
+| Job | Answers any client, does the walk, caches | Holds the records for one zone |
+| Who runs it | ISP, company, public resolver service | The domain owner or a DNS hosting provider |
+| Answers from | Cache, or the chain of servers | Its own zone data |
+| Client sees it as | The DNS server in the network settings | Not contacted by clients directly |
 
-## Sources
+| | UDP 53 | DoT | DoH |
+|---|---|---|---|
+| Transport | UDP | TCP and TLS | HTTP/2 or HTTP/3 over TLS |
+| Port | 53 | 853 | 443 |
+| Encrypted | No | Yes | Yes |
+| Handshake cost | None | TCP plus TLS | TCP plus TLS, usually reused |
+| Looks like | DNS traffic | DNS on a special port | Ordinary web traffic |
 
-- Prep 1 networking session, 2026-10-30
-- RFC 1034, Domain Names: Concepts and Facilities
-- RFC 1035, Domain Names: Implementation and Specification
-- RFC 2308, Negative Caching of DNS Queries
-- RFC 7858, Specification for DNS over Transport Layer Security (TLS)
-- RFC 8484, DNS Queries over HTTPS (DoH)
-- RFC 5737, IPv4 Address Blocks Reserved for Documentation
+## Where it's used
+
+- **Every network request by name.** A browser, `curl`, a mobile app or a server making an API call all start with a DNS lookup unless they already have the IP address.
+- **Email.** Mail servers look up MX records to find where to deliver a message, and TXT records for SPF, DKIM and DMARC checks.
+- **CDNs and load balancers.** A CDN can return a different IP address to each client, chosen by location or load. The record TTL is often short so that the CDN can change its answers quickly.
+- **Certificate issuance and domain verification.** Some certificate authorities and cloud services ask the domain owner to publish a specific TXT record to prove control.
+- **Service discovery.** Inside a cluster, names resolve to service addresses, so applications do not need fixed IPs.
+
+> [!info]- Sources
+> - study session, 2026-10-30
+> - RFC 1034, Domain Names: Concepts and Facilities
+> - RFC 1035, Domain Names: Implementation and Specification
+> - RFC 2308, Negative Caching of DNS Queries
+> - RFC 7858, Specification for DNS over Transport Layer Security (TLS)
+> - RFC 8484, DNS Queries over HTTPS (DoH)
+> - RFC 5737, IPv4 Address Blocks Reserved for Documentation
+
+<!-- series-nav:start -->
+---
+
+← [[networking/request-lifecycle|Request lifecycle]] · [[networking/tcp|TCP]] →
+<!-- series-nav:end -->

@@ -6,19 +6,36 @@ aliases: [web origin, same-origin, same-origin policy, SOP, Origin header]
 created: 2026-10-30
 updated: 2026-10-30
 status: draft
-sources: ["Prep 1 networking session 2026-10-30", "https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS", "https://www.rfc-editor.org/rfc/rfc6265", "https://fetch.spec.whatwg.org/"]
+sources: ["study session 2026-10-30", "https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS", "https://www.rfc-editor.org/rfc/rfc6265", "https://fetch.spec.whatwg.org/"]
 ---
+
+<!-- series:start -->
+> [!series]- Networking · 7 of 11
+> 1. [[networking/http-message|HTTP message]]
+> 2. [[networking/request-lifecycle|Request lifecycle]]
+> 3. [[networking/dns|DNS]]
+> 4. [[networking/tcp|TCP]]
+> 5. [[networking/tls|TLS]]
+> 6. [[networking/http-caching|HTTP caching]]
+> 7. **Origin** · you are here
+> 8. [[networking/cors|CORS]]
+> 9. [[networking/cors-credentials|CORS and credentials]]
+> 10. [[networking/cors-expose-headers|CORS exposed headers]]
+> 11. [[networking/cors-lab|CORS lab]]
+<!-- series:end -->
 
 > [!tldr] In three lines
 > An origin is the three parts of a URL that matter for browser security: scheme, host, and port. The browser's same-origin policy stops a page on one origin from reading responses from another origin.
 > It solves the problem of a random website reading your bank page, or your email, through the browser.
 > You meet it as CORS errors in the console, the `Origin` header in DevTools, and the rule that cookies are sent to a host, not to a page.
+>
+> [[#Interview questions|→ Self-test: 6 questions]]
 
 ## Why it exists
 
 A browser loads many sites in tabs and frames, and each site has its own data and its own logins. Without a rule, a page you opened by accident could send a request to your bank, the browser would attach your bank cookie, and the page could read the account details in the reply.
 
-The same-origin policy (SOP) is the rule that stops this. Page code may freely load and run things from other origins, but it may not read what comes back, unless the other origin says it is allowed. CORS (Cross-Origin Resource Sharing) is the explicit "allowed" signal, and [[cors]] covers it in detail.
+The same-origin policy (SOP) is the rule that stops this. Page code may freely load and run things from other origins, but it may not read what comes back, unless the other origin says it is allowed. CORS (Cross-Origin Resource Sharing) is the explicit "allowed" signal, and [[networking/cors|CORS]] covers it in detail.
 
 The word "origin" names the unit that the rule works with. If that unit is wrong, the rule is wrong, so it is worth being exact.
 
@@ -27,7 +44,7 @@ The word "origin" names the unit that the rule works with. If that unit is wrong
 <!-- interactive widget: runs on the site only; src path is from the site root -->
 <iframe src="/static/widgets/origin-vs-user-and-allow-credentials.html" width="100%" height="620" style="border:0" loading="lazy"></iframe>
 
-Part A shows three requests with different Origin and Cookie values: Origin says which page asked, Cookie says which person. Part B is a grid: pick a `fetch` credentials mode and reply headers, and see whether the page can read the reply. The buttons in the lab page reproduce the same cases on a real server.
+*Part A: Origin says which page asked, Cookie says which person. Part B: pick a credentials mode and reply headers to see whether the page can read the reply.*
 
 ## Plain version
 
@@ -75,7 +92,7 @@ The `localhost:8000` and `localhost:9000` pair is the lab case. The same machine
 1. A page at `http://localhost:8000` runs a `fetch` to `http://localhost:9000/api/open`.
 2. The browser compares the page origin with the request URL's origin. They differ (port), so the request is cross-origin.
 3. The browser adds an `Origin: http://localhost:8000` request header. The page code cannot change this value.
-4. The request is sent to the server. For a simple cross-origin request (a plain GET, or a simple POST), the server receives it and can act on it. The browser does not stop the request from being sent. Requests that need extra permission (for example a JSON `POST` with a `Content-Type` of `application/json`) first get a preflight `OPTIONS` request. If the preflight is refused, the browser never sends the real request. [[cors]] covers preflight.
+4. The request is sent to the server. For a simple cross-origin request (a plain GET, or a simple POST), the server receives it and can act on it. The browser does not stop the request from being sent. Requests that need extra permission (for example a JSON `POST` with a `Content-Type` of `application/json`) first get a preflight `OPTIONS` request. If the preflight is refused, the browser never sends the real request. [[networking/cors|CORS]] covers preflight.
 5. The server replies. The browser checks the response headers for `Access-Control-Allow-Origin` (and credentials rules, see below).
 6. If the header allows this origin, the browser gives the body to the page. If not, the page's `fetch` promise fails, and the body is hidden from the page's JavaScript.
 
@@ -99,7 +116,7 @@ Note on the diagram: the server does the work. The browser only decides what the
 ### What the same-origin policy blocks
 
 - Reading the body of a cross-origin `fetch` or `XMLHttpRequest` response, unless CORS allows it.
-- Reading response headers other than the CORS-safelisted ones (see [[cors]]).
+- Reading response headers other than the CORS-safelisted ones (see [[networking/cors|CORS]]).
 - Reading the DOM of a cross-origin `iframe`.
 - Reading the contents of a cross-origin page opened in a popup.
 
@@ -205,23 +222,6 @@ The browser also does not isolate cookies by scheme in the way people often assu
 - **Application** > **Cookies**: the cookies for each host, with their attributes.
 - **Server terminal**: the lab prints `GET /path Origin=...`, which shows what the server received even when the page got nothing.
 
-## Where it's used
-
-- **Single-page apps** on one domain calling an API on a subdomain (`app.example.com` calling `api.example.com`). Those are different origins, so CORS is needed.
-- **Local development** where the front end runs on one port and the back end on another. This is the lab setup.
-- **Third-party widgets** (payment forms, maps, analytics) that load scripts from other origins without reading their data.
-- **Security reviews** that check whether an API reflects arbitrary `Origin` values or accepts `null`.
-- **Mobile apps and `curl`** are not browsers. They do not enforce SOP or add `Origin` for you, so `Origin` is not a login and not a security check on its own.
-
-## Compared with
-
-| | Origin | Site | Cookie scope |
-|---|---|---|---|
-| Parts | scheme + host + port | scheme + registrable domain | host + path (+ attributes) |
-| Ports count? | Yes | No | No |
-| Used for | SOP, CORS, `Origin` header | `SameSite` cookie rules | Which cookies are sent |
-| Example, same? | `localhost:8000` vs `localhost:9000`: no | same | `localhost` cookie visible on both ports: yes |
-
 ## Common misconceptions
 
 - **Wrong:** `Origin` identifies the user.
@@ -257,17 +257,32 @@ The browser also does not isolate cookies by scheme in the way people often assu
 
 > [!example] When I see a CORS error in the console, it means the browser refused to show the page the reply, because the server's `Access-Control-Allow-Origin` did not name the page's origin (scheme, host, and port) exactly.
 
-## Related
+## Compared with
 
-- [[cors]] - the headers the server sends to relax the same-origin policy
-- [[http-message]] - the `Origin`, `Cookie`, and `Set-Cookie` headers in full
-- [[http-caching]] - why a cached response should `Vary` on `Origin` when the response differs per origin
-- [[tls]] - why `https` and `http` are different origins even for the same host name
+| | Origin | Site | Cookie scope |
+|---|---|---|---|
+| Parts | scheme + host + port | scheme + registrable domain | host + path (+ attributes) |
+| Ports count? | Yes | No | No |
+| Used for | SOP, CORS, `Origin` header | `SameSite` cookie rules | Which cookies are sent |
+| Example, same? | `localhost:8000` vs `localhost:9000`: no | same | `localhost` cookie visible on both ports: yes |
 
-## Sources
+## Where it's used
 
-- Prep 1 networking session 2026-10-30
-- MDN - Same-origin policy: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
-- MDN - CORS: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS
-- RFC 6265 - HTTP State Management (cookies): https://www.rfc-editor.org/rfc/rfc6265
-- WHATWG Fetch Standard: https://fetch.spec.whatwg.org/
+- **Single-page apps** on one domain calling an API on a subdomain (`app.example.com` calling `api.example.com`). Those are different origins, so CORS is needed.
+- **Local development** where the front end runs on one port and the back end on another. This is the lab setup.
+- **Third-party widgets** (payment forms, maps, analytics) that load scripts from other origins without reading their data.
+- **Security reviews** that check whether an API reflects arbitrary `Origin` values or accepts `null`.
+- **Mobile apps and `curl`** are not browsers. They do not enforce SOP or add `Origin` for you, so `Origin` is not a login and not a security check on its own.
+
+> [!info]- Sources
+> - study session 2026-10-30
+> - MDN - Same-origin policy: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
+> - MDN - CORS: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS
+> - RFC 6265 - HTTP State Management (cookies): https://www.rfc-editor.org/rfc/rfc6265
+> - WHATWG Fetch Standard: https://fetch.spec.whatwg.org/
+
+<!-- series-nav:start -->
+---
+
+← [[networking/http-caching|HTTP caching]] · [[networking/cors|CORS]] →
+<!-- series-nav:end -->

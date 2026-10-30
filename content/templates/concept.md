@@ -1,16 +1,21 @@
 ---
-title: <Concept name>
+title: <Short name, e.g. "TCP" not "TCP (Transmission Control Protocol)">
+short: <optional label for nav lists, if the title is still long>
 subject: <subject folder, e.g. networking>
 tags: [<subject>, <topic>]
-aliases: [<abbreviation or other names>]
+aliases: [<full name>, <abbreviation>, <other names>]
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 status: draft            # draft | reviewed
-sources: [<session or link>]
+sources: [<study session YYYY-MM-DD>, <RFC/MDN/book links>]
 ---
 
+<!-- tools/series.py inserts the reading-order block here. Don't write it by hand. -->
+
 > [!tldr] In three lines
-> What it is. What problem it solves. Where you meet it.
+> What it is (expand the full name here, e.g. "Transmission Control Protocol"). What problem it solves. Where you meet it.
+>
+> [[#Interview questions|→ Self-test: N questions]]
 
 ## Why it exists
 
@@ -18,10 +23,13 @@ The problem, told as a short story. Without the "why", the mechanics look arbitr
 
 ## Picture
 
+<!-- Only if there is a picture. No diagram? Delete this whole section. Never write "no diagram yet". -->
 ![<what the diagram shows>](../assets/diagrams/<diagram>.svg)
 
-<!-- interactive widget: runs on the site only; src path is from the site root -->
+<!-- Interactive widget (site only). The iframe sizes itself; height is the fallback. -->
 <iframe src="/static/widgets/<widget>.html" width="100%" height="600" style="border:0" loading="lazy"></iframe>
+
+*What to click and what to notice, in one line.*
 
 ## Plain version
 
@@ -37,7 +45,7 @@ The definition with the correct terms.
 
 ## How it works
 
-Step by step. Use a Mermaid sequence diagram for protocols, LaTeX for formulas ($O(n \log n)$, $$\sum_i x_i$$).
+Numbered steps. Mermaid `sequenceDiagram` for protocols, LaTeX for formulas ($O(n \log n)$).
 
 ```mermaid
 sequenceDiagram
@@ -46,23 +54,22 @@ sequenceDiagram
   C->>S: ...
 ```
 
+> [!warning] Gotcha
+> Use `warning` callouts for traps worth flagging in place. Optional.
+
 ## The real thing
 
-The real artifact, raw: an HTTP request/response, packet fields, SQL and its result rows, a log line, a worked calculation. Then explain each field.
+The real artifact, raw (HTTP exchange, packet fields, SQL and result rows, a worked calculation, a log line), then each field explained.
 
 | Field | Value | What it means |
 |---|---|---|
 | | | |
 
-## Where it's used
-
-Real products, protocols, and everyday situations.
-
-## Compared with
-
-| | This | Neighbour |
-|---|---|---|
-| | | |
+<!-- Long reference tables (more than ~8 rows) go inside a collapsed callout:
+> [!info]- Full header reference
+> | Header | Meaning |
+> |---|---|
+-->
 
 ## Common misconceptions
 
@@ -77,10 +84,26 @@ Real products, protocols, and everyday situations.
 
 > [!example] When I see ___, it means ___ because ___.
 
+## Compared with
+
+| | This | Neighbour |
+|---|---|---|
+| | | |
+
+## Where it's used
+
+Real products, protocols, and everyday situations.
+
 ## Related
 
-- [[...]]
+<!-- Only pages OUTSIDE this subject's reading order, each with one line on why. The series block already links the siblings. No such links? Delete this section. -->
+- [[<subject>/<page>|<Label>]]: why it's related.
 
-## Sources
+> [!info]- Sources
+> - ...
 
-- ...
+<!--
+Rules
+- Callout types mean one thing each: tldr = summary · question = self-test · example = trigger card · warning = gotcha · info = collapsed reference/sources · series = reading order (generated).
+- Wikilinks use the full path: [[networking/tcp|TCP]], never [[tcp]] (aliases create root redirect pages that shortest-match wins).
+-->

@@ -59,13 +59,15 @@ COMMON_VARS = """
 """
 
 
-def ramp_rules(dark):
+def ramp_rules(dark, scope=""):
+    """Fill/stroke/text colours for the c-<ramp> classes. `scope` prefixes every selector."""
     out = []
     for name, (s50, s100, s200, _s400, s600, s800, _s900) in RAMPS.items():
         fill, stroke, title, sub = (s800, s200, s100, s200) if dark else (s50, s600, s800, s600)
-        sel = f".c-{name}"
+        sel = f"{scope} .c-{name}" if scope else f".c-{name}"
         out.append(
-            f"{sel}>rect,{sel}>circle,{sel}>ellipse,{sel}>polygon,rect{sel},circle{sel},ellipse{sel}"
+            f"{sel}>rect,{sel}>circle,{sel}>ellipse,{sel}>polygon,"
+            f"{scope} rect.c-{name},{scope} circle.c-{name},{scope} ellipse.c-{name}"
             f"{{fill:{fill};stroke:{stroke}}}"
             f"{sel}>.t,{sel}>.th{{fill:{title}}}{sel}>.ts{{fill:{sub}}}"
         )
@@ -84,7 +86,7 @@ BASE_RULES = """
 """
 
 HTML_RULES = """
-html,body{margin:0;background:var(--surface-2);color:var(--text-primary);font:400 16px/1.7 var(--font-sans)}
+html,body{margin:0;background:transparent;color:var(--text-primary);font:400 16px/1.7 var(--font-sans)}
 body{padding:16px}
 h1,h2,h3{font-weight:500;color:var(--text-primary)}
 code,pre{font-family:var(--font-mono)}
@@ -98,15 +100,35 @@ input,select,textarea{font:inherit;color:var(--text-primary);background:var(--su
 
 
 def stylesheet(for_html):
-    css = (
-        ":root{" + COMMON_VARS + LIGHT_VARS + "}\n"
-        "@media (prefers-color-scheme: dark){:root{" + DARK_VARS + "}\n" + ramp_rules(True) + "}\n"
-        ":root[data-theme=dark]{" + DARK_VARS + "}\n"
-        + ramp_rules(False) + "\n" + BASE_RULES
-    )
+    # Light is the base. SVG diagrams stay light-only: the site inverts them in dark mode with a CSS filter.
+    css = ":root{" + COMMON_VARS + LIGHT_VARS + "}\n" + ramp_rules(False) + "\n" + BASE_RULES
     if for_html:
-        css += HTML_RULES
+        # Widgets follow the site's theme (data-theme, set by THEME_AND_HEIGHT), else the OS setting.
+        # color-scheme must match the parent page, or the browser paints an opaque white backdrop behind the iframe.
+        css += (
+            ":root{color-scheme:light}\n"
+            "@media (prefers-color-scheme: dark){:root:not([data-theme=light]){color-scheme:dark;" + DARK_VARS + "}\n"
+            + ramp_rules(True, ":root:not([data-theme=light])") + "}\n"
+            ":root[data-theme=dark]{color-scheme:dark;" + DARK_VARS + "}\n" + ramp_rules(True, ":root[data-theme=dark]") + "\n"
+            + HTML_RULES
+        )
     return css
+
+
+# Runs inside the widget page: copies the site's light/dark choice and sizes the parent <iframe> to the content.
+THEME_AND_HEIGHT = """<script>
+addEventListener('load', function () {
+  var frame = null, site = null;
+  try { frame = window.frameElement; site = parent.document.documentElement; } catch (e) {}
+  if (!frame || !site) return;
+  var sync = function () { var t = site.getAttribute('saved-theme'); if (t) document.documentElement.dataset.theme = t; };
+  // body, not documentElement: inside an iframe the root is at least as tall as the frame itself.
+  var fit = function () { frame.style.height = Math.ceil(document.body.getBoundingClientRect().height) + 'px'; };
+  sync(); fit();
+  new MutationObserver(sync).observe(site, { attributes: true, attributeFilter: ['saved-theme'] });
+  new ResizeObserver(fit).observe(document.body);
+});
+</script>"""
 
 
 def slug(text):
@@ -127,12 +149,13 @@ def export(code, name):
             code = code.replace('width="100%"', f'width="{vb.group(1)}" height="{vb.group(2)}"', 1)
         path = SVG_OUT / f"{name}.svg"
     else:
-        # HTML: a full page that reports its height so the parent iframe can fit it.
+        # HTML: a full page that sizes its parent iframe and follows the site theme.
         code = (
             "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
             "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n"
             f"<title>{name}</title>\n<style>{stylesheet(True)}</style>\n"
             "<script>window.sendPrompt=function(t){alert(t)};window.openLink=function(u){window.open(u,'_blank')};</script>\n"
+            + THEME_AND_HEIGHT + "\n"
             "</head>\n<body>\n" + code + "\n</body>\n</html>\n"
         )
         path = HTML_OUT / f"{name}.html"

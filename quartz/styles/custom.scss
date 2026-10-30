@@ -1,3 +1,71 @@
 @use "./variables.scss" as *;
 
-// put your custom CSS here!
+// Reading comfort: ~70 characters per line for prose; tables, code and diagrams stay full width.
+article {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+article > p,
+article > ul,
+article > ol,
+article .callout-content > p {
+  max-width: 72ch;
+}
+
+// Clear section breaks on long pages.
+article h2 {
+  margin-top: 2.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--lightgray);
+}
+article h3 {
+  font-size: 1.15rem;
+}
+
+// Definition tables: top-aligned, roomier cells, term column in bold.
+article td,
+article th {
+  vertical-align: top;
+  text-align: left;
+  padding: 0.45rem 0.7rem;
+}
+article td:first-child {
+  font-weight: 600;
+}
+
+// Reading-order block (tools/series.py): quiet, so it doesn't look like the TL;DR.
+.callout[data-callout="series"] {
+  --color: var(--darkgray);
+  --border: var(--lightgray);
+  --bg: transparent;
+}
+
+// Interview questions: readable title colour in light mode (default amber is ~2:1 contrast).
+:root[saved-theme="light"] .callout[data-callout="question"] {
+  --color: #8a5a00;
+}
+
+// Diagrams are light-only SVGs; invert them when the site is in dark mode.
+:root[saved-theme="dark"] article img[src*="diagrams/"] {
+  filter: invert(0.92) hue-rotate(180deg);
+}
+
+// Subject folder pages: the index already has the ordered list, so hide the automatic A–Z listing.
+body:not([data-slug^="tags/"]) .page-listing {
+  display: none;
+}
+
+@media #{$mobile} {
+  .page-title {
+    font-size: 1.3rem;
+    white-space: nowrap;
+  }
+  // Keep diagram labels legible on phones: scroll sideways instead of shrinking.
+  article p:has(> img[src*="diagrams/"]) {
+    overflow-x: auto;
+  }
+  article img[src*="diagrams/"] {
+    max-width: none;
+    width: 560px;
+  }
+}

@@ -6,11 +6,28 @@ aliases: [Cross-Origin Resource Sharing]
 created: 2026-10-30
 updated: 2026-10-30
 status: draft
-sources: ["Prep 1 networking session 2026-10-30", "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS", "https://fetch.spec.whatwg.org/", "https://www.rfc-editor.org/rfc/rfc6454"]
+sources: ["study session 2026-10-30", "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS", "https://fetch.spec.whatwg.org/", "https://www.rfc-editor.org/rfc/rfc6454"]
 ---
+
+<!-- series:start -->
+> [!series]- Networking · 8 of 11
+> 1. [[networking/http-message|HTTP message]]
+> 2. [[networking/request-lifecycle|Request lifecycle]]
+> 3. [[networking/dns|DNS]]
+> 4. [[networking/tcp|TCP]]
+> 5. [[networking/tls|TLS]]
+> 6. [[networking/http-caching|HTTP caching]]
+> 7. [[networking/origin|Origin]]
+> 8. **CORS** · you are here
+> 9. [[networking/cors-credentials|CORS and credentials]]
+> 10. [[networking/cors-expose-headers|CORS exposed headers]]
+> 11. [[networking/cors-lab|CORS lab]]
+<!-- series:end -->
 
 > [!tldr] In three lines
 > CORS (Cross-Origin Resource Sharing) is how a server tells the browser which other websites' pages may read its responses. The browser enforces it, not the server. You meet it as the red "blocked by CORS policy" message when a page calls an API on another origin.
+>
+> [[#Interview questions|→ Self-test: 5 questions]]
 
 ## Why it exists
 
@@ -52,7 +69,7 @@ The approved list is the `Access-Control-Allow-Origin` header. The rule is appli
 1. which origins may read a response from a page script, and
 2. whether the request may include credentials (cookies, HTTP auth, client certificates).
 
-An **origin** is the triple scheme + host + port. Two URLs are same-origin only if all three parts match exactly. (Origin is explained in [[origin]].)
+An **origin** is the triple scheme + host + port. Two URLs are same-origin only if all three parts match exactly. (Origin is explained in [[networking/origin|Origin]].)
 
 | Term | Definition | Where it's used |
 |---|---|---|
@@ -127,7 +144,7 @@ sequenceDiagram
   B-->>P: Response (page can read it)
 ```
 
-> [!note] This is a general example
+> [!warning] This is a general example
 > The lab's `api.py` has no `OPTIONS` handler, and every lab button sends a simple `GET`. So the lab never shows a preflight. The sequence above is the standard flow, not a captured lab exchange.
 
 ## The real thing
@@ -193,25 +210,26 @@ The browser compares `http://localhost:8000` (the request `Origin`) with `http:/
 
 ### Header reference
 
-| Header | Sent by | Where | What it does | In the lab |
-|---|---|---|---|---|
-| `Origin` | Browser | Every cross-origin request from page script; preflight | Names the page's origin (scheme + host + port). Page script cannot change it. | Yes, every route |
-| `Access-Control-Request-Method` | Browser | Preflight `OPTIONS` | The method the real request will use | No preflight in the lab |
-| `Access-Control-Request-Headers` | Browser | Preflight `OPTIONS` | Non-safelisted headers the real request will send | No |
-| `Access-Control-Allow-Origin` | Server | Response, and preflight response | The one origin allowed to read (exact string), or `*` for any origin without credentials | Yes, except `/api/open` |
-| `Access-Control-Allow-Credentials` | Server | Response, and preflight response | `true` lets the browser send cookies on the request and let the page read the reply | Yes, on `/api/login`, `/api/me`, `/api/allow-creds`, `/api/wildcard-creds` |
-| `Access-Control-Allow-Methods` | Server | Preflight response | Methods the real request may use | No |
-| `Access-Control-Allow-Headers` | Server | Preflight response | Request headers the real request may send | No |
-| `Access-Control-Max-Age` | Server | Preflight response | Seconds the browser may cache the preflight answer | No |
-| `Access-Control-Expose-Headers` | Server | Response | Extra response headers that page script may read | No (see [[cors-expose-headers]]) |
-| `Vary: Origin` | Server | Response | Tells caches that the reply depends on `Origin`. Needed when the server sends a different `Allow-Origin` per origin, so a cache does not serve one origin's answer to another | No |
+> [!info]- Header reference
+> | Header | Sent by | Where | What it does | In the lab |
+> |---|---|---|---|---|
+> | `Origin` | Browser | Every cross-origin request from page script; preflight | Names the page's origin (scheme + host + port). Page script cannot change it. | Yes, every route |
+> | `Access-Control-Request-Method` | Browser | Preflight `OPTIONS` | The method the real request will use | No preflight in the lab |
+> | `Access-Control-Request-Headers` | Browser | Preflight `OPTIONS` | Non-safelisted headers the real request will send | No |
+> | `Access-Control-Allow-Origin` | Server | Response, and preflight response | The one origin allowed to read (exact string), or `*` for any origin without credentials | Yes, except `/api/open` |
+> | `Access-Control-Allow-Credentials` | Server | Response, and preflight response | `true` lets the browser send cookies on the request and let the page read the reply | Yes, on `/api/login`, `/api/me`, `/api/allow-creds`, `/api/wildcard-creds` |
+> | `Access-Control-Allow-Methods` | Server | Preflight response | Methods the real request may use | No |
+> | `Access-Control-Allow-Headers` | Server | Preflight response | Request headers the real request may send | No |
+> | `Access-Control-Max-Age` | Server | Preflight response | Seconds the browser may cache the preflight answer | No |
+> | `Access-Control-Expose-Headers` | Server | Response | Extra response headers that page script may read | No (see [[networking/cors-expose-headers|CORS exposed headers]]) |
+> | `Vary: Origin` | Server | Response | Tells caches that the reply depends on `Origin`. Needed when the server sends a different `Allow-Origin` per origin, so a cache does not serve one origin's answer to another | No |
 
 Field notes:
 
 - The allowed origin is compared as an exact string. `http://localhost:8000` matches. `localhost:8000` (no scheme), `http://localhost:8000/` (trailing slash), and `http://localhost` (no port) do not match.
-- `Access-Control-Allow-Origin: *` allows any origin to read a response, but only when the request carries no credentials. See [[cors-credentials]].
+- `Access-Control-Allow-Origin: *` allows any origin to read a response, but only when the request carries no credentials. See [[networking/cors-credentials|CORS and credentials]].
 
-## Debugging
+### Debugging
 
 Check these three places, in this order.
 
@@ -226,24 +244,6 @@ curl -i -H "Origin: http://localhost:8000" http://localhost:9000/api/allow
 ```
 
 `curl` shows exactly which headers the server sends. It does not enforce CORS, so a request that works in `curl` and fails in the browser points at CORS, not at the server being down.
-
-## Where it's used
-
-- Single-page apps (React, Vue, Angular) that call an API on another domain or port. In development, the front-end dev server often runs on one port and the API on another, so CORS is needed.
-- Font and asset CDNs. Browsers request `@font-face` files and some images in CORS mode, so CDNs send `Access-Control-Allow-Origin` headers to let other sites use them.
-- Canvas and images. A cross-origin image without CORS "taints" a `<canvas>`, and reading its pixels (`getImageData`) throws. An `<img crossorigin="anonymous">` plus a CORS-enabled image server fixes this.
-- Public APIs that want browser clients (weather, maps, open data) and send `Access-Control-Allow-Origin: *`.
-- Not used by `curl`, Postman, server-to-server calls, or most mobile native HTTP clients. Those do not enforce the same-origin policy.
-
-## Compared with
-
-| | CORS | Same-origin policy | CSRF defence (SameSite, tokens) | Authentication |
-|---|---|---|---|---|
-| What it is | Server opt-in for cross-origin reads | Default browser rule: reads only from same origin | Stops a cross-site page from making a state-changing request succeed | Server checks who the caller is |
-| Who enforces it | Browser | Browser | Browser (SameSite) and server (tokens) | Server |
-| Stops the request being sent? | No | No | Sometimes (SameSite cookies not attached) | No |
-| Stops the page reading the reply? | Yes, unless allowed | Yes, unless CORS allows | No, the reply is not the target | No |
-| Protects the API from `curl`? | No | No | No | Yes |
 
 ## Common misconceptions
 
@@ -280,18 +280,32 @@ curl -i -H "Origin: http://localhost:8000" http://localhost:9000/api/allow
 
 > [!example] When I see "blocked by CORS policy" in the console, it means the server answered but the browser did not let the page read the reply, because the reply's `Access-Control-Allow-Origin` is missing or does not exactly match the page's origin.
 
-## Related
+## Compared with
 
-- [[origin]] - scheme + host + port, the value CORS compares.
-- [[http-message]] - the request and response lines and headers used here.
-- [[cors-credentials]] - cookies, `credentials: 'include'`, and why `*` is not allowed with them.
-- [[cors-expose-headers]] - which response headers JavaScript can read.
-- [[cors-lab]] - run the lab and click through the seven steps.
-- [[http-caching]] - why `Vary: Origin` matters for caches.
+| | CORS | Same-origin policy | CSRF defence (SameSite, tokens) | Authentication |
+|---|---|---|---|---|
+| What it is | Server opt-in for cross-origin reads | Default browser rule: reads only from same origin | Stops a cross-site page from making a state-changing request succeed | Server checks who the caller is |
+| Who enforces it | Browser | Browser | Browser (SameSite) and server (tokens) | Server |
+| Stops the request being sent? | No | No | Sometimes (SameSite cookies not attached) | No |
+| Stops the page reading the reply? | Yes, unless allowed | Yes, unless CORS allows | No, the reply is not the target | No |
+| Protects the API from `curl`? | No | No | No | Yes |
 
-## Sources
+## Where it's used
 
-- Prep 1 networking session, 2026-10-30.
-- MDN, [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
-- WHATWG, [Fetch Standard](https://fetch.spec.whatwg.org/) (CORS protocol section).
-- RFC 6454, [The Web Origin Concept](https://www.rfc-editor.org/rfc/rfc6454).
+- Single-page apps (React, Vue, Angular) that call an API on another domain or port. In development, the front-end dev server often runs on one port and the API on another, so CORS is needed.
+- Font and asset CDNs. Browsers request `@font-face` files and some images in CORS mode, so CDNs send `Access-Control-Allow-Origin` headers to let other sites use them.
+- Canvas and images. A cross-origin image without CORS "taints" a `<canvas>`, and reading its pixels (`getImageData`) throws. An `<img crossorigin="anonymous">` plus a CORS-enabled image server fixes this.
+- Public APIs that want browser clients (weather, maps, open data) and send `Access-Control-Allow-Origin: *`.
+- Not used by `curl`, Postman, server-to-server calls, or most mobile native HTTP clients. Those do not enforce the same-origin policy.
+
+> [!info]- Sources
+> - Study session, 2026-10-30.
+> - MDN, [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
+> - WHATWG, [Fetch Standard](https://fetch.spec.whatwg.org/) (CORS protocol section).
+> - RFC 6454, [The Web Origin Concept](https://www.rfc-editor.org/rfc/rfc6454).
+
+<!-- series-nav:start -->
+---
+
+← [[networking/origin|Origin]] · [[networking/cors-credentials|CORS and credentials]] →
+<!-- series-nav:end -->

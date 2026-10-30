@@ -2,17 +2,34 @@
 title: HTTP message
 subject: networking
 tags: [networking, http, web]
-aliases: [HTTP request, HTTP response, HTTP/1.1 message, request line, status line]
+aliases: [HTTP request, HTTP response, HTTP/1.1 message, request line, status line, HyperText Transfer Protocol message]
 created: 2026-10-30
 updated: 2026-10-30
 status: draft
-sources: ["Prep 1 networking session 2026-10-30", "https://www.rfc-editor.org/rfc/rfc9110", "https://www.rfc-editor.org/rfc/rfc9112", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview"]
+sources: ["study session 2026-10-30", "https://www.rfc-editor.org/rfc/rfc9110", "https://www.rfc-editor.org/rfc/rfc9112", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview"]
 ---
 
+<!-- series:start -->
+> [!series]- Networking · 1 of 11
+> 1. **HTTP message** · you are here
+> 2. [[networking/request-lifecycle|Request lifecycle]]
+> 3. [[networking/dns|DNS]]
+> 4. [[networking/tcp|TCP]]
+> 5. [[networking/tls|TLS]]
+> 6. [[networking/http-caching|HTTP caching]]
+> 7. [[networking/origin|Origin]]
+> 8. [[networking/cors|CORS]]
+> 9. [[networking/cors-credentials|CORS and credentials]]
+> 10. [[networking/cors-expose-headers|CORS exposed headers]]
+> 11. [[networking/cors-lab|CORS lab]]
+<!-- series:end -->
+
 > [!tldr] In three lines
-> An HTTP message is plain text that a client sends (a request) and a server answers with (a response). Both have a first line, a list of headers, a blank line, and an optional body.
+> An HTTP (HyperText Transfer Protocol) message is plain text that a client sends (a request) and a server answers with (a response). Both have a first line, a list of headers, a blank line, and an optional body.
 > It solves the problem of "what do I want, and what did I get back" in a format any browser, phone, or server can read.
 > You meet it every time a page, image, script, or API call loads.
+>
+> [[#Interview questions|→ Self-test: 5 questions]]
 
 ## Why it exists
 
@@ -25,7 +42,7 @@ HTTP (HyperText Transfer Protocol) is that format. It defines what the first lin
 <!-- interactive widget: runs on the site only; src path is from the site root -->
 <iframe src="/static/widgets/raw-http-api-me-after-login.html" width="100%" height="520" style="border:0" loading="lazy"></iframe>
 
-Click through the widget: step 1 is the request the browser sends, step 2 is the response the server sends back. Each line is labelled with what it does.
+*Step 1 is the browser's request, step 2 the server's response. Each line is labelled with what it does.*
 
 ## Plain version
 
@@ -58,15 +75,16 @@ A method is the verb. Two properties matter:
 - **Safe**: the request should not change server state. Read-only.
 - **Idempotent**: sending the same request twice leaves the same result as sending it once.
 
-| Method | Purpose | Body? | Safe | Idempotent | Typical use |
-|---|---|---|---|---|---|
-| GET | Read a resource | No (not used) | Yes | Yes | Load a page, fetch `/api/me` |
-| POST | Create or do an action | Yes | No | No | Submit a form, create an order |
-| PUT | Replace a resource at a known URL | Yes | No | Yes | Save a whole profile document |
-| PATCH | Change part of a resource | Yes | No | Not necessarily | Update one field |
-| DELETE | Remove a resource | Optional | No | Yes | Delete a comment |
-| OPTIONS | Ask what the server allows | Optional | Yes | Yes | Browser CORS preflight |
-| HEAD | Same as GET but no body returned | No | Yes | Yes | Check size or freshness without downloading |
+> [!info]- Method reference
+> | Method | Purpose | Body? | Safe | Idempotent | Typical use |
+> |---|---|---|---|---|---|
+> | GET | Read a resource | No (not used) | Yes | Yes | Load a page, fetch `/api/me` |
+> | POST | Create or do an action | Yes | No | No | Submit a form, create an order |
+> | PUT | Replace a resource at a known URL | Yes | No | Yes | Save a whole profile document |
+> | PATCH | Change part of a resource | Yes | No | Not necessarily | Update one field |
+> | DELETE | Remove a resource | Optional | No | Yes | Delete a comment |
+> | OPTIONS | Ask what the server allows | Optional | Yes | Yes | Browser CORS preflight |
+> | HEAD | Same as GET but no body returned | No | Yes | Yes | Check size or freshness without downloading |
 
 A common mistake: thinking "idempotent" means "returns the same answer". It means the server state is the same after one or many identical calls. A DELETE that returns 404 the second time is still idempotent, because the resource is gone both times.
 
@@ -82,23 +100,24 @@ A common mistake: thinking "idempotent" means "returns the same answer". It mean
 
 ### Common status codes
 
-| Code | Name | Meaning |
-|---|---|---|
-| 200 | OK | Request worked, body holds the answer |
-| 201 | Created | A new resource was made; `Location` header often gives its URL |
-| 204 | No Content | Worked, and there is intentionally no body |
-| 301 | Moved Permanently | The URL has a new permanent address (`Location` header) |
-| 302 | Found | Temporary redirect to the `Location` URL |
-| 304 | Not Modified | Your saved copy is still valid; body is empty (see [[http-caching]]) |
-| 400 | Bad Request | The request is malformed (bad JSON, missing field) |
-| 401 | Unauthorized | Not authenticated: no valid credentials were sent |
-| 403 | Forbidden | Authenticated (or public), but not allowed to do this |
-| 404 | Not Found | No resource at this URL |
-| 409 | Conflict | The request clashes with current state (e.g. duplicate username) |
-| 429 | Too Many Requests | Rate limit hit; often sent with a `Retry-After` header |
-| 500 | Internal Server Error | Generic server bug |
-| 502 | Bad Gateway | A proxy or gateway got a bad reply from the server behind it |
-| 503 | Service Unavailable | Server is overloaded or down for maintenance |
+> [!info]- Status code reference
+> | Code | Name | Meaning |
+> |---|---|---|
+> | 200 | OK | Request worked, body holds the answer |
+> | 201 | Created | A new resource was made; `Location` header often gives its URL |
+> | 204 | No Content | Worked, and there is intentionally no body |
+> | 301 | Moved Permanently | The URL has a new permanent address (`Location` header) |
+> | 302 | Found | Temporary redirect to the `Location` URL |
+> | 304 | Not Modified | Your saved copy is still valid; body is empty (see [[networking/http-caching|HTTP caching]]) |
+> | 400 | Bad Request | The request is malformed (bad JSON, missing field) |
+> | 401 | Unauthorized | Not authenticated: no valid credentials were sent |
+> | 403 | Forbidden | Authenticated (or public), but not allowed to do this |
+> | 404 | Not Found | No resource at this URL |
+> | 409 | Conflict | The request clashes with current state (e.g. duplicate username) |
+> | 429 | Too Many Requests | Rate limit hit; often sent with a `Retry-After` header |
+> | 500 | Internal Server Error | Generic server bug |
+> | 502 | Bad Gateway | A proxy or gateway got a bad reply from the server behind it |
+> | 503 | Service Unavailable | Server is overloaded or down for maintenance |
 
 The first digit is the most useful part. A 4xx means "fix the request", a 5xx means "the server side is broken, retrying may help".
 
@@ -111,7 +130,7 @@ The first digit is the most useful part. A 4xx means "fix the request", a 5xx me
 5. The server runs its code for that method and path.
 6. The server writes the status line, its own headers (`Content-Type`, `Content-Length`, `Set-Cookie`, CORS headers, and others), an empty line, and the body.
 7. The browser reads the status line, then the headers, then exactly `Content-Length` bytes (or chunks) of body.
-8. The browser hands the response to the page code, which can read it only if the browser's rules allow (see [[origin]] and [[cors]]).
+8. The browser hands the response to the page code, which can read it only if the browser's rules allow (see [[networking/origin|Origin]] and [[networking/cors|CORS]]).
 
 ```mermaid
 sequenceDiagram
@@ -151,19 +170,20 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 
 The blank line after the last header is required. It marks the end of the headers. A GET has no body, so nothing follows.
 
-| Line | Value | What it means |
-|---|---|---|
-| Request line | `GET /api/me HTTP/1.1` | Method GET, path `/api/me`, protocol version HTTP/1.1 |
-| `Host` | `localhost:9000` | Which site on the server is wanted. Required in HTTP/1.1. Includes the port when it is not the default. Added by the browser |
-| `Connection` | `keep-alive` | Hint that the TCP connection can stay open for more requests. Added by the browser |
-| `Origin` | `http://localhost:8000` | Which page (scheme, host, port) started this request. Added by the browser, not by page code. See [[origin]] |
-| `Cookie` | `session=demo123` | Cookies the browser has stored for `localhost` that it sends back. Sent here because the fetch used `credentials: 'include'` |
-| `Accept` | `*/*` | What response types the client can take. `*/*` means anything |
-| `Accept-Encoding` | `gzip, deflate` | Compressions the client can decode. The server may compress the body |
-| `Accept-Language` | `en-US,en;q=0.9` | Preferred human languages, with weights (`q`) |
-| `Referer` | `http://localhost:8000/` | The page that made the request. Spelled wrong on purpose in the spec; keep the spelling |
-| `Sec-Fetch-Dest` / `Mode` / `Site` | `empty` / `cors` / `same-site` | Metadata the browser adds so servers can tell where a request came from. `same-site` means the two ports share a site, even though the origins differ |
-| `User-Agent` | Browser identification string | What client is calling. Often used for logs and statistics |
+> [!info]- Request line reference
+> | Line | Value | What it means |
+> |---|---|---|
+> | Request line | `GET /api/me HTTP/1.1` | Method GET, path `/api/me`, protocol version HTTP/1.1 |
+> | `Host` | `localhost:9000` | Which site on the server is wanted. Required in HTTP/1.1. Includes the port when it is not the default. Added by the browser |
+> | `Connection` | `keep-alive` | Hint that the TCP connection can stay open for more requests. Added by the browser |
+> | `Origin` | `http://localhost:8000` | Which page (scheme, host, port) started this request. Added by the browser, not by page code. See [[networking/origin|Origin]] |
+> | `Cookie` | `session=demo123` | Cookies the browser has stored for `localhost` that it sends back. Sent here because the fetch used `credentials: 'include'` |
+> | `Accept` | `*/*` | What response types the client can take. `*/*` means anything |
+> | `Accept-Encoding` | `gzip, deflate` | Compressions the client can decode. The server may compress the body |
+> | `Accept-Language` | `en-US,en;q=0.9` | Preferred human languages, with weights (`q`) |
+> | `Referer` | `http://localhost:8000/` | The page that made the request. Spelled wrong on purpose in the spec; keep the spelling |
+> | `Sec-Fetch-Dest` / `Mode` / `Site` | `empty` / `cors` / `same-site` | Metadata the browser adds so servers can tell where a request came from. `same-site` means the two ports share a site, even though the origins differ |
+> | `User-Agent` | Browser identification string | What client is calling. Often used for logs and statistics |
 
 ### The response
 
@@ -181,17 +201,18 @@ Access-Control-Allow-Credentials: true
 {"cookie_seen": true, "cookie": "demo123"}
 ```
 
-| Line | Value | What it means |
-|---|---|---|
-| Status line | `HTTP/1.0 200 OK` | Protocol version, status code 200, reason phrase "OK". The reason phrase is free text; clients should use the code |
-| `Server` | `BaseHTTP/0.6 Python/3.12.4` | Software that answered. Python's built-in server adds this |
-| `Date` | `Fri, 30 Oct 2026 10:15:02 GMT` | When the server wrote the reply, in GMT. Caches use it for age calculations |
-| `Content-Type` | `application/json` | The body is JSON text. The browser and the page use this to decide how to parse it |
-| `Content-Length` | `42` | The body is exactly 42 bytes. The reader stops after 42 bytes |
-| `Access-Control-Allow-Origin` | `http://localhost:8000` | Only this origin may read the reply in the page. Checked by the browser, not by the server |
-| `Access-Control-Allow-Credentials` | `true` | The browser may let the page read a reply that came with cookies |
-| Empty line | | Ends the headers. The body starts after it |
-| Body | `{"cookie_seen": true, "cookie": "demo123"}` | The answer. `cookie_seen` is true because the request had a `session` cookie |
+> [!info]- Response line reference
+> | Line | Value | What it means |
+> |---|---|---|
+> | Status line | `HTTP/1.0 200 OK` | Protocol version, status code 200, reason phrase "OK". The reason phrase is free text; clients should use the code |
+> | `Server` | `BaseHTTP/0.6 Python/3.12.4` | Software that answered. Python's built-in server adds this |
+> | `Date` | `Fri, 30 Oct 2026 10:15:02 GMT` | When the server wrote the reply, in GMT. Caches use it for age calculations |
+> | `Content-Type` | `application/json` | The body is JSON text. The browser and the page use this to decide how to parse it |
+> | `Content-Length` | `42` | The body is exactly 42 bytes. The reader stops after 42 bytes |
+> | `Access-Control-Allow-Origin` | `http://localhost:8000` | Only this origin may read the reply in the page. Checked by the browser, not by the server |
+> | `Access-Control-Allow-Credentials` | `true` | The browser may let the page read a reply that came with cookies |
+> | Empty line | | Ends the headers. The body starts after it |
+> | Body | `{"cookie_seen": true, "cookie": "demo123"}` | The answer. `cookie_seen` is true because the request had a `session` cookie |
 
 Two details that often surprise people:
 
@@ -204,17 +225,18 @@ Open DevTools (Cmd+Option+I on macOS, F12 on Windows), go to the **Network** tab
 
 ### Common headers
 
-| Header | Direction | Example | What it is for |
-|---|---|---|---|
-| `Host` | Request | `Host: example.com` | Name of the site wanted. Lets one IP address serve many sites |
-| `Content-Type` | Both | `Content-Type: application/json` | Format of the body |
-| `Content-Length` | Both | `Content-Length: 42` | Body size in bytes |
-| `Cookie` | Request | `Cookie: session=demo123` | Cookies the browser sends back to the server |
-| `Set-Cookie` | Response | `Set-Cookie: session=demo123; Path=/; SameSite=Lax` | Asks the browser to store a cookie |
-| `Authorization` | Request | `Authorization: Bearer <token>` | Credentials for an API. Set by page code (not sent automatically) |
-| `Origin` | Request | `Origin: http://localhost:8000` | Page origin that started a cross-origin or POST request. Added by the browser |
-| `Cache-Control` | Both | `Cache-Control: max-age=3600` | Rules for storing and reusing the response (see [[http-caching]]) |
-| `ETag` | Response | `ETag: "a1b2c3"` | A version tag for a resource, used for revalidation (see [[http-caching]]) |
+> [!info]- Header reference
+> | Header | Direction | Example | What it is for |
+> |---|---|---|---|
+> | `Host` | Request | `Host: example.com` | Name of the site wanted. Lets one IP address serve many sites |
+> | `Content-Type` | Both | `Content-Type: application/json` | Format of the body |
+> | `Content-Length` | Both | `Content-Length: 42` | Body size in bytes |
+> | `Cookie` | Request | `Cookie: session=demo123` | Cookies the browser sends back to the server |
+> | `Set-Cookie` | Response | `Set-Cookie: session=demo123; Path=/; SameSite=Lax` | Asks the browser to store a cookie |
+> | `Authorization` | Request | `Authorization: Bearer <token>` | Credentials for an API. Set by page code (not sent automatically) |
+> | `Origin` | Request | `Origin: http://localhost:8000` | Page origin that started a cross-origin or POST request. Added by the browser |
+> | `Cache-Control` | Both | `Cache-Control: max-age=3600` | Rules for storing and reusing the response (see [[networking/http-caching|HTTP caching]]) |
+> | `ETag` | Response | `ETag: "a1b2c3"` | A version tag for a resource, used for revalidation (see [[networking/http-caching|HTTP caching]]) |
 
 Headers are case-insensitive by name. `content-type` and `Content-Type` are the same. In HTTP/2 and HTTP/3 the names are always lowercase on the wire.
 
@@ -223,23 +245,6 @@ Headers are case-insensitive by name. `content-type` and `Content-Type` are the 
 HTTP/2 and HTTP/3 keep the same semantics: the same methods, status codes, headers, and body rules. What changes is the wire format. Instead of text lines, messages are split into binary frames on one connection, so many requests can run at once. HTTP/2 runs over TCP. HTTP/3 runs over QUIC, which runs over UDP.
 
 The request line becomes pseudo-headers such as `:method: GET`, `:path: /api/me`, `:authority: localhost:9000`, and `:scheme: http`. DevTools still shows them in the familiar form, so the lab's text view stays useful even when the protocol is HTTP/2.
-
-## Where it's used
-
-- **Browsers** build and parse these messages for every page, image, script, and `fetch` call.
-- **curl** and **HTTPie** print the same lines with `curl -v` (or `-i` to show headers).
-- **API servers** (Express, Django, Spring, FastAPI) read the request line and headers, then return status and body.
-- **CDNs and reverse proxies** (Cloudflare, nginx) read and rewrite headers on the way through.
-- **Mobile apps** send the same messages from their own HTTP client libraries.
-
-## Compared with
-
-| | HTTP message | Raw TCP bytes | WebSocket frame |
-|---|---|---|---|
-| Who starts | Client always | Either side | Either side, after an upgrade |
-| Shape | Text lines, headers, body | Any bytes you like | Binary or text frames |
-| One reply per request | Yes | No protocol rule | No |
-| Typical use | Pages, APIs | Custom protocols | Chat, live updates |
 
 ## Common misconceptions
 
@@ -267,17 +272,31 @@ The request line becomes pseudo-headers such as `:method: GET`, `:path: /api/me`
 
 > [!example] When I see a request in DevTools with a `Cookie` line but no `Authorization` line, it means the browser attached a stored cookie on its own, because cookies are stored and sent by the browser per host, not written by page code.
 
-## Related
+## Compared with
 
-- [[origin]] - why the `Origin` header exists and what it identifies
-- [[http-caching]] - `Cache-Control`, `ETag`, and `304 Not Modified`
-- [[cors]] - the `Access-Control-*` headers that decide whether the page can read a reply
-- [[tcp]] - the byte stream that carries the message
-- [[tls]] - the encryption layer that wraps HTTPS messages
+| | HTTP message | Raw TCP bytes | WebSocket frame |
+|---|---|---|---|
+| Who starts | Client always | Either side | Either side, after an upgrade |
+| Shape | Text lines, headers, body | Any bytes you like | Binary or text frames |
+| One reply per request | Yes | No protocol rule | No |
+| Typical use | Pages, APIs | Custom protocols | Chat, live updates |
 
-## Sources
+## Where it's used
 
-- Prep 1 networking session 2026-10-30
-- RFC 9110 - HTTP Semantics: https://www.rfc-editor.org/rfc/rfc9110
-- RFC 9112 - HTTP/1.1 message syntax: https://www.rfc-editor.org/rfc/rfc9112
-- MDN - HTTP overview: https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview
+- **Browsers** build and parse these messages for every page, image, script, and `fetch` call.
+- **curl** and **HTTPie** print the same lines with `curl -v` (or `-i` to show headers).
+- **API servers** (Express, Django, Spring, FastAPI) read the request line and headers, then return status and body.
+- **CDNs and reverse proxies** (Cloudflare, nginx) read and rewrite headers on the way through.
+- **Mobile apps** send the same messages from their own HTTP client libraries.
+
+> [!info]- Sources
+> - study session 2026-10-30
+> - RFC 9110 - HTTP Semantics: https://www.rfc-editor.org/rfc/rfc9110
+> - RFC 9112 - HTTP/1.1 message syntax: https://www.rfc-editor.org/rfc/rfc9112
+> - MDN - HTTP overview: https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview
+
+<!-- series-nav:start -->
+---
+
+← [[networking/index|Networking]] · [[networking/request-lifecycle|Request lifecycle]] →
+<!-- series-nav:end -->

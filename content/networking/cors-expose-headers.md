@@ -6,11 +6,28 @@ aliases: [Access-Control-Expose-Headers, CORS-safelisted response headers]
 created: 2026-10-30
 updated: 2026-10-30
 status: draft
-sources: ["Prep 1 networking session 2026-10-30", "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS", "https://fetch.spec.whatwg.org/"]
+sources: ["study session 2026-10-30", "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS", "https://fetch.spec.whatwg.org/"]
 ---
+
+<!-- series:start -->
+> [!series]- Networking · 10 of 11
+> 1. [[networking/http-message|HTTP message]]
+> 2. [[networking/request-lifecycle|Request lifecycle]]
+> 3. [[networking/dns|DNS]]
+> 4. [[networking/tcp|TCP]]
+> 5. [[networking/tls|TLS]]
+> 6. [[networking/http-caching|HTTP caching]]
+> 7. [[networking/origin|Origin]]
+> 8. [[networking/cors|CORS]]
+> 9. [[networking/cors-credentials|CORS and credentials]]
+> 10. **CORS exposed headers** · you are here
+> 11. [[networking/cors-lab|CORS lab]]
+<!-- series:end -->
 
 > [!tldr] In three lines
 > Even when CORS allows a page to read a reply, JavaScript sees only a short list of response headers. To read any other header, the server must list it in `Access-Control-Expose-Headers`. You meet this when a header that is clearly in the reply (like `Access-Control-Allow-Origin`) comes back as `null` in the page.
+>
+> [[#Interview questions|→ Self-test: 4 questions]]
 
 ## Why it exists
 
@@ -50,7 +67,7 @@ A **CORS-safelisted response header** is one of a fixed set that the Fetch Stand
 ## How it works
 
 1. The server sends a reply with several headers. Some are safelisted, some are not.
-2. The browser runs the CORS check for the origin (see [[cors]]).
+2. The browser runs the CORS check for the origin (see [[networking/cors|CORS]]).
 3. If the check passes, the browser builds the page's `Headers` object from two sources: the safelisted headers, and any names listed in `Access-Control-Expose-Headers`.
 4. Every other header is dropped from that object. The page sees `null` (`res.headers.get(name)` returns `null`) for them.
 5. The network tools (DevTools Network tab) still show all headers. The filter applies only to what the page script can read.
@@ -71,7 +88,7 @@ sequenceDiagram
 
 ### Why the lab shows `Access-Control-Allow-Origin: null`
 
-The lab's page runs this code (from `index.html`):
+The lab's page runs this code (from [index.html](cors-lab-files/index.html)):
 
 ```js
 const res = await call();
@@ -93,7 +110,7 @@ Access-Control-Allow-Origin: http://localhost:8000
 
 The call succeeds, the body is readable, and the page shows `HTTP 200` with the body. But the line for `Access-Control-Allow-Origin` reads `null`, because `Access-Control-Allow-Origin` is not in the safelisted list and nothing exposes it. The `?? 'null'` in the lab code is what makes the missing value visible. The reply was fine; the page just cannot see that header.
 
-This is a teaching point, not a bug in the lab. The lab's `api.py` does not send `Access-Control-Expose-Headers`, so the page reads `null` on purpose.
+This is a teaching point, not a bug in the lab. The lab's [api.py](cors-lab-files/api.py) does not send `Access-Control-Expose-Headers`, so the page reads `null` on purpose.
 
 ### The fix: expose the header on the server
 
@@ -111,7 +128,7 @@ Access-Control-Expose-Headers: Access-Control-Allow-Origin
 
 Now `res.headers.get('Access-Control-Allow-Origin')` returns `http://localhost:8000` on the page.
 
-To make this change in the lab, add a tuple to the `reply` call in `api.py`:
+To make this change in the lab, add a tuple to the `reply` call in [api.py](cors-lab-files/api.py):
 
 ```python
 ("Access-Control-Expose-Headers", "Access-Control-Allow-Origin"),
@@ -140,23 +157,6 @@ The lab code is not changed in this page. Adding the line is the exercise if you
 | `Access-Control-Allow-Origin` | No | Not safelisted. Listing it lets the page read it, which real code rarely needs. The lab uses it to show the effect |
 | `X-Request-Id` (custom) | No | Not safelisted. List it when the page uses it for logs or support |
 | `Set-Cookie` | Never | Forbidden for page script |
-
-## Where it's used
-
-- Pagination in APIs: a server sends `Link` or `X-Total-Count` and lists them in `Access-Control-Expose-Headers` so the page can read the total or the next-page link.
-- Request tracing: a server sends `X-Request-Id` and the page logs it to link a front-end error to a server log line.
-- Caching with `ETag`: a page that revalidates with `If-None-Match` must read `ETag` from the reply, so the server lists it.
-- Rate limits: `RateLimit-Remaining` style headers are read by client code to back off before a `429`.
-- Debugging: temporarily exposing `Access-Control-Allow-Origin` (as in the lab) shows what the server sent.
-
-## Compared with
-
-| | Safelisted response headers | `Access-Control-Expose-Headers` | Forbidden response headers |
-|---|---|---|---|
-| Set by | Fixed list in the Fetch Standard | Server, in each CORS reply | Not applicable |
-| Readable by page | Yes, when CORS passes | Yes, once listed | Never |
-| Examples | `Content-Type`, `Content-Length` | `X-Request-Id`, `ETag` | `Set-Cookie` |
-| Visible in DevTools | Yes | Yes | Yes |
 
 ## Common misconceptions
 
@@ -187,15 +187,30 @@ The lab code is not changed in this page. Adding the line is the exercise if you
 
 > [!example] When a header is in the DevTools response but `headers.get()` returns `null` in the page, it means the header is not CORS-safelisted and the server did not list it in `Access-Control-Expose-Headers`, so the browser hides it from page script.
 
-## Related
+## Compared with
 
-- [[cors]] - the CORS check and the header table.
-- [[cors-credentials]] - credentialed calls, where `*` cannot be used in exposed headers.
-- [[cors-lab]] - the lab page that shows the `null` value.
-- [[http-caching]] - why `ETag` and `Cache-Control` matter to the browser and to scripts.
+| | Safelisted response headers | `Access-Control-Expose-Headers` | Forbidden response headers |
+|---|---|---|---|
+| Set by | Fixed list in the Fetch Standard | Server, in each CORS reply | Not applicable |
+| Readable by page | Yes, when CORS passes | Yes, once listed | Never |
+| Examples | `Content-Type`, `Content-Length` | `X-Request-Id`, `ETag` | `Set-Cookie` |
+| Visible in DevTools | Yes | Yes | Yes |
 
-## Sources
+## Where it's used
 
-- Prep 1 networking session, 2026-10-30.
-- MDN, [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) (`Access-Control-Expose-Headers`).
-- WHATWG, [Fetch Standard](https://fetch.spec.whatwg.org/) (CORS-safelisted response-header names and forbidden response-header names).
+- Pagination in APIs: a server sends `Link` or `X-Total-Count` and lists them in `Access-Control-Expose-Headers` so the page can read the total or the next-page link.
+- Request tracing: a server sends `X-Request-Id` and the page logs it to link a front-end error to a server log line.
+- Caching with `ETag`: a page that revalidates with `If-None-Match` must read `ETag` from the reply, so the server lists it.
+- Rate limits: `RateLimit-Remaining` style headers are read by client code to back off before a `429`.
+- Debugging: temporarily exposing `Access-Control-Allow-Origin` (as in the lab) shows what the server sent.
+
+> [!info]- Sources
+> - Study session, 2026-10-30.
+> - MDN, [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) (`Access-Control-Expose-Headers`).
+> - WHATWG, [Fetch Standard](https://fetch.spec.whatwg.org/) (CORS-safelisted response-header names and forbidden response-header names).
+
+<!-- series-nav:start -->
+---
+
+← [[networking/cors-credentials|CORS and credentials]] · [[networking/cors-lab|CORS lab]] →
+<!-- series-nav:end -->
