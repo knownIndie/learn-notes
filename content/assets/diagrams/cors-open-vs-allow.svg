@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="200" viewBox="0 0 680 200" role="img">
+<style>:root{
+  --font-sans:system-ui,-apple-system,"Segoe UI",sans-serif; --font-mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --font-voice:Georgia,serif; --radius:8px;
+  --pad-sm:8px; --pad-md:12px; --pad-lg:16px; --pad-xl:24px;
+  --gap-xs:4px; --gap-sm:8px; --gap-md:12px; --gap-lg:16px; --gap-xl:24px;
+  --p:var(--text-primary); --s:var(--text-secondary); --t:var(--text-muted); --b:var(--border); --bg2:var(--surface-1);
+
+  --text-primary:#1f1e1d; --text-secondary:#5e5d59; --text-muted:#8a8984; --text-disabled:#b4b2a9;
+  --text-accent:#185FA5; --text-danger:#A32D2D; --text-success:#3B6D11; --text-warning:#854F0B;
+  --bg-accent:#E6F1FB; --bg-danger:#FCEBEB; --bg-success:#EAF3DE; --bg-warning:#FAEEDA;
+  --border:rgba(31,30,29,.15); --border-strong:rgba(31,30,29,.3); --border-stronger:rgba(31,30,29,.4);
+  --border-accent:#85B7EB; --border-danger:#F09595; --border-success:#97C459; --border-warning:#EF9F27;
+  --surface-0:#f5f4ef; --surface-1:#faf9f5; --surface-2:#ffffff; --surface-3:#ffffff;
+}
+@media (prefers-color-scheme: dark){:root{
+  --text-primary:#ecebe6; --text-secondary:#b4b2a9; --text-muted:#888780; --text-disabled:#5F5E5A;
+  --text-accent:#85B7EB; --text-danger:#F09595; --text-success:#97C459; --text-warning:#EF9F27;
+  --bg-accent:#0C447C; --bg-danger:#791F1F; --bg-success:#27500A; --bg-warning:#633806;
+  --border:rgba(236,235,230,.15); --border-strong:rgba(236,235,230,.3); --border-stronger:rgba(236,235,230,.4);
+  --border-accent:#185FA5; --border-danger:#A32D2D; --border-success:#3B6D11; --border-warning:#854F0B;
+  --surface-0:#1a1a19; --surface-1:#232321; --surface-2:#2b2b29; --surface-3:#333331;
+}
+.c-purple>rect,.c-purple>circle,.c-purple>ellipse,.c-purple>polygon,rect.c-purple,circle.c-purple,ellipse.c-purple{fill:#3C3489;stroke:#AFA9EC}.c-purple>.t,.c-purple>.th{fill:#CECBF6}.c-purple>.ts{fill:#AFA9EC}
+.c-teal>rect,.c-teal>circle,.c-teal>ellipse,.c-teal>polygon,rect.c-teal,circle.c-teal,ellipse.c-teal{fill:#085041;stroke:#5DCAA5}.c-teal>.t,.c-teal>.th{fill:#9FE1CB}.c-teal>.ts{fill:#5DCAA5}
+.c-coral>rect,.c-coral>circle,.c-coral>ellipse,.c-coral>polygon,rect.c-coral,circle.c-coral,ellipse.c-coral{fill:#712B13;stroke:#F0997B}.c-coral>.t,.c-coral>.th{fill:#F5C4B3}.c-coral>.ts{fill:#F0997B}
+.c-pink>rect,.c-pink>circle,.c-pink>ellipse,.c-pink>polygon,rect.c-pink,circle.c-pink,ellipse.c-pink{fill:#72243E;stroke:#ED93B1}.c-pink>.t,.c-pink>.th{fill:#F4C0D1}.c-pink>.ts{fill:#ED93B1}
+.c-gray>rect,.c-gray>circle,.c-gray>ellipse,.c-gray>polygon,rect.c-gray,circle.c-gray,ellipse.c-gray{fill:#444441;stroke:#B4B2A9}.c-gray>.t,.c-gray>.th{fill:#D3D1C7}.c-gray>.ts{fill:#B4B2A9}
+.c-blue>rect,.c-blue>circle,.c-blue>ellipse,.c-blue>polygon,rect.c-blue,circle.c-blue,ellipse.c-blue{fill:#0C447C;stroke:#85B7EB}.c-blue>.t,.c-blue>.th{fill:#B5D4F4}.c-blue>.ts{fill:#85B7EB}
+.c-green>rect,.c-green>circle,.c-green>ellipse,.c-green>polygon,rect.c-green,circle.c-green,ellipse.c-green{fill:#27500A;stroke:#97C459}.c-green>.t,.c-green>.th{fill:#C0DD97}.c-green>.ts{fill:#97C459}
+.c-amber>rect,.c-amber>circle,.c-amber>ellipse,.c-amber>polygon,rect.c-amber,circle.c-amber,ellipse.c-amber{fill:#633806;stroke:#EF9F27}.c-amber>.t,.c-amber>.th{fill:#FAC775}.c-amber>.ts{fill:#EF9F27}
+.c-red>rect,.c-red>circle,.c-red>ellipse,.c-red>polygon,rect.c-red,circle.c-red,ellipse.c-red{fill:#791F1F;stroke:#F09595}.c-red>.t,.c-red>.th{fill:#F7C1C1}.c-red>.ts{fill:#F09595}}
+:root[data-theme=dark]{
+  --text-primary:#ecebe6; --text-secondary:#b4b2a9; --text-muted:#888780; --text-disabled:#5F5E5A;
+  --text-accent:#85B7EB; --text-danger:#F09595; --text-success:#97C459; --text-warning:#EF9F27;
+  --bg-accent:#0C447C; --bg-danger:#791F1F; --bg-success:#27500A; --bg-warning:#633806;
+  --border:rgba(236,235,230,.15); --border-strong:rgba(236,235,230,.3); --border-stronger:rgba(236,235,230,.4);
+  --border-accent:#185FA5; --border-danger:#A32D2D; --border-success:#3B6D11; --border-warning:#854F0B;
+  --surface-0:#1a1a19; --surface-1:#232321; --surface-2:#2b2b29; --surface-3:#333331;
+}
+.c-purple>rect,.c-purple>circle,.c-purple>ellipse,.c-purple>polygon,rect.c-purple,circle.c-purple,ellipse.c-purple{fill:#EEEDFE;stroke:#534AB7}.c-purple>.t,.c-purple>.th{fill:#3C3489}.c-purple>.ts{fill:#534AB7}
+.c-teal>rect,.c-teal>circle,.c-teal>ellipse,.c-teal>polygon,rect.c-teal,circle.c-teal,ellipse.c-teal{fill:#E1F5EE;stroke:#0F6E56}.c-teal>.t,.c-teal>.th{fill:#085041}.c-teal>.ts{fill:#0F6E56}
+.c-coral>rect,.c-coral>circle,.c-coral>ellipse,.c-coral>polygon,rect.c-coral,circle.c-coral,ellipse.c-coral{fill:#FAECE7;stroke:#993C1D}.c-coral>.t,.c-coral>.th{fill:#712B13}.c-coral>.ts{fill:#993C1D}
+.c-pink>rect,.c-pink>circle,.c-pink>ellipse,.c-pink>polygon,rect.c-pink,circle.c-pink,ellipse.c-pink{fill:#FBEAF0;stroke:#993556}.c-pink>.t,.c-pink>.th{fill:#72243E}.c-pink>.ts{fill:#993556}
+.c-gray>rect,.c-gray>circle,.c-gray>ellipse,.c-gray>polygon,rect.c-gray,circle.c-gray,ellipse.c-gray{fill:#F1EFE8;stroke:#5F5E5A}.c-gray>.t,.c-gray>.th{fill:#444441}.c-gray>.ts{fill:#5F5E5A}
+.c-blue>rect,.c-blue>circle,.c-blue>ellipse,.c-blue>polygon,rect.c-blue,circle.c-blue,ellipse.c-blue{fill:#E6F1FB;stroke:#185FA5}.c-blue>.t,.c-blue>.th{fill:#0C447C}.c-blue>.ts{fill:#185FA5}
+.c-green>rect,.c-green>circle,.c-green>ellipse,.c-green>polygon,rect.c-green,circle.c-green,ellipse.c-green{fill:#EAF3DE;stroke:#3B6D11}.c-green>.t,.c-green>.th{fill:#27500A}.c-green>.ts{fill:#3B6D11}
+.c-amber>rect,.c-amber>circle,.c-amber>ellipse,.c-amber>polygon,rect.c-amber,circle.c-amber,ellipse.c-amber{fill:#FAEEDA;stroke:#854F0B}.c-amber>.t,.c-amber>.th{fill:#633806}.c-amber>.ts{fill:#854F0B}
+.c-red>rect,.c-red>circle,.c-red>ellipse,.c-red>polygon,rect.c-red,circle.c-red,ellipse.c-red{fill:#FCEBEB;stroke:#A32D2D}.c-red>.t,.c-red>.th{fill:#791F1F}.c-red>.ts{fill:#A32D2D}
+
+.t{font:400 14px var(--font-sans);fill:var(--text-primary)}
+.ts{font:400 12px var(--font-sans);fill:var(--text-secondary)}
+.th{font:500 14px var(--font-sans);fill:var(--text-primary)}
+.box{fill:var(--surface-1);stroke:var(--border-strong)}
+.arr{stroke:var(--text-secondary);stroke-width:1.5;fill:none}
+.leader{stroke:var(--text-muted);stroke-width:.5;stroke-dasharray:3 3;fill:none}
+.node{cursor:default}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+<title>Open route versus allow route</title>
+<desc>Same request to both routes. The open reply has no Allow-Origin header so the browser blocks the page. The allow reply names localhost:8000 so the browser lets the page read it.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<g class="c-purple"><rect x="40" y="30" width="250" height="56" rx="8" stroke-width="0.5"/><text class="th" x="165" y="48" text-anchor="middle" dominant-baseline="central">/api/open reply</text><text class="ts" x="165" y="68" text-anchor="middle" dominant-baseline="central">No Allow-Origin header</text></g>
+<line x1="290" y1="58" x2="388" y2="58" class="arr" marker-end="url(#arrow)"/>
+<g class="c-red"><rect x="390" y="30" width="250" height="56" rx="8" stroke-width="0.5"/><text class="th" x="515" y="48" text-anchor="middle" dominant-baseline="central">Browser: no list</text><text class="ts" x="515" y="68" text-anchor="middle" dominant-baseline="central">Page gets fetch error</text></g>
+<g class="c-purple"><rect x="40" y="120" width="250" height="56" rx="8" stroke-width="0.5"/><text class="th" x="165" y="138" text-anchor="middle" dominant-baseline="central">/api/allow reply</text><text class="ts" x="165" y="158" text-anchor="middle" dominant-baseline="central">Allow-Origin: localhost:8000</text></g>
+<line x1="290" y1="148" x2="388" y2="148" class="arr" marker-end="url(#arrow)"/>
+<g class="c-green"><rect x="390" y="120" width="250" height="56" rx="8" stroke-width="0.5"/><text class="th" x="515" y="138" text-anchor="middle" dominant-baseline="central">Browser: 8000 is listed</text><text class="ts" x="515" y="158" text-anchor="middle" dominant-baseline="central">Page reads the body</text></g>
+</svg>

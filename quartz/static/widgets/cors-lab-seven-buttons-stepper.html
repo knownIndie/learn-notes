@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>cors-lab-seven-buttons-stepper</title>
+<style>:root{
+  --font-sans:system-ui,-apple-system,"Segoe UI",sans-serif; --font-mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --font-voice:Georgia,serif; --radius:8px;
+  --pad-sm:8px; --pad-md:12px; --pad-lg:16px; --pad-xl:24px;
+  --gap-xs:4px; --gap-sm:8px; --gap-md:12px; --gap-lg:16px; --gap-xl:24px;
+  --p:var(--text-primary); --s:var(--text-secondary); --t:var(--text-muted); --b:var(--border); --bg2:var(--surface-1);
+
+  --text-primary:#1f1e1d; --text-secondary:#5e5d59; --text-muted:#8a8984; --text-disabled:#b4b2a9;
+  --text-accent:#185FA5; --text-danger:#A32D2D; --text-success:#3B6D11; --text-warning:#854F0B;
+  --bg-accent:#E6F1FB; --bg-danger:#FCEBEB; --bg-success:#EAF3DE; --bg-warning:#FAEEDA;
+  --border:rgba(31,30,29,.15); --border-strong:rgba(31,30,29,.3); --border-stronger:rgba(31,30,29,.4);
+  --border-accent:#85B7EB; --border-danger:#F09595; --border-success:#97C459; --border-warning:#EF9F27;
+  --surface-0:#f5f4ef; --surface-1:#faf9f5; --surface-2:#ffffff; --surface-3:#ffffff;
+}
+@media (prefers-color-scheme: dark){:root{
+  --text-primary:#ecebe6; --text-secondary:#b4b2a9; --text-muted:#888780; --text-disabled:#5F5E5A;
+  --text-accent:#85B7EB; --text-danger:#F09595; --text-success:#97C459; --text-warning:#EF9F27;
+  --bg-accent:#0C447C; --bg-danger:#791F1F; --bg-success:#27500A; --bg-warning:#633806;
+  --border:rgba(236,235,230,.15); --border-strong:rgba(236,235,230,.3); --border-stronger:rgba(236,235,230,.4);
+  --border-accent:#185FA5; --border-danger:#A32D2D; --border-success:#3B6D11; --border-warning:#854F0B;
+  --surface-0:#1a1a19; --surface-1:#232321; --surface-2:#2b2b29; --surface-3:#333331;
+}
+.c-purple>rect,.c-purple>circle,.c-purple>ellipse,.c-purple>polygon,rect.c-purple,circle.c-purple,ellipse.c-purple{fill:#3C3489;stroke:#AFA9EC}.c-purple>.t,.c-purple>.th{fill:#CECBF6}.c-purple>.ts{fill:#AFA9EC}
+.c-teal>rect,.c-teal>circle,.c-teal>ellipse,.c-teal>polygon,rect.c-teal,circle.c-teal,ellipse.c-teal{fill:#085041;stroke:#5DCAA5}.c-teal>.t,.c-teal>.th{fill:#9FE1CB}.c-teal>.ts{fill:#5DCAA5}
+.c-coral>rect,.c-coral>circle,.c-coral>ellipse,.c-coral>polygon,rect.c-coral,circle.c-coral,ellipse.c-coral{fill:#712B13;stroke:#F0997B}.c-coral>.t,.c-coral>.th{fill:#F5C4B3}.c-coral>.ts{fill:#F0997B}
+.c-pink>rect,.c-pink>circle,.c-pink>ellipse,.c-pink>polygon,rect.c-pink,circle.c-pink,ellipse.c-pink{fill:#72243E;stroke:#ED93B1}.c-pink>.t,.c-pink>.th{fill:#F4C0D1}.c-pink>.ts{fill:#ED93B1}
+.c-gray>rect,.c-gray>circle,.c-gray>ellipse,.c-gray>polygon,rect.c-gray,circle.c-gray,ellipse.c-gray{fill:#444441;stroke:#B4B2A9}.c-gray>.t,.c-gray>.th{fill:#D3D1C7}.c-gray>.ts{fill:#B4B2A9}
+.c-blue>rect,.c-blue>circle,.c-blue>ellipse,.c-blue>polygon,rect.c-blue,circle.c-blue,ellipse.c-blue{fill:#0C447C;stroke:#85B7EB}.c-blue>.t,.c-blue>.th{fill:#B5D4F4}.c-blue>.ts{fill:#85B7EB}
+.c-green>rect,.c-green>circle,.c-green>ellipse,.c-green>polygon,rect.c-green,circle.c-green,ellipse.c-green{fill:#27500A;stroke:#97C459}.c-green>.t,.c-green>.th{fill:#C0DD97}.c-green>.ts{fill:#97C459}
+.c-amber>rect,.c-amber>circle,.c-amber>ellipse,.c-amber>polygon,rect.c-amber,circle.c-amber,ellipse.c-amber{fill:#633806;stroke:#EF9F27}.c-amber>.t,.c-amber>.th{fill:#FAC775}.c-amber>.ts{fill:#EF9F27}
+.c-red>rect,.c-red>circle,.c-red>ellipse,.c-red>polygon,rect.c-red,circle.c-red,ellipse.c-red{fill:#791F1F;stroke:#F09595}.c-red>.t,.c-red>.th{fill:#F7C1C1}.c-red>.ts{fill:#F09595}}
+:root[data-theme=dark]{
+  --text-primary:#ecebe6; --text-secondary:#b4b2a9; --text-muted:#888780; --text-disabled:#5F5E5A;
+  --text-accent:#85B7EB; --text-danger:#F09595; --text-success:#97C459; --text-warning:#EF9F27;
+  --bg-accent:#0C447C; --bg-danger:#791F1F; --bg-success:#27500A; --bg-warning:#633806;
+  --border:rgba(236,235,230,.15); --border-strong:rgba(236,235,230,.3); --border-stronger:rgba(236,235,230,.4);
+  --border-accent:#185FA5; --border-danger:#A32D2D; --border-success:#3B6D11; --border-warning:#854F0B;
+  --surface-0:#1a1a19; --surface-1:#232321; --surface-2:#2b2b29; --surface-3:#333331;
+}
+.c-purple>rect,.c-purple>circle,.c-purple>ellipse,.c-purple>polygon,rect.c-purple,circle.c-purple,ellipse.c-purple{fill:#EEEDFE;stroke:#534AB7}.c-purple>.t,.c-purple>.th{fill:#3C3489}.c-purple>.ts{fill:#534AB7}
+.c-teal>rect,.c-teal>circle,.c-teal>ellipse,.c-teal>polygon,rect.c-teal,circle.c-teal,ellipse.c-teal{fill:#E1F5EE;stroke:#0F6E56}.c-teal>.t,.c-teal>.th{fill:#085041}.c-teal>.ts{fill:#0F6E56}
+.c-coral>rect,.c-coral>circle,.c-coral>ellipse,.c-coral>polygon,rect.c-coral,circle.c-coral,ellipse.c-coral{fill:#FAECE7;stroke:#993C1D}.c-coral>.t,.c-coral>.th{fill:#712B13}.c-coral>.ts{fill:#993C1D}
+.c-pink>rect,.c-pink>circle,.c-pink>ellipse,.c-pink>polygon,rect.c-pink,circle.c-pink,ellipse.c-pink{fill:#FBEAF0;stroke:#993556}.c-pink>.t,.c-pink>.th{fill:#72243E}.c-pink>.ts{fill:#993556}
+.c-gray>rect,.c-gray>circle,.c-gray>ellipse,.c-gray>polygon,rect.c-gray,circle.c-gray,ellipse.c-gray{fill:#F1EFE8;stroke:#5F5E5A}.c-gray>.t,.c-gray>.th{fill:#444441}.c-gray>.ts{fill:#5F5E5A}
+.c-blue>rect,.c-blue>circle,.c-blue>ellipse,.c-blue>polygon,rect.c-blue,circle.c-blue,ellipse.c-blue{fill:#E6F1FB;stroke:#185FA5}.c-blue>.t,.c-blue>.th{fill:#0C447C}.c-blue>.ts{fill:#185FA5}
+.c-green>rect,.c-green>circle,.c-green>ellipse,.c-green>polygon,rect.c-green,circle.c-green,ellipse.c-green{fill:#EAF3DE;stroke:#3B6D11}.c-green>.t,.c-green>.th{fill:#27500A}.c-green>.ts{fill:#3B6D11}
+.c-amber>rect,.c-amber>circle,.c-amber>ellipse,.c-amber>polygon,rect.c-amber,circle.c-amber,ellipse.c-amber{fill:#FAEEDA;stroke:#854F0B}.c-amber>.t,.c-amber>.th{fill:#633806}.c-amber>.ts{fill:#854F0B}
+.c-red>rect,.c-red>circle,.c-red>ellipse,.c-red>polygon,rect.c-red,circle.c-red,ellipse.c-red{fill:#FCEBEB;stroke:#A32D2D}.c-red>.t,.c-red>.th{fill:#791F1F}.c-red>.ts{fill:#A32D2D}
+
+.t{font:400 14px var(--font-sans);fill:var(--text-primary)}
+.ts{font:400 12px var(--font-sans);fill:var(--text-secondary)}
+.th{font:500 14px var(--font-sans);fill:var(--text-primary)}
+.box{fill:var(--surface-1);stroke:var(--border-strong)}
+.arr{stroke:var(--text-secondary);stroke-width:1.5;fill:none}
+.leader{stroke:var(--text-muted);stroke-width:.5;stroke-dasharray:3 3;fill:none}
+.node{cursor:default}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+html,body{margin:0;background:var(--surface-2);color:var(--text-primary);font:400 16px/1.7 var(--font-sans)}
+body{padding:16px}
+h1,h2,h3{font-weight:500;color:var(--text-primary)}
+code,pre{font-family:var(--font-mono)}
+button{font:inherit;font-size:14px;color:var(--text-primary);background:transparent;border:.5px solid var(--border-strong);
+  border-radius:var(--radius);padding:6px 12px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button:active{transform:scale(.98)}
+input,select,textarea{font:inherit;color:var(--text-primary);background:var(--surface-2);border:.5px solid var(--border-strong);
+  border-radius:var(--radius);padding:6px 10px}
+</style>
+<script>window.sendPrompt=function(t){alert(t)};window.openLink=function(u){window.open(u,'_blank')};</script>
+</head>
+<body>
+<h2 class="sr-only">Stepper through the seven CORS lab buttons. Each step pairs the page code, the raw request, the server code, the raw response, then a hidden browser check and what the page shows.</h2>
+<style>
+.cl-pill{border:0.5px solid var(--border);border-radius:var(--radius);padding:4px 10px;font-size:13px;background:transparent;color:var(--text-primary);cursor:pointer}
+.cl-pill.on{border-color:var(--border-stronger);font-weight:500}
+.cl-card{border:0.5px solid var(--border);border-radius:12px;padding:10px;margin-top:10px}
+.cl-h{font-size:13px;font-weight:500;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.cl-tag{font-size:11px;padding:1px 6px;border-radius:4px;font-weight:400}
+.t-page{background:#EEEDFE;color:#3C3489}.t-api{background:#E1F5EE;color:#085041}.t-br{background:#FAEEDA;color:#633806}
+pre.cl{font-family:var(--font-mono);font-size:12px;margin:0;white-space:pre-wrap;line-height:1.6}
+.hl{background:var(--bg-success);color:var(--text-success)}
+.cl-row{display:flex;justify-content:space-between;gap:8px}
+.src{font-size:11px;color:var(--text-muted);white-space:nowrap}
+</style>
+<div style="padding:0.5rem 0">
+<div id="pills" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+<div id="stage"></div>
+</div>
+<script>
+const R='Access-Control-Allow-Origin: http://localhost:8000', C='Access-Control-Allow-Credentials: true';
+const ROUTE_ME=`elif self.path == "/api/me":
+    jar = SimpleCookie(self.headers.get("Cookie", ""))
+    session = jar["session"].value if "session" in jar else None
+    self.reply(200, {"cookie_seen": session is not None, "cookie": session}, [
+        <hl>("Access-Control-Allow-Origin", "http://localhost:8000"),</hl>
+        <hl>("Access-Control-Allow-Credentials", "true"),</hl>
+    ])`;
+const S=[
+{n:'5. who am I (before login)',js:"fetch('http://localhost:9000/api/me', <hl>{ credentials: 'include' }</hl>)",path:'/api/me',cookie:false,
+ py:ROUTE_ME,resp:[['HTTP/1.0 200 OK'],['Content-Type: application/json'],['Content-Length: 38'],[R,1],[C,1],[''],['{"cookie_seen": false, "cookie": null}']],
+ ok:true,check:"credentials is 'include', so the browser needs two things: the exact origin in Access-Control-Allow-Origin (yes) and Access-Control-Allow-Credentials: true (yes).",
+ page:'HTTP 200\n{"cookie_seen": false, "cookie": null}',why:'No cookie stored yet, so the request had no Cookie line, so api.py found no session.'},
+{n:'Log in (set cookie)',js:"fetch('http://localhost:9000/api/login', <hl>{ credentials: 'include' }</hl>)",path:'/api/login',cookie:false,
+ py:`elif self.path == "/api/login":
+    self.reply(200, {"logged_in": True}, [
+        <hl>("Set-Cookie", "session=demo123; Path=/; SameSite=Lax"),</hl>
+        ("Access-Control-Allow-Origin", "http://localhost:8000"),
+        ("Access-Control-Allow-Credentials", "true"),
+    ])`,resp:[['HTTP/1.0 200 OK'],['Content-Type: application/json'],['Content-Length: 19'],['Set-Cookie: session=demo123; Path=/; SameSite=Lax',1],[R],[C],[''],['{"logged_in": true}']],
+ ok:true,check:'Same two checks pass. Because of them, the browser also saves the Set-Cookie line: cookie name session, value demo123, for host localhost.',
+ page:'HTTP 200\n{"logged_in": true}',why:'Nothing about a user name is sent back. The only effect is the stored cookie.'},
+{n:'5. who am I (after login)',js:"fetch('http://localhost:9000/api/me', <hl>{ credentials: 'include' }</hl>)",path:'/api/me',cookie:true,
+ py:ROUTE_ME,resp:[['HTTP/1.0 200 OK'],['Content-Type: application/json'],['Content-Length: 42'],[R],[C],[''],['{"cookie_seen": true, "cookie": "demo123"}',1]],
+ ok:true,check:'Both checks pass, same as the first step.',
+ page:'HTTP 200\n{"cookie_seen": true, "cookie": "demo123"}',why:'The only change from the first step is the Cookie line the browser added. That flips cookie_seen.'},
+{n:'1. open (no CORS headers)',js:"fetch('http://localhost:9000/api/open')",path:'/api/open',cookie:false,
+ py:`if self.path == "/api/open":
+    self.reply(200, {"route": "open"})   <hl># no Access-Control-* headers</hl>`,resp:[['HTTP/1.0 200 OK'],['Content-Type: application/json'],['Content-Length: 17'],[''],['{"route": "open"}']],
+ ok:false,check:'No Access-Control-Allow-Origin line in the reply. The browser hides the reply from the page.',
+ console:"Access to fetch at 'http://localhost:9000/api/open' from origin 'http://localhost:8000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+ page:'fetch failed: the browser blocked the request or the response. Check the browser console for the real reason.',why:'The server still answered 200 and the api.py terminal printed the line. Only the page was blocked.'},
+{n:'2. allow (origin only)',js:"fetch('http://localhost:9000/api/allow')",path:'/api/allow',cookie:false,
+ py:`elif self.path == "/api/allow":
+    self.reply(200, {"route": "allow"}, [
+        <hl>("Access-Control-Allow-Origin", "http://localhost:8000"),</hl>
+    ])`,resp:[['HTTP/1.0 200 OK'],['Content-Type: application/json'],['Content-Length: 18'],[R,1],[''],['{"route": "allow"}']],
+ ok:true,check:'credentials is the default, so only one check: is http://localhost:8000 in Access-Control-Allow-Origin? Yes.',
+ page:'HTTP 200\n{"route": "allow"}',why:'Compared with open, the only difference is the one highlighted line in api.py.'},
+{n:'4. wildcard with credentials',js:"fetch('http://localhost:9000/api/wildcard-creds', <hl>{ credentials: 'include' }</hl>)",path:'/api/wildcard-creds',cookie:true,
+ py:`elif self.path == "/api/wildcard-creds":
+    self.reply(200, {"route": "wildcard-creds"}, [
+        <hl>("Access-Control-Allow-Origin", "*"),</hl>
+        ("Access-Control-Allow-Credentials", "true"),
+    ])`,resp:[['HTTP/1.0 200 OK'],['Content-Type: application/json'],['Content-Length: 27'],['Access-Control-Allow-Origin: *',1],[C],[''],['{"route": "wildcard-creds"}']],
+ ok:false,check:"credentials is 'include', so * is not accepted. It must be the exact origin.",
+ console:"Access to fetch at 'http://localhost:9000/api/wildcard-creds' from origin 'http://localhost:8000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.",
+ page:'fetch failed: the browser blocked the request or the response. Check the browser console for the real reason.',why:'Compared with the next step, the only difference is * instead of http://localhost:8000.'},
+{n:'3. allow with credentials',js:"fetch('http://localhost:9000/api/allow-creds', <hl>{ credentials: 'include' }</hl>)",path:'/api/allow-creds',cookie:true,
+ py:`elif self.path == "/api/allow-creds":
+    self.reply(200, {"route": "allow-creds"}, [
+        <hl>("Access-Control-Allow-Origin", "http://localhost:8000"),</hl>
+        <hl>("Access-Control-Allow-Credentials", "true"),</hl>
+    ])`,resp:[['HTTP/1.0 200 OK'],['Content-Type: application/json'],['Content-Length: 24'],[R,1],[C,1],[''],['{"route": "allow-creds"}']],
+ ok:true,check:'Exact origin (yes) and Allow-Credentials true (yes). Pass.',
+ page:'HTTP 200\n{"route": "allow-creds"}',why:'This is the correct setup for a page that sends cookies to another origin.'}
+];
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const hl=s=>esc(s).replace(/&lt;hl&gt;/g,'<span class="hl">').replace(/&lt;\/hl&gt;/g,'</span>');
+function line(t,src,h){return `<div class="cl-row"><pre class="cl">${h?'<span class="hl">'+esc(t)+'</span>':esc(t)||' '}</pre>${src?`<span class="src">${src}</span>`:''}</div>`}
+let cur=0;
+function render(){
+ const s=S[cur];
+ document.getElementById('pills').innerHTML=S.map((x,i)=>`<button class="cl-pill${i===cur?' on':''}" onclick="go(${i})">${i+1}. ${esc(x.n.replace(/^\d\. /,''))}</button>`).join('');
+ let req=line(`GET ${s.path} HTTP/1.1`,'browser, from the fetch URL')+line('Host: localhost:9000','browser, from the fetch URL')+line('Origin: http://localhost:8000','browser adds it, no code writes it');
+ req+=s.cookie?line('Cookie: session=demo123','browser, because of credentials: \'include\'',1):line('(no Cookie line)',s.js.includes('include')?'no cookie stored yet':'default credentials: no cookies');
+ const resp=s.resp.map(([t,h])=>line(t,'',h)).join('');
+ document.getElementById('stage').innerHTML=`
+ <div class="cl-card"><div class="cl-h">1. Page code sends <span class="cl-tag t-page">index.html</span></div><pre class="cl">${hl(s.js)}</pre></div>
+ <div class="cl-card"><div class="cl-h">2. Raw request <span class="cl-tag t-br">built by the browser</span></div>${req}</div>
+ <div class="cl-card"><div class="cl-h">3. Server code answers <span class="cl-tag t-api">api.py</span></div><pre class="cl">${hl(s.py)}</pre></div>
+ <div class="cl-card"><div class="cl-h">4. Raw response <span class="cl-tag t-api">sent by api.py</span></div>${resp}<div class="src" style="margin-top:4px">Server and Date lines trimmed</div></div>
+ <div style="margin-top:10px"><button class="cl-pill" id="rv" onclick="reveal()">Show result</button></div>
+ <div id="res" style="visibility:hidden">
+ <div class="cl-card" style="border-color:${s.ok?'var(--border-success)':'var(--border-danger)'}"><div class="cl-h">5. Browser check <span class="cl-tag t-br">Chrome</span> <span style="color:${s.ok?'var(--text-success)':'var(--text-danger)'}">${s.ok?'pass':'blocked'}</span></div><div style="font-size:13px;line-height:1.6">${esc(s.check)}</div>${s.console?`<div class="src" style="margin-top:6px">DevTools Console:</div><pre class="cl" style="color:var(--text-danger)">${esc(s.console)}</pre>`:''}</div>
+ <div class="cl-card"><div class="cl-h">6. What the page shows <span class="cl-tag t-page">index.html reads the reply</span></div><pre class="cl">${esc(s.page)}</pre><div style="font-size:13px;color:var(--text-secondary);margin-top:6px">${esc(s.why)}</div></div>
+ </div>`;
+}
+function go(i){cur=i;render()}
+function reveal(){document.getElementById('res').style.visibility='visible';document.getElementById('rv').style.display='none'}
+render();
+</script>
+</body>
+</html>

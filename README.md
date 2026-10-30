@@ -1,17 +1,19 @@
-# Quartz v5
+# Learn notes
 
-> “[One] who works with the door open gets all kinds of interruptions, but [they] also occasionally gets clues as to what the world is and what might be important.” — Richard Hamming
+Detailed notes on everything I learn, one page per concept, published at
+**https://knownindie.github.io/learn-notes/**.
 
-Quartz is a set of tools that helps you publish your [digital garden](https://jzhao.xyz/posts/networked-thought) and notes as a website for free.
+- Notes: `content/<subject>/<concept>.md` (Obsidian-flavoured markdown: wikilinks, callouts, LaTeX, Mermaid).
+  `content/` can be opened as an Obsidian vault.
+- Template: `content/templates/concept.md` (not published).
+- Diagrams: `content/assets/diagrams/*.svg`. Interactive widgets: `quartz/static/widgets/*.html`.
+- `tools/export_widget.py` turns a chat widget (or every widget in a session transcript) into those files.
 
-🔗 Read the documentation and get started: https://quartz.jzhao.xyz/
+Preview locally:
 
-[Join the Discord Community](https://discord.gg/cRFFHYye7t)
+```bash
+npm ci && npx quartz build --serve
+```
 
-## Sponsors
-
-<p align="center">
-  <a href="https://github.com/sponsors/jackyzha0">
-    <img src="https://cdn.jsdelivr.net/gh/jackyzha0/jackyzha0/sponsorkit/sponsors.svg" />
-  </a>
-</p>
+Pushing to `main` builds and deploys to GitHub Pages (`.github/workflows/deploy.yml`).
+Built with [Quartz](https://quartz.jzhao.xyz).
