@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="520" viewBox="0 0 360 520" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>TCP handshake: SYN, SYN-ACK and ACK go down the page, then data flows</title>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5e5d59"/></marker></defs>
+<rect x="1" y="1" width="358" height="518" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="16" y="16" width="120" height="48" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="76" y="37" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">Client</text>
+<text x="76" y="54" text-anchor="middle" font-size="11" fill="#534AB7">port 51734</text>
+<rect x="224" y="16" width="120" height="48" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="284" y="37" text-anchor="middle" font-size="13" font-weight="600" fill="#085041">Server</text>
+<text x="284" y="54" text-anchor="middle" font-size="11" fill="#0F6E56">port 443</text>
+<line x1="76" y1="64" x2="76" y2="452" stroke="#b4b2a9" stroke-width="1.5" stroke-dasharray="4 4"/>
+<line x1="284" y1="64" x2="284" y2="452" stroke="#b4b2a9" stroke-width="1.5" stroke-dasharray="4 4"/>
+<text x="180" y="96" text-anchor="middle" font-size="12" font-weight="600" fill="#185FA5">1. SYN</text>
+<text x="180" y="112" text-anchor="middle" font-size="11" fill="#185FA5">start number seq=1000</text>
+<line x1="76" y1="122" x2="284" y2="122" stroke="#185FA5" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="160" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">2. SYN-ACK</text>
+<text x="180" y="176" text-anchor="middle" font-size="11" fill="#0F6E56">seq=5000, ack=1001</text>
+<line x1="284" y1="186" x2="76" y2="186" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="222" text-anchor="middle" font-size="12" font-weight="600" fill="#534AB7">3. ACK</text>
+<text x="180" y="238" text-anchor="middle" font-size="11" fill="#534AB7">ack=5001, connection is open</text>
+<line x1="76" y1="248" x2="284" y2="248" stroke="#534AB7" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="268" width="280" height="56" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="180" y="291" text-anchor="middle" font-size="12" font-weight="600" fill="#633806">Handshake done: 1 round trip (RTT)</text>
+<text x="180" y="309" text-anchor="middle" font-size="11" fill="#854F0B">both sides know the other's start number</text>
+<text x="180" y="352" text-anchor="middle" font-size="12" font-weight="600" fill="#185FA5">4. DATA: request</text>
+<text x="180" y="368" text-anchor="middle" font-size="11" fill="#185FA5">seq=1001, len=20</text>
+<line x1="76" y1="378" x2="284" y2="378" stroke="#185FA5" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="402" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">5. DATA: reply</text>
+<text x="180" y="418" text-anchor="middle" font-size="11" fill="#0F6E56">seq=5001, len=300</text>
+<line x1="284" y1="428" x2="76" y2="428" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="474" text-anchor="middle" font-size="12" fill="#5e5d59">Every byte is numbered.</text>
+<text x="180" y="492" text-anchor="middle" font-size="12" fill="#5e5d59">Each side ACKs what it has received.</text>
+</svg>

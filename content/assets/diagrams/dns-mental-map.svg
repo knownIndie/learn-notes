@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="540" viewBox="0 0 360 540" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>DNS mental map</title>
+<rect x="1" y="1" width="358" height="538" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="120" y="16" width="120" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">DNS</text>
+<path d="M120 36 H36 V472" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 102 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="60" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="90" font-weight="600" fill="#3C3489">What it does</text>
+<text x="68" y="107" fill="#534AB7">Turns shop.com into 203.0.113.10</text>
+<text x="68" y="123" fill="#534AB7">Computers need IPs, people use names</text>
+<path d="M36 176 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="146" width="288" height="60" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="164" font-weight="600" fill="#0C447C">Who does what</text>
+<text x="68" y="181" fill="#185FA5">Resolver: does the walk for you</text>
+<text x="68" y="197" fill="#185FA5">Authoritative: holds the real records</text>
+<path d="M36 250 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="220" width="288" height="60" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="238" font-weight="600" fill="#633806">Lookup path</text>
+<text x="68" y="255" fill="#854F0B">Browser, OS cache, then resolver</text>
+<text x="68" y="271" fill="#854F0B">Then root, .com, authoritative</text>
+<path d="M36 324 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="294" width="288" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="312" font-weight="600" fill="#085041">Record types</text>
+<text x="68" y="329" fill="#0F6E56">A / AAAA: IP address</text>
+<text x="68" y="345" fill="#0F6E56">CNAME alias, MX mail, NS, TXT notes</text>
+<path d="M36 398 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="368" width="288" height="60" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="386" font-weight="600" fill="#791F1F">TTL and caching</text>
+<text x="68" y="403" fill="#A32D2D">Answers live for TTL seconds</text>
+<text x="68" y="419" fill="#A32D2D">Changes spread only when caches expire</text>
+<path d="M36 472 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="442" width="288" height="60" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="460" font-weight="600" fill="#27500A">Transport</text>
+<text x="68" y="477" fill="#3B6D11">UDP port 53, one packet each way</text>
+<text x="68" y="493" fill="#3B6D11">TCP for big replies, DoT/DoH encrypt</text>
+</g>
+<text x="180" y="528" text-anchor="middle" font-size="11" fill="#8a8984">Records are cached, so changes take time</text>
+</svg>

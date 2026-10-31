@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="566" viewBox="0 0 360 566" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>CORS mental map</title>
+<rect x="1" y="1" width="358" height="564" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="120" y="16" width="120" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">CORS</text>
+<path d="M120 36 H36 V498" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 102 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="60" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="90" font-weight="600" fill="#3C3489">Why it exists</text>
+<text x="68" y="107" fill="#534AB7">Same-origin policy: read only your own origin</text>
+<text x="68" y="123" fill="#534AB7">so other sites can't read your logged-in data</text>
+<path d="M36 168 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="146" width="288" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="164" font-weight="600" fill="#0C447C">Origin</text>
+<text x="68" y="181" fill="#185FA5">scheme + host + port, all three must match</text>
+<path d="M36 226 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="204" width="288" height="44" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="222" font-weight="600" fill="#633806">Who checks</text>
+<text x="68" y="239" fill="#854F0B">The browser. curl and Postman ignore CORS</text>
+<path d="M36 292 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="262" width="288" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="280" font-weight="600" fill="#085041">Two headers</text>
+<text x="68" y="297" fill="#0F6E56" font-family="ui-monospace,Menlo,monospace" font-size="11">Origin  (browser → server)</text>
+<text x="68" y="313" fill="#0F6E56" font-family="ui-monospace,Menlo,monospace" font-size="11">Access-Control-Allow-Origin  (back)</text>
+<path d="M36 358 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="336" width="288" height="44" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="354" font-weight="600" fill="#791F1F">Preflight</text>
+<text x="68" y="371" fill="#A32D2D">OPTIONS "may I?" before PUT, DELETE, JSON</text>
+<path d="M36 424 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="394" width="288" height="60" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="412" font-weight="600" fill="#27500A">Cookies (credentials)</text>
+<text x="68" y="429" fill="#3B6D11">need Allow-Credentials: true</text>
+<text x="68" y="445" fill="#3B6D11">and the exact origin, never *</text>
+<path d="M36 498 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="468" width="288" height="60" rx="8" fill="#F1EFE8" stroke="#5F5E5A"/>
+<text x="68" y="486" font-weight="600" fill="#2C2C2A">Not CSRF protection</text>
+<text x="68" y="503" fill="#5F5E5A">request still runs on the server</text>
+<text x="68" y="519" fill="#5F5E5A">CSRF fix: tokens + SameSite cookies</text>
+</g>
+<text x="180" y="554" text-anchor="middle" font-size="11" fill="#8a8984">Fix CORS on the server, never in the page</text>
+</svg>

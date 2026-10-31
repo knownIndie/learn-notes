@@ -1,228 +1,128 @@
 ---
 title: Request lifecycle
-subject: networking
-tags: [networking, http, overview]
-aliases: [page load, what happens when you type a URL, request lifecycle, Request lifecycle (from typing a URL to a rendered page)]
-created: 2026-10-30
-updated: 2026-10-30
-status: draft
-sources: ["study session 2026-10-30", "RFC 1035 (DNS)", "RFC 9293 (TCP)", "RFC 8446 (TLS 1.3)", "RFC 9110 (HTTP semantics)", "RFC 9111 (HTTP caching)", "MDN: How the web works"]
+tags: [networking, request-lifecycle]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 2 of 11
+> [!series]- Networking · 2 of 8
 > 1. [[networking/http-message|HTTP message]]
 > 2. **Request lifecycle** · you are here
 > 3. [[networking/dns|DNS]]
-> 4. [[networking/tcp|TCP]]
-> 5. [[networking/tls|TLS]]
+> 4. [[networking/tcp|TCP and UDP]]
+> 5. [[networking/tls|TLS and HTTPS]]
 > 6. [[networking/http-caching|HTTP caching]]
 > 7. [[networking/origin|Origin]]
 > 8. [[networking/cors|CORS]]
-> 9. [[networking/cors-credentials|CORS and credentials]]
-> 10. [[networking/cors-expose-headers|CORS exposed headers]]
-> 11. [[networking/cors-lab|CORS lab]]
 <!-- series:end -->
 
-> [!tldr] In three lines
-> The request lifecycle, from typing a URL to a rendered page, runs four network steps in order: DNS finds the server's IP address, TCP opens a connection, TLS secures it, and HTTP asks for the page. Each step waits for the one before it, so a first visit pays for all four in round trips. A second visit can skip most of that work.
->
-> [[#Interview questions|→ Self-test: 6 questions]]
+> [!abstract] What this page is for
+> **Intent:** answer "What happens when you type a URL and press Enter?" step by step, in the order interviewers expect.
+> **You'll learn:** the ten steps from URL to page on screen · what a round trip costs · why a second visit is faster · the questions that follow.
+> **Time:** about 8 minutes. Every step has a longer version on the [[networking/deep/request-lifecycle|detailed request lifecycle page]].
+
+## Words you need first
+
+- **URL (Uniform Resource Locator)**: the address you type, such as `https://shop.com/cart`. It has a scheme (`https`), a host (`shop.com`), an optional port (`443` is the default for https) and a path (`/cart`).
+- **DNS (Domain Name System)**: the internet's phone book. It turns a name like `shop.com` into an IP address like `203.0.113.10`. Networks route by IP address, never by name.
+- **TCP (Transmission Control Protocol)**: the way two computers open a reliable pipe. Bytes arrive in order, and lost bytes are sent again.
+- **TLS (Transport Layer Security)**: the layer that encrypts the pipe, proves the server really is `shop.com`, and detects tampering.
+- **HTTP (HyperText Transfer Protocol)**: the language of the web. A request asks for something, and a response carries the answer.
+- **Round trip (RTT)**: one message going to the other side and one coming back. If the path takes 50 milliseconds each way, one RTT is 100 milliseconds.
+- **Cache**: a stored copy kept so the browser does not have to ask again.
 
 ## Why it exists
 
-A browser starts with a name such as `example.com`. Networks do not route by names. They route packets to IP addresses, and they can lose or reorder those packets. The name has to be turned into an address first. A reliable path then has to be opened, because a page is far too big to send as loose packets. That path crosses networks run by other people, so it must be encrypted and the server's identity must be checked. Only then can the browser ask for the page itself.
+A browser starts with a name, `shop.com`. Networks route packets to IP addresses, not names, so the name must become an address first. Then a reliable pipe must be opened, because a page is too big to send as loose packets. That pipe crosses networks run by other people, so it must be encrypted and the server's identity checked. Only then can the browser ask for the page.
 
-Each layer solves one problem and hands a clean result to the next layer. Without this order, the steps look arbitrary. With it, every step has a clear reason to exist.
+## The picture
 
-## Picture
+![Ten steps from typing a URL to the page on screen, stacked from top to bottom](../assets/diagrams/request-lifecycle-pipeline-phone.svg)
 
-![DNS, then TCP, then TLS, then HTTP, each step waiting for the one before](../assets/diagrams/page-load-four-steps.svg)
+*Ten steps, top to bottom. Each one waits for the step above it.*
 
-*Four steps, each waiting for the one before it.*
+## How it works, with an example
 
-![Timeline of a first visit with four steps and a second visit with only the HTTP step](../assets/diagrams/first-vs-second-visit-timeline.svg)
+You type `https://shop.com/cart` and press Enter. The browser reads the URL and has no fresh copy of the page. It asks DNS for the address of `shop.com` and gets `203.0.113.10`. It opens a TCP pipe to that address, which takes 1 round trip. It runs TLS over the pipe, which takes 1 more, and checks that the certificate names `shop.com`. It sends `GET /cart` over the secure pipe, and the server answers `200 OK` with the HTML one round trip later. The browser then fetches the files the HTML names and draws the page.
 
-*A first visit against a second visit: on the second visit, DNS, TCP and TLS are skipped or saved.*
+Added up, a first visit costs about 4 round trips: DNS 1, TCP 1, TLS 1, HTTP 1.
 
-## Plain version
+## The most common mistake
 
-Think of ordering food by phone from a restaurant you have never called.
+> [!warning] One request is not one page
+> Many people say "the browser sends a request and gets the page." The page is the end of a long chain. DNS, TCP and TLS come first. And the HTML is only the start: each stylesheet, script and image is another request. A normal page makes many requests, often dozens.
 
-1. Look up the restaurant's number in a directory. That is DNS.
-2. Dial and wait until the line connects and both sides say hello. That is TCP.
-3. Agree on a secret language and check that the voice on the line really is the restaurant. That is TLS.
-4. Place the order. That is HTTP.
+## The steps one by one
 
-Next time, you already know the number, and the line may still be open. Most of the waiting disappears. That is the second visit.
+1. **Parse the URL.** The browser splits it into scheme, host, port and path. For https with no port, it uses 443. No network traffic yet.
+2. **Check the browser cache.** If it holds a fresh copy of the page, it shows that copy and skips the rest. See [[networking/http-caching|HTTP caching]].
+3. **DNS lookup.** The browser checks its own DNS cache, then asks a recursive resolver (a DNS helper that does the searching). The answer is kept for its TTL (time to live, how many seconds it may be reused). A cached answer costs about 1 round trip. See [[networking/dns|DNS]].
+4. **TCP connection.** The browser sends SYN, the server answers SYN-ACK, and the browser sends ACK. This three-message handshake opens the pipe and costs 1 round trip. No page data moves before it. See [[networking/tcp|TCP]].
+5. **TLS handshake.** The two sides agree on keys, and the browser checks the server's certificate. In TLS 1.3 this costs 1 round trip. See [[networking/tls|TLS]].
+6. **Send the HTTP request.** The browser sends `GET /cart HTTP/1.1` with headers such as `Host` and `Accept`, encrypted by TLS. See [[networking/http-message|HTTP message]].
+7. **Server work.** A load balancer, a machine that spreads requests over many identical servers, picks one app server. The app runs its code and often asks a database for data.
+8. **HTTP response.** The server sends `200 OK`, headers such as `Cache-Control` (how long to keep the copy), and the HTML. It arrives 1 round trip after the request.
+9. **Sub-resources.** The HTML names more files: CSS, JavaScript, images and fonts. Each is a new request, often sent over the open connection.
+10. **Render.** The browser builds the DOM (the page's structure) and the CSSOM (its styles), works out where each box goes, paints the pixels, and runs the JavaScript.
 
-## Precise definition
+## Second visit: what gets skipped
 
-The request lifecycle is the ordered chain of steps a browser runs to turn a URL into a rendered page. The terms it uses are listed below.
+A second visit can skip most of the first visit's work.
 
-> [!info]- Terms reference
-> | Term | Definition | Where it's used |
-> |---|---|---|
-> | URL (Uniform Resource Locator) | A string with a scheme, host, optional port, path and query, such as `https://example.com/docs?q=1` | Address bar, links, `fetch()`, `curl` |
-> | Scheme | The protocol named at the front of a URL, such as `https` | Chooses the default port: 443 for https, 80 for http |
-> | Host | The name part of the URL, which DNS must resolve | DNS lookup |
-> | DNS (Domain Name System) | The system that maps names to IP addresses | First step of every connection by name |
-> | IP address | A numeric address used to route packets between machines | Target of the TCP connection |
-> | TCP (Transmission Control Protocol) | Delivers a reliable, ordered stream of bytes between two ports | Carries TLS and HTTP |
-> | TLS (Transport Layer Security) | Encrypts the stream, checks it is not changed, and proves the server's identity | Carries HTTP in HTTPS |
-> | HTTP (HyperText Transfer Protocol) | The request and response format for web resources | Asks for the page, images, API data |
-> | RTT (round-trip time) | Time for a message to go to the other side and back | The unit used to count the cost of each step |
-> | Connection reuse (keep-alive) | Sending more requests over an already open TCP connection | Second visits, many requests to one host |
-> | HTTP cache | A store of responses, controlled by HTTP headers, that can answer a request without the network | Browser, CDN, proxies |
+- **DNS.** The answer is still cached until its TTL runs out, so no query is needed.
+- **TCP and TLS.** If the pipe is still open, the browser reuses it.
+- **HTTP.** A fresh cached copy is shown with no network traffic. A stale copy is checked, and the server may answer `304 Not Modified` with no body. That check still costs 1 round trip.
 
-## How it works
-
-1. **Parse the URL.** The browser reads `https://example.com/`. The scheme is `https`, the host is `example.com`, the port defaults to 443, and the path is `/`.
-2. **Check the caches for the address.** The browser checks its own DNS cache, then the operating system's cache. A hit skips DNS.
-3. **Ask a resolver for the IP address.** On a miss, the operating system sends a DNS query to a recursive resolver. The resolver does the work of walking the DNS hierarchy and returns an A record (IPv4) or AAAA record (IPv6). See [[networking/dns|DNS]].
-4. **Open a TCP connection.** The client sends a SYN to the server's IP on port 443. The server answers SYN-ACK, and the client answers ACK. This costs 1 RTT before any data can move. See [[networking/tcp|TCP]].
-5. **Start TLS inside the TCP stream.** The client sends a ClientHello that includes its key share and the server name (SNI). The server answers with its certificate and proof that it holds the private key. The client checks the chain of trust and the host name. In TLS 1.3, the client's first HTTP request can ride in the same flight as its Finished message, so this costs 1 RTT. See [[networking/tls|TLS]].
-6. **Send the HTTP request.** The browser writes `GET / HTTP/1.1` (or the HTTP/2 equivalent) with headers such as `Host`, `User-Agent` and `Accept`. The bytes travel encrypted through TLS. See [[networking/http-message|HTTP message]].
-7. **Check the HTTP cache.** Before or after the request, the browser checks whether a stored copy is still fresh. A fresh copy is used with no network traffic. A stale copy can be revalidated with a conditional request, and the server may answer 304 Not Modified with no body. See [[networking/http-caching|HTTP caching]].
-8. **Receive the response.** The server returns `200 OK` with the HTML. The browser parses the HTML as it arrives.
-9. **Fetch the sub-resources.** The HTML names CSS, JavaScript, images and fonts. The browser fetches them, often over the same connection or a few parallel ones. Each is a new request, so each costs at least 1 RTT on a fresh connection.
-10. **Render.** The browser builds the DOM and CSSOM, combines them into a render tree, runs layout, paints the pixels, and runs the JavaScript that was loaded.
-
-```mermaid
-sequenceDiagram
-  participant B as Browser
-  participant R as Recursive resolver
-  participant S as Web server
-  B->>R: DNS query, A record for example.com
-  R-->>B: A 203.0.113.10
-  B->>S: TCP SYN
-  S-->>B: TCP SYN-ACK
-  B->>S: TCP ACK
-  B->>S: TLS ClientHello with key share and SNI
-  S-->>B: TLS ServerHello, Certificate, CertificateVerify, Finished
-  B->>S: TLS Finished, then HTTP GET /
-  S-->>B: HTTP 200 OK with HTML body
-```
-
-### Counting round trips
-
-Each request and response exchange costs one RTT. The four steps of a first visit add up as:
-
-$$T_{first} \approx 1\,\text{RTT}_{DNS} + 1\,\text{RTT}_{TCP} + 1\,\text{RTT}_{TLS1.3} + 1\,\text{RTT}_{HTTP}$$
-
-The DNS term is 1 RTT only when the resolver already has the answer. On a cache miss, the resolver may make several queries of its own, so the DNS term grows.
-
-For TLS 1.2, the handshake costs 2 RTT instead of 1:
-
-$$T_{first}^{TLS1.2} \approx 1\,\text{RTT}_{DNS} + 1\,\text{RTT}_{TCP} + 2\,\text{RTT}_{TLS1.2} + 1\,\text{RTT}_{HTTP} = 5\,\text{RTT}$$
-
-A worked example with RTT = 50 ms, a resolver answer in the cache and TLS 1.3:
-
-$$T_{first} \approx 4 \times 50\,\text{ms} = 200\,\text{ms}$$
-
-A second visit with a cached DNS answer, a reused connection and a stale HTTP cache entry:
-
-$$T_{second} \approx 1\,\text{RTT}_{HTTP} = 50\,\text{ms}$$
-
-A second visit with a fresh HTTP cache entry makes no network request, so $T_{second} \approx 0$.
-
-These numbers ignore transfer time for large bodies and server processing time. They show only the cost of setup and round trips.
-
-## The real thing
-
-A first visit, listed as the messages that cross the wire. The IP address uses 203.0.113.10, a documentation address from RFC 5737. Real values differ.
-
-```
- #  layer  direction         content
- 1  DNS    client -> resolver  QUERY  example.com  type A
- 2  DNS    resolver -> client  ANSWER example.com  A 203.0.113.10  TTL 3600
- 3  TCP    client -> server    SYN   seq=1000
- 4  TCP    server -> client    SYN ACK seq=5000 ack=1001
- 5  TCP    client -> server    ACK   seq=1001 ack=5001
- 6  TLS    client -> server    ClientHello  (key_share, SNI example.com, ALPN h2 http/1.1)
- 7  TLS    server -> client    ServerHello  (key_share)
- 8  TLS    server -> client    EncryptedExtensions, Certificate, CertificateVerify, Finished
- 9  TLS    client -> server    Finished
-10  HTTP   client -> server    GET / HTTP/1.1  (encrypted by TLS)
-11  HTTP   server -> client    HTTP/1.1 200 OK  Content-Type text/html  (encrypted by TLS)
-```
-
-| Row | Field | What it means |
+| Step | First visit | Second visit |
 |---|---|---|
-| 1 | DNS QUERY, type A | The resolver is asked for the IPv4 address of the host |
-| 2 | ANSWER, TTL 3600 | The address is valid for 3600 seconds, so caches may reuse it for an hour |
-| 3 | SYN, seq=1000 | The client opens a connection and sends its starting sequence number |
-| 4 | SYN ACK, ack=1001 | The server accepts and acknowledges the client's SYN by sending the next expected number |
-| 5 | ACK, ack=5001 | The client acknowledges the server's SYN, and the connection is open |
-| 6 | ClientHello, SNI | The client's first TLS message. SNI is the server name in plain text, so the server can pick the right certificate |
-| 7 | ServerHello, key_share | The server picks the cipher and sends its half of the key exchange |
-| 8 | Certificate, CertificateVerify | The server sends its certificate chain, then a signature proving it holds the matching private key |
-| 9 | Finished | The client confirms that the handshake was not tampered with |
-| 10 | GET / HTTP/1.1 | The first HTTP request, now encrypted |
-| 11 | 200 OK, text/html | The status line and headers of the response. The HTML body follows |
+| DNS | 1 RTT or more | skipped (cached) |
+| TCP | 1 RTT | skipped if the pipe is open |
+| TLS | 1 RTT | skipped if the pipe is open |
+| HTTP | 1 RTT | 0 if fresh, 1 RTT if checked |
+| Total | about 4 RTT | about 1 RTT, or 0 if fresh |
 
-Rows 3 to 5 cost 1 RTT. Rows 6 to 9 cost 1 RTT in TLS 1.3. Row 10 and row 11 cost 1 RTT. Row 1 and row 2 cost at least 1 RTT to the resolver.
+## Say it in an interview
 
-## Common misconceptions
+> "I'd walk the path in order. The browser parses the URL and checks its cache. On a miss, DNS turns the host into an IP address. TCP opens a connection with a three-way handshake, one round trip. TLS encrypts it and checks the certificate, one more round trip in TLS 1.3. Then the HTTP request goes out, a load balancer picks a server, and the app answers. The browser fetches the CSS, scripts and images, and renders the page. A first visit costs about four round trips. A second visit usually skips DNS and the handshakes."
 
-- **Wrong:** TCP is secure, so the page data is encrypted by default.
-  **Right:** TCP only delivers bytes in order and without loss. It does not encrypt them. Anyone on the path can read plain TCP data. TLS adds encryption, integrity and server identity on top of TCP. (See [[networking/tcp|TCP]] and [[networking/tls|TLS]].)
-- **Wrong:** TLS can start before TCP is up, so the handshakes overlap and save time.
-  **Right:** TLS messages are carried inside the TCP byte stream, so the TCP handshake must finish before the first TLS message can be sent. The two steps add up. QUIC, which HTTP/3 uses, is a different transport that combines transport and TLS setup, but it is not TCP.
-- **Wrong:** HTTP itself caches the page.
-  **Right:** HTTP defines headers such as `Cache-Control`, `ETag` and `Last-Modified`. The caches (the browser cache, CDNs and proxies) are separate software that read those headers and decide what to store. (See [[networking/http-caching|HTTP caching]].)
+## Questions interviewers ask
 
-## Interview questions
+Tap a question to see the answer.
 
-> [!question]- Q1. What happens when you type `https://example.com` into a browser and press Enter?
-> The browser parses the URL and checks its caches for the IP address. On a miss, it asks a recursive resolver, which returns the IP address. The browser opens a TCP connection to that IP on port 443, which takes a three-way handshake. It runs a TLS handshake inside the connection, which verifies the server's certificate and derives the keys. It then sends an HTTP GET request over TLS. The server responds, the browser parses the HTML, fetches sub-resources, and renders the page.
+> [!question]- What happens when you type a URL and press Enter?
+> Parse the URL, check the cache, DNS for the IP address, TCP connection, TLS handshake, HTTP request and response, fetch the sub-resources, render.
 
-> [!question]- Q2. Why is a first visit slower than a second visit?
-> The first visit has to do DNS, TCP and TLS setup before the HTTP request can be sent. Those steps cost round trips. A second visit can use a cached DNS answer, reuse the TCP and TLS connection, and sometimes skip the request entirely with a fresh HTTP cache entry.
+> [!question]- Why does DNS come before TCP?
+> TCP connects to an IP address, not a name. If DNS fails, no connection is tried.
 
-> [!question]- Q3. How many round trips does a first HTTPS visit need with TLS 1.3?
-> Roughly four when the DNS answer is cached in the resolver: one for DNS, one for the TCP handshake, one for the TLS 1.3 handshake, and one for the HTTP request and response. A cache miss at the resolver adds more. TLS 1.2 adds one more round trip, which gives about five.
+> [!question]- How many round trips does a first HTTPS visit need?
+> About 4 with TLS 1.3 and a cached DNS answer: DNS, TCP, TLS and HTTP, one each. TLS 1.2 adds one more. A DNS miss adds more.
 
-> [!question]- Q4. Why does DNS come before TCP?
-> TCP connects to an IP address, not to a name. The browser cannot open a connection until it knows the address, so DNS must finish first. A DNS failure stops the page load before any connection is attempted.
+> [!question]- Why is a second visit faster?
+> A cached DNS answer, a reused connection and a fresh cache entry skip most of the setup.
 
-> [!question]- Q5. What is the difference between a fresh cache hit and a 304 revalidation?
-> A fresh cache hit uses the stored copy with no network traffic. The response is considered valid until its freshness lifetime ends, such as when `Cache-Control: max-age` has not expired. A revalidation happens after the copy is stale. The browser sends a conditional request with `If-None-Match` or `If-Modified-Since`. If the resource has not changed, the server answers 304 Not Modified with no body, and the browser reuses its stored copy. A revalidation still costs one round trip.
+> [!question]- Why can't the setup steps overlap?
+> TLS messages travel inside the TCP pipe, and the HTTP request travels inside TLS. Each step needs the one before it, so the costs add up.
 
-> [!question]- Q6. Why do sub-resources make a page slower even when each file is small?
-> Each sub-resource is a separate request. On a fresh connection, each costs at least one round trip. Browsers open a few parallel connections and reuse them, which helps, but many small files still add latency. Bundling, caching and HTTP/2 multiplexing reduce the cost.
+> [!question]- What does TLS add on top of TCP?
+> Encryption, so others on the path cannot read the data. A check that nothing was changed. And proof that the server holds the certificate for its name.
 
-## Trigger card
+> [!question]- Where does a load balancer fit?
+> Between the internet and the app servers. It sends each HTTP request to one of many identical servers.
 
-> [!example] When I see a page stall before any bytes arrive, it means setup is still running (DNS, TCP or TLS), because the HTTP request cannot be sent until all three are finished.
+> [!question]- Why does one page cause many requests?
+> The HTML only names the other files. Each stylesheet, script, image and font is its own request.
 
-## Compared with
+> [!question]- Does the browser wait for the whole HTML before drawing?
+> No. It parses as the bytes arrive. But a script without `async` or `defer` stops the parser, and CSS can block drawing.
 
-| | First visit | Second visit (typical) | Second visit (fresh cache) |
-|---|---|---|---|
-| DNS | Query to resolver | Cached, 0 RTT | Cached, 0 RTT |
-| TCP | New handshake, 1 RTT | Reused connection, 0 RTT | Not needed |
-| TLS | New handshake, 1 RTT (TLS 1.3) | Reused session, 0 RTT | Not needed |
-| HTTP | Full request, 1 RTT | Conditional request, 1 RTT (304 possible) | Served from cache, 0 RTT |
-| Round trips | About 4 RTT | About 1 RTT | 0 RTT |
+> [!question]- What is the difference between a fresh cache hit and a 304?
+> A fresh hit uses the stored copy with no network traffic. A 304 means the stale copy is still valid, so the browser reuses it, but the check costs a round trip.
 
-## Where it's used
+## Mental map
 
-- **Browsers.** Every navigation and every sub-resource follows this path, with caches cutting it short.
-- **curl and command-line tools.** `curl -v https://example.com` prints the TCP and TLS steps and the HTTP messages in order, which makes it a good way to see the lifecycle.
-- **Mobile apps and API clients.** An app calling a backend performs the same steps, usually reusing one connection for many calls.
-- **CDNs.** A CDN returns a nearby edge IP from DNS, so the first three steps end close to the user. The HTTP step may be answered from the edge cache.
-- **Databases and other TCP services.** PostgreSQL, MySQL and SSH use the TCP and TLS steps, but not HTTP.
+![Request lifecycle mental map](../assets/diagrams/request-lifecycle-mental-map.svg)
 
-> [!info]- Sources
-> - study session, 2026-10-30
-> - RFC 1035, Domain Names: Implementation and Specification
-> - RFC 9293, Transmission Control Protocol (TCP)
-> - RFC 8446, The Transport Layer Security (TLS) Protocol Version 1.3
-> - RFC 9110, HTTP Semantics
-> - RFC 9111, HTTP Caching
-> - RFC 5737, IPv4 Address Blocks Reserved for Documentation
-> - MDN Web Docs, How the web works
+**Want more?** The [[networking/deep/request-lifecycle|detailed request lifecycle page]] has the same sections with raw messages, exact round-trip math, and more interview questions.
 
 <!-- series-nav:start -->
 ---

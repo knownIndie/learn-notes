@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="630" viewBox="0 0 360 630" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Request lifecycle mental map</title>
+<rect x="1" y="1" width="358" height="628" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="120" y="16" width="120" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">URL to page</text>
+<path d="M120 36 H36 V562" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 102 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="60" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="90" font-weight="600" fill="#3C3489">Six steps, in order</text>
+<text x="68" y="107" fill="#534AB7">parse, cache, DNS, TCP, TLS, HTTP</text>
+<text x="68" y="123" fill="#534AB7">then server, response, render</text>
+<path d="M36 184 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="146" width="288" height="76" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="164" font-weight="600" fill="#0C447C">Network setup</text>
+<text x="68" y="181" fill="#185FA5">DNS: name to IP address</text>
+<text x="68" y="197" fill="#185FA5">TCP: open the pipe, 1 round trip</text>
+<text x="68" y="213" fill="#185FA5">TLS: lock the pipe, 1 round trip</text>
+<path d="M36 266 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="236" width="288" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="254" font-weight="600" fill="#085041">Round trip (RTT)</text>
+<text x="68" y="271" fill="#0F6E56">one message there, one back</text>
+<text x="68" y="287" fill="#0F6E56">first visit: about 4 RTT in total</text>
+<path d="M36 340 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="310" width="288" height="60" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="328" font-weight="600" fill="#633806">Server side</text>
+<text x="68" y="345" fill="#854F0B">load balancer picks an app server</text>
+<text x="68" y="361" fill="#854F0B">app code, then database if needed</text>
+<path d="M36 414 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="384" width="288" height="60" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="402" font-weight="600" fill="#27500A">Rendering</text>
+<text x="68" y="419" fill="#3B6D11">HTML is drawn as it arrives</text>
+<text x="68" y="435" fill="#3B6D11">CSS and scripts can block drawing</text>
+<path d="M36 488 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="458" width="288" height="60" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="476" font-weight="600" fill="#791F1F">Second visit</text>
+<text x="68" y="493" fill="#A32D2D">cached DNS, reused connection</text>
+<text x="68" y="509" fill="#A32D2D">fresh cache: no network at all</text>
+<path d="M36 562 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="532" width="288" height="60" rx="8" fill="#F1EFE8" stroke="#5F5E5A"/>
+<text x="68" y="550" font-weight="600" fill="#2C2C2A">Caches</text>
+<text x="68" y="567" fill="#5F5E5A">browser cache and HTTP caching headers</text>
+<text x="68" y="583" fill="#5F5E5A">304 Not Modified: reuse stored copy</text>
+</g>
+<text x="180" y="618" text-anchor="middle" font-size="11" fill="#8a8984">Each step waits for the one before it</text>
+</svg>

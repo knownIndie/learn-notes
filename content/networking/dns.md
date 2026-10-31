@@ -1,227 +1,142 @@
 ---
 title: DNS
-subject: networking
 tags: [networking, dns]
-aliases: [DNS (Domain Name System), Domain Name System, name resolution, resolver]
-created: 2026-10-30
-updated: 2026-10-30
-status: draft
-sources: ["study session 2026-10-30", "RFC 1034 (DNS concepts)", "RFC 1035 (DNS implementation)", "RFC 2308 (negative caching)", "RFC 7858 (DNS over TLS)", "RFC 8484 (DNS over HTTPS)"]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 3 of 11
+> [!series]- Networking · 3 of 8
 > 1. [[networking/http-message|HTTP message]]
 > 2. [[networking/request-lifecycle|Request lifecycle]]
 > 3. **DNS** · you are here
-> 4. [[networking/tcp|TCP]]
-> 5. [[networking/tls|TLS]]
+> 4. [[networking/tcp|TCP and UDP]]
+> 5. [[networking/tls|TLS and HTTPS]]
 > 6. [[networking/http-caching|HTTP caching]]
 > 7. [[networking/origin|Origin]]
 > 8. [[networking/cors|CORS]]
-> 9. [[networking/cors-credentials|CORS and credentials]]
-> 10. [[networking/cors-expose-headers|CORS exposed headers]]
-> 11. [[networking/cors-lab|CORS lab]]
 <!-- series:end -->
 
-> [!tldr] In three lines
-> The Domain Name System (DNS) turns a name such as `example.com` into an IP address such as `203.0.113.10`. A recursive resolver does the lookup work for the client, and it walks a chain of servers if its cache is empty. Answers are cached for their TTL, which is why a changed record can take time to appear everywhere.
->
-> [[#Interview questions|→ Self-test: 6 questions]]
+> [!abstract] What this page is for
+> **Intent:** understand how a name like `shop.com` becomes an IP address, and answer the common DNS interview questions.
+> **You'll learn:** what DNS is · the lookup path from browser to authoritative server · recursive vs iterative queries · the record types · TTL and why changes are slow · why DNS mostly uses UDP port 53.
+> **Time:** about 7 minutes. Every section has a longer version on the [[networking/deep/dns|detailed DNS page]].
+
+## Words you need first
+
+- **DNS (Domain Name System)**: the system that turns names into addresses. It is a database spread across many servers.
+- **Domain name**: a human name such as `shop.com`.
+- **IP address**: the number a computer uses to reach another computer, such as `203.0.113.10`. Computers connect by IP address, not by name. **IPv4** is the older form (four numbers). **IPv6** is the newer, longer form with colons.
+- **Resolver**: a server that does the DNS lookup for you. The one your network uses is a **recursive resolver**, which does the whole walk.
+- **Root server, TLD server**: the top levels of DNS. A **TLD** (top-level domain) is the last part of a name, such as `.com`. The TLD server knows which servers run the names under it.
+- **Authoritative name server**: the server that holds the real records for a domain, such as shop.com's own DNS server.
+- **Record**: one entry in that database, such as "the name `shop.com` has the address `203.0.113.10`".
+- **Cache**: a stored copy of an answer, kept so the next question is faster.
+- **TTL (time to live)**: how many seconds an answer may stay in a cache.
+- **UDP and TCP**: two ways to send data. UDP sends one packet with no setup. TCP opens a connection first and checks that all data arrives.
+- **Port**: a number that says which service on a machine gets the data. DNS uses port 53.
 
 ## Why it exists
 
-Machines find each other by IP address. People remember names. Early networks kept a single shared text file that mapped names to addresses, and every machine downloaded a new copy when hosts changed. That broke down as the network grew.
+Computers reach each other by IP address, but people remember names. Early networks kept one text file that mapped every name to an address, and every machine downloaded a new copy whenever a host changed. That broke as the network grew.
 
-DNS replaced the file with a distributed database. Each organization runs the servers for its own names. Clients ask a chain of servers, and the answers are cached so the whole system does not have to answer every question each time.
+DNS replaced the file with a distributed database. Each organization runs servers for its own names, and caching spares the system from answering every question.
 
-## Plain version
+## The picture
 
-DNS is like finding a person's new address when you only know their name.
+![DNS lookup: the query goes down the chain, the answer comes back up](../assets/diagrams/dns-lookup-phone.svg)
 
-You ask a helpful friend who knows where to look. The friend checks what they remember first. If they do not know, they ask the national directory, which points to the regional directory for that country. The regional directory points to the office that keeps the person's record. The office gives the address, and the friend writes it down for a while, so the next question is faster. The note on the paper says how long it is valid. That is the TTL.
+Solid arrows are queries. Dashed arrows are replies. The numbers are the order of the steps.
 
-## Precise definition
+## How it works, with an example
 
-DNS is the distributed, hierarchical database that maps names to records. The terms it uses are listed below.
+You type `https://shop.com` in your browser. The browser needs an IP address before it can connect. It does not know the address yet, so it asks DNS. Often the answer is already cached. If not, a chain of servers finds it.
 
-> [!info]- Terms reference
-> | Term | Definition | Where it's used |
-> |---|---|---|
-> | DNS | A distributed, hierarchical database that maps names to records | Every connection that starts from a name |
-> | Stub resolver | The small DNS client in the operating system or browser that sends queries | `getaddrinfo()` and similar calls |
-> | Recursive resolver | A server that accepts a query and does all the steps to find the final answer, then caches it | ISP resolvers, `1.1.1.1`, `8.8.8.8`, company resolvers |
-> | Authoritative name server | The server that holds the real records for a zone and answers for them | Run by the domain owner or a DNS host |
-> | Root server | The top of the hierarchy. It refers queries to the right top-level domain servers | Step 2 of an uncached lookup |
-> | TLD server | Serves a top-level domain such as `.com`. It refers queries to the domain's authoritative servers | Step 3 of an uncached lookup |
-> | Zone | The part of the name space that one set of authoritative servers manages | `example.com` is one zone |
-> | Record | One entry in a zone, such as an A record or MX record | The answer to a query |
-> | TTL (time to live) | How many seconds an answer may be cached | Resolvers, operating systems, browsers |
-> | Negative caching | Caching the fact that a name does not exist | `NXDOMAIN` answers, per RFC 2308 |
+Your browser never has to know where shop.com's records live. It asks one helper, and the helper does the walk.
 
-## How it works
+## The most common mistake
 
-A client almost never talks to the root servers itself. It asks one recursive resolver, and the resolver does the rest.
+> [!warning] Thinking the browser asks the authoritative server
+> The browser asks only one server, its recursive resolver. The resolver does the walk through the root and TLD servers. Your browser never talks to the root, or to shop.com's DNS server, directly.
 
-1. **Check the local caches.** The browser checks its own DNS cache. Then the operating system checks its cache. A valid entry ends the lookup here.
-2. **Ask the recursive resolver.** The stub resolver sends one query with the recursion-desired flag set. The resolver is asked for an A record, which is an IPv4 address, or an AAAA record for IPv6.
-3. **The resolver checks its cache.** A hit returns the answer with the remaining TTL.
-4. **The resolver asks a root server.** The root does not know `example.com`, but it knows the servers for `.com`, so it returns a referral.
-5. **The resolver asks a TLD server.** The `.com` server returns a referral to the authoritative servers for `example.com`. These are listed as NS records.
-6. **The resolver asks an authoritative server.** The authoritative server returns the A record with the address and a TTL. It sets the authoritative-answer flag, which says the answer comes from the owner of the zone.
-7. **The resolver caches the answer and returns it.** The client gets the address. The client then caches it for the TTL.
+## The lookup step by step
 
-```mermaid
-sequenceDiagram
-  participant C as Client stub resolver
-  participant R as Recursive resolver
-  participant Root as Root server
-  participant TLD as .com TLD server
-  participant A as Authoritative server
-  C->>R: A example.com?
-  R->>Root: A example.com?
-  Root-->>R: Referral to .com servers
-  R->>TLD: A example.com?
-  TLD-->>R: Referral to ns1.example.com
-  R->>A: A example.com?
-  A-->>R: A 203.0.113.10, TTL 3600
-  R-->>C: A 203.0.113.10, TTL 3600
-```
+The browser and operating system check their caches first. If a valid answer is there, the lookup ends. Otherwise:
 
-### Record types
+1. The browser asks the recursive resolver: "What is the address of shop.com?" This is a **recursive query**: the client wants the final answer, and the server does all the work.
+2. The resolver asks a root server.
+3. The root server does not know shop.com, so it returns a **referral**: a pointer to the servers for `.com`.
+4. The resolver asks a `.com` TLD server.
+5. The TLD server returns a referral to the authoritative servers for shop.com.
+6. The resolver asks the authoritative server.
+7. The authoritative server returns the answer, the A record `203.0.113.10`.
+8. The resolver caches the answer and returns it to the browser.
 
-| Type | Holds | Example | Notes |
-|---|---|---|---|
-| A | An IPv4 address | `example.com. A 203.0.113.10` | The most common answer before a TCP connection |
-| AAAA | An IPv6 address | `example.com. AAAA 2001:db8::10` | Same job as A, for IPv6 |
-| CNAME | An alias pointing to another name | `www.example.com. CNAME example.com.` | The target is resolved again. A CNAME cannot sit beside other records on the same name, and it cannot be used at the zone apex |
-| MX | A mail server and a priority | `example.com. MX 10 mail.example.com.` | Lower priority numbers are tried first. Used by mail senders, not browsers |
-| NS | The authoritative name servers for a zone | `example.com. NS ns1.example-dns.net.` | Used for referrals in step 5 above |
-| TXT | Free text | `example.com. TXT "v=spf1 -all"` | Used for domain ownership checks and email policies such as SPF and DKIM |
+Steps 2 to 7 are **iterative queries**: each server answers with the best it knows, even if that is only a referral. Each referral narrows the search, until the server that owns the record gives the answer.
 
-## The real thing
+## Record types
 
-Output of `dig example.com`, the standard DNS lookup tool. The values are illustrative. The address is from the documentation range in RFC 5737, and the TTL and timing will differ on a real run.
-
-```
-; <<>> DiG 9.18.28 <<>> example.com
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 41237
-;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
-
-;; OPT PSEUDOSECTION:
-; EDNS: version: 0, flags:; udp: 1232
-;; QUESTION SECTION:
-;example.com.                   IN      A
-
-;; ANSWER SECTION:
-example.com.            3600    IN      A       203.0.113.10
-
-;; Query time: 12 msec
-;; SERVER: 192.168.1.1#53(192.168.1.1) (UDP)
-;; WHEN: Fri Oct 30 10:00:00 CET 2026
-;; MSG SIZE  rcvd: 56
-```
-
-> [!info]- dig field reference
-> | Field | Value in the example | What it means |
-> |---|---|---|
-> | `; <<>> DiG 9.18.28` | Tool name and version | The `dig` client that printed the output |
-> | `opcode: QUERY` | Message type | A normal query. Other opcodes include NOTIFY and UPDATE |
-> | `status: NOERROR` | Result code | The query worked. A name that does not exist returns `NXDOMAIN` instead |
-> | `id: 41237` | Transaction ID | A 16-bit number that matches the answer to the query. Used to block spoofed replies |
-> | `flags: qr rd ra` | Header flags | `qr`: this is a response. `rd`: recursion was desired. `ra`: recursion is available on the server that answered |
-> | `QUERY: 1, ANSWER: 1` | Section counts | One question was asked and one answer came back |
-> | `AUTHORITY: 0` | Count of NS records | Empty here, because the answer came from a cache. An authoritative reply would often include NS records |
-> | `ADDITIONAL: 1` | Count of extra records | The OPT record that carries EDNS options |
-> | `OPT PSEUDOSECTION`, `udp: 1232` | EDNS0 option | The client says it can accept UDP replies up to 1232 bytes. Larger replies use TCP |
-> | `QUESTION SECTION` | The question | Asks for the `A` record of `example.com.`, class `IN` (Internet) |
-> | `ANSWER SECTION` | The answer record | `example.com.` is the name. `3600` is the TTL in seconds. `IN A` is the class and type. `203.0.113.10` is the address |
-> | `Query time: 12 msec` | Round trip | Time from sending the query to reading the reply. Mostly the RTT to the resolver |
-> | `SERVER: 192.168.1.1#53` | Responder | The server that answered, here a local router, on port 53 over UDP |
-> | `MSG SIZE rcvd: 56` | Reply size | The reply was 56 bytes, which fits in one UDP packet |
-
-A tip for learning: `dig +trace example.com` skips the cache and prints each step of the walk from the root down to the authoritative server.
-
-### Transport: UDP 53, TCP 53, DoT and DoH
-
-- **UDP port 53.** The classic transport. A query is one small packet and the reply is one packet, with no handshake. That keeps latency low. Replies larger than the UDP size limit, such as zone transfers, switch to TCP port 53.
-- **Plain DNS is readable.** Anyone on the path can see the names being looked up and the answers, and a forged reply can be inserted unless the resolver validates DNSSEC. Plain DNS does not encrypt the query.
-- **DoT (DNS over TLS).** RFC 7858. Queries run over TLS on TCP port 853. The content is encrypted, but a separate port makes the traffic easy to spot.
-- **DoH (DNS over HTTPS).** RFC 8484. Queries are HTTP requests, usually on port 443, inside TLS. Network observers see ordinary HTTPS traffic to the resolver.
-
-## Common misconceptions
-
-- **Wrong:** DNS is one big server that knows every name.
-  **Right:** DNS is a hierarchy. The root, TLD and authoritative servers each know only a part of the answer. Recursive resolvers combine the parts and cache them.
-- **Wrong:** Changing a DNS record takes effect immediately everywhere.
-  **Right:** Caches keep the old answer until its TTL expires. Lower the TTL well before a planned change, then raise it again once the change is done. Some clients also ignore TTL values, so an exact time cannot be promised.
-- **Wrong:** The browser asks the authoritative server directly.
-  **Right:** The browser asks a recursive resolver. The resolver does the walk through the hierarchy on the client's behalf.
-- **Wrong:** DNS is always encrypted.
-  **Right:** Classic DNS over UDP port 53 is plain text. DoT and DoH add encryption, and they are a separate choice made by the client or the network.
-
-## Interview questions
-
-> [!question]- Q1. What is the difference between a recursive resolver and an authoritative name server?
-> A recursive resolver serves clients. It takes a query, follows referrals from the root through the TLD servers to the authoritative servers, caches each answer for its TTL, and returns the final answer. An authoritative name server holds the actual records for a zone and answers only for that zone. It does not walk the hierarchy for clients.
-
-> [!question]- Q2. Why does DNS normally use UDP rather than TCP?
-> A query and its reply usually fit in one small UDP packet each. There is no handshake, so the lookup costs one round trip. TCP needs a handshake before the query can be sent, which adds a round trip. DNS switches to TCP when a reply is too large for UDP, such as a large zone transfer or a response that is truncated.
-
-> [!question]- Q3. What does the TTL do, and why does a DNS change not take effect at once?
-> TTL is the number of seconds a resolver or client may keep an answer. Until it expires, every cache along the path can answer from memory, so the old address keeps being used. Changing a record only affects clients that query again after their cached copy has expired.
-
-> [!question]- Q4. Why can a CNAME not be placed at the zone apex?
-> The zone apex, such as `example.com` itself, must hold SOA and NS records. A CNAME cannot exist on a name alongside any other record, so it cannot be used there. Services that need an alias at the apex use vendor-specific features or an address record instead.
-
-> [!question]- Q5. What do DoT and DoH change, and what do they not change?
-> They encrypt the DNS query and reply between the client and the resolver, so a network observer cannot read the names being looked up. They do not change how the hierarchy works, and they do not hide the destination IP address of the later connection. They also do not change what the resolver itself knows.
-
-> [!question]- Q6. What does the `NXDOMAIN` status mean, and is it cached?
-> `NXDOMAIN` means the name does not exist. Resolvers can cache this fact for a period taken from the zone's SOA record, which is called negative caching in RFC 2308. A new name that was looked up too early can therefore stay missing for a while.
-
-## Trigger card
-
-> [!example] When I see a "could not resolve host" error, it means the lookup failed before any TCP connection, because the client never received an IP address to connect to.
-
-## Compared with
-
-| | Recursive resolver | Authoritative name server |
+| Type | What it holds | One-line example |
 |---|---|---|
-| Job | Answers any client, does the walk, caches | Holds the records for one zone |
-| Who runs it | ISP, company, public resolver service | The domain owner or a DNS hosting provider |
-| Answers from | Cache, or the chain of servers | Its own zone data |
-| Client sees it as | The DNS server in the network settings | Not contacted by clients directly |
+| A | An IPv4 address | `shop.com. A 203.0.113.10` |
+| AAAA | An IPv6 address | `shop.com. AAAA 2001:db8::10` |
+| CNAME | An alias that points to another name | `www.shop.com. CNAME shop.com.` |
+| MX | The mail server for the domain, with a priority | `shop.com. MX 10 mail.shop.com.` |
+| NS | The authoritative name servers for the domain | `shop.com. NS ns1.dnshost.net.` |
+| TXT | Free text, used for ownership and email checks | `shop.com. TXT "v=spf1 -all"` |
 
-| | UDP 53 | DoT | DoH |
-|---|---|---|---|
-| Transport | UDP | TCP and TLS | HTTP/2 or HTTP/3 over TLS |
-| Port | 53 | 853 | 443 |
-| Encrypted | No | Yes | Yes |
-| Handshake cost | None | TCP plus TLS | TCP plus TLS, usually reused |
-| Looks like | DNS traffic | DNS on a special port | Ordinary web traffic |
+## Caching and TTL
 
-## Where it's used
+Every answer carries a TTL, in seconds. The browser, the operating system and the resolver each keep the answer, so most lookups never reach the authoritative server.
 
-- **Every network request by name.** A browser, `curl`, a mobile app or a server making an API call all start with a DNS lookup unless they already have the IP address.
-- **Email.** Mail servers look up MX records to find where to deliver a message, and TXT records for SPF, DKIM and DMARC checks.
-- **CDNs and load balancers.** A CDN can return a different IP address to each client, chosen by location or load. The record TTL is often short so that the CDN can change its answers quickly.
-- **Certificate issuance and domain verification.** Some certificate authorities and cloud services ask the domain owner to publish a specific TXT record to prove control.
-- **Service discovery.** Inside a cluster, names resolve to service addresses, so applications do not need fixed IPs.
+**Why DNS changes take time:** suppose shop.com moves to a new IP address, and the old record had a TTL of 3600 seconds. Caches may keep the old IP for up to an hour. Until they expire, some users still reach the old server. Teams lower the TTL well before a planned change, then raise it again after the move.
 
-> [!info]- Sources
-> - study session, 2026-10-30
-> - RFC 1034, Domain Names: Concepts and Facilities
-> - RFC 1035, Domain Names: Implementation and Specification
-> - RFC 2308, Negative Caching of DNS Queries
-> - RFC 7858, Specification for DNS over Transport Layer Security (TLS)
-> - RFC 8484, DNS Queries over HTTPS (DoH)
-> - RFC 5737, IPv4 Address Blocks Reserved for Documentation
+A short TTL means changes spread fast, but more queries reach the DNS servers. A long TTL means fewer queries, but changes spread slowly.
+
+## Say it in an interview
+
+> "DNS turns a name like shop.com into an IP address, because computers connect by address and people use names. My browser asks a recursive resolver. If the resolver has no cached answer, it asks a root server, which points to the .com servers. Those point to shop.com's authoritative server, which returns the A record. The resolver caches the answer for its TTL and returns it. DNS mostly uses UDP port 53, because one small packet each way is fast, and it switches to TCP when the answer is too big. Because answers are cached for the TTL, a DNS change takes time to reach everyone."
+
+## Questions interviewers ask
+
+Tap a question to see the answer.
+
+> [!question]- What is DNS?
+> The Domain Name System. It maps names such as shop.com to IP addresses. It is a database spread across many servers.
+
+> [!question]- What is the difference between a recursive and an iterative query?
+> A recursive query asks for the final answer, and the server does all the work. An iterative query asks for the best answer the server knows, which is often a referral to another server. Clients send recursive queries to the resolver, and the resolver sends iterative queries up the chain.
+
+> [!question]- What is the difference between a recursive resolver and an authoritative server?
+> The resolver serves clients, walks the hierarchy and caches the results. The authoritative server holds the real records for one domain. It does not walk the chain for other names.
+
+> [!question]- What are the main record types?
+> A and AAAA hold IP addresses (IPv4 and IPv6). CNAME is an alias. MX names the mail server. NS names the authoritative servers. TXT holds free text, used for ownership and email checks.
+
+> [!question]- What is a CNAME, and what can't it do?
+> An alias that points to another name, which is then looked up again. It cannot sit beside other records on the same name, and it cannot be used at the bare domain itself, such as shop.com.
+
+> [!question]- What is TTL?
+> The number of seconds an answer may be cached. It controls how long the old answer keeps being used after a change.
+
+> [!question]- Why does a DNS change take time to spread?
+> Caches keep the old answer until its TTL expires. Some software ignores or caps the TTL, so the exact timing is not guaranteed.
+
+> [!question]- Why does DNS mostly use UDP rather than TCP?
+> A query and its reply each fit in one small UDP packet. There is no connection setup, so a lookup costs one round trip. TCP is used when the answer is too big for one UDP packet, and for large zone transfers.
+
+> [!question]- What port does DNS use?
+> Port 53. It uses UDP for normal queries and TCP for large answers.
+
+> [!question]- Is DNS encrypted?
+> Classic DNS is not, so anyone on the network path can read the names being looked up. DNS over TLS and DNS over HTTPS add encryption.
+
+## Mental map
+
+![DNS mental map](../assets/diagrams/dns-mental-map.svg)
+
+**Want more?** The [[networking/deep/dns|detailed DNS page]] has the same sections with the raw dig output, transport details, load balancing, and more interview questions.
 
 <!-- series-nav:start -->
 ---
 
-← [[networking/request-lifecycle|Request lifecycle]] · [[networking/tcp|TCP]] →
+← [[networking/request-lifecycle|Request lifecycle]] · [[networking/tcp|TCP and UDP]] →
 <!-- series-nav:end -->

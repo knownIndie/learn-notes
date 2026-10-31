@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="572" viewBox="0 0 360 572" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>HTTP caching decision flow: a fresh copy is used with no request, a stale copy is revalidated with its ETag, and the server answers 304 or 200</title>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5e5d59"/></marker></defs>
+<rect x="1" y="1" width="358" height="570" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="40" y="14" width="280" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="180" y="32" text-anchor="middle" font-size="13" font-weight="600" fill="#0C447C">Browser needs /styles/site.css</text>
+<text x="180" y="49" text-anchor="middle" font-size="11" fill="#185FA5">a GET request to shop.com</text>
+<line x1="180" y1="58" x2="180" y2="82" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="82" width="280" height="52" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="180" y="104" text-anchor="middle" font-size="13" font-weight="600" fill="#633806">1. Is there a cached copy?</text>
+<text x="180" y="121" text-anchor="middle" font-size="11" fill="#854F0B">browser first, then a CDN</text>
+<line x1="180" y1="134" x2="180" y2="158" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="190" y="150" font-size="11" fill="#5e5d59">yes</text>
+<rect x="40" y="158" width="280" height="52" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="180" y="180" text-anchor="middle" font-size="13" font-weight="600" fill="#633806">2. Is it fresh?</text>
+<text x="180" y="197" text-anchor="middle" font-size="11" fill="#854F0B">age &lt; max-age (from Cache-Control)</text>
+<line x1="180" y1="210" x2="180" y2="226" stroke="#5e5d59" stroke-width="1.5"/>
+<line x1="96" y1="226" x2="264" y2="226" stroke="#5e5d59" stroke-width="1.5"/>
+<line x1="96" y1="226" x2="96" y2="262" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="264" y1="226" x2="264" y2="262" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="104" y="220" font-size="11" font-weight="600" fill="#3B6D11">yes, fresh</text>
+<text x="256" y="220" text-anchor="end" font-size="11" font-weight="600" fill="#A32D2D">no, stale</text>
+<rect x="16" y="262" width="160" height="76" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="96" y="286" text-anchor="middle" font-size="13" font-weight="600" fill="#27500A">Use the copy</text>
+<text x="96" y="304" text-anchor="middle" font-size="11" fill="#3B6D11">No request is sent</text>
+<text x="96" y="320" text-anchor="middle" font-size="11" fill="#3B6D11">Done.</text>
+<rect x="184" y="262" width="160" height="76" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="264" y="284" text-anchor="middle" font-size="13" font-weight="600" fill="#0C447C">3. Revalidate</text>
+<text x="264" y="302" text-anchor="middle" font-size="10" font-family="ui-monospace,Menlo,monospace" fill="#185FA5">If-None-Match</text>
+<text x="264" y="318" text-anchor="middle" font-size="11" fill="#185FA5">with the stored ETag</text>
+<line x1="264" y1="338" x2="264" y2="360" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="360" width="280" height="52" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="180" y="382" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">4. Does the ETag still match?</text>
+<text x="180" y="399" text-anchor="middle" font-size="11" fill="#534AB7">server compares it with If-None-Match</text>
+<line x1="180" y1="412" x2="180" y2="428" stroke="#5e5d59" stroke-width="1.5"/>
+<line x1="96" y1="428" x2="264" y2="428" stroke="#5e5d59" stroke-width="1.5"/>
+<line x1="96" y1="428" x2="96" y2="440" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="264" y1="428" x2="264" y2="440" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="104" y="422" font-size="11" font-weight="600" fill="#3B6D11">yes, same</text>
+<text x="256" y="422" text-anchor="end" font-size="11" font-weight="600" fill="#A32D2D">no, changed</text>
+<rect x="16" y="440" width="160" height="76" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="96" y="462" text-anchor="middle" font-size="13" font-weight="600" fill="#27500A">304 Not Modified</text>
+<text x="96" y="480" text-anchor="middle" font-size="11" fill="#3B6D11">no body is sent</text>
+<text x="96" y="496" text-anchor="middle" font-size="11" fill="#3B6D11">reuses stored body</text>
+<rect x="184" y="440" width="160" height="76" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="264" y="462" text-anchor="middle" font-size="13" font-weight="600" fill="#791F1F">200 OK</text>
+<text x="264" y="480" text-anchor="middle" font-size="11" fill="#A32D2D">new body + new ETag</text>
+<text x="264" y="496" text-anchor="middle" font-size="11" fill="#A32D2D">browser replaces copy</text>
+<text x="180" y="540" text-anchor="middle" font-size="12" fill="#5e5d59">No copy at all? Plain GET, 200 with body,</text>
+<text x="180" y="558" text-anchor="middle" font-size="12" fill="#5e5d59">then the browser stores it. Done.</text>
+</svg>

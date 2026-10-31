@@ -1,311 +1,134 @@
 ---
 title: CORS
-subject: networking
-tags: [networking, cors, browser, security, http]
-aliases: [Cross-Origin Resource Sharing]
-created: 2026-10-30
-updated: 2026-10-30
-status: draft
-sources: ["study session 2026-10-30", "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS", "https://fetch.spec.whatwg.org/", "https://www.rfc-editor.org/rfc/rfc6454"]
+
+tags: [networking, cors]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 8 of 11
+> [!series]- Networking · 8 of 8
 > 1. [[networking/http-message|HTTP message]]
 > 2. [[networking/request-lifecycle|Request lifecycle]]
 > 3. [[networking/dns|DNS]]
-> 4. [[networking/tcp|TCP]]
-> 5. [[networking/tls|TLS]]
+> 4. [[networking/tcp|TCP and UDP]]
+> 5. [[networking/tls|TLS and HTTPS]]
 > 6. [[networking/http-caching|HTTP caching]]
 > 7. [[networking/origin|Origin]]
 > 8. **CORS** · you are here
-> 9. [[networking/cors-credentials|CORS and credentials]]
-> 10. [[networking/cors-expose-headers|CORS exposed headers]]
-> 11. [[networking/cors-lab|CORS lab]]
 <!-- series:end -->
 
-> [!tldr] In three lines
-> CORS (Cross-Origin Resource Sharing) is how a server tells the browser which other websites' pages may read its responses. The browser enforces it, not the server. You meet it as the red "blocked by CORS policy" message when a page calls an API on another origin.
->
-> [[#Interview questions|→ Self-test: 5 questions]]
+> [!abstract] What this page is for
+> **Intent:** understand why the browser shows *"blocked by CORS policy"*, and answer every common CORS interview question.
+> **You'll learn:** what an origin is · why browsers block reads · the two headers that matter · preflight · cookies across sites · how to fix it · why CORS is not CSRF protection.
+> **Time:** about 7 minutes. Every section has a longer version on the [[networking/deep/cors|detailed CORS page]].
+
+## Words you need first
+
+- **Origin**: the "address" of a web page, made of three parts: **scheme** (`https`), **host** (`shop.com`) and **port** (`443`, the default for https). Two URLs share an origin only if all three match. `http://localhost:3000` and `http://localhost:8000` are *different* origins, because the port differs.
+- **Same-origin policy (SOP)**: the browser's default safety rule. A page's JavaScript may *read* replies only from its own origin.
+- **CORS (Cross-Origin Resource Sharing)**: the way a server says *"pages from these other origins may read my replies too."* It relaxes the same-origin policy, only for the origins the server names.
+- **Header**: a `name: value` line sent with a request or a reply, e.g. `Origin: https://shop.com`.
+- **`fetch()`**: the JavaScript function a page uses to call an API (a server URL that returns data, usually JSON).
+- **Cookie**: a small value the browser stores for a site and sends back on every request to that site. It's how a site remembers you're logged in.
 
 ## Why it exists
 
-Imagine you log in to your bank at `https://bank.example`. The bank sets a session cookie, and your browser keeps it. From then on, every request your browser sends to `bank.example` carries that cookie, so the bank knows it is you.
+You're logged in to `bank.com`, so your browser holds its cookie. You open `evil.com` in another tab. Its script calls `fetch("https://bank.com/api/balance", { credentials: "include" })`. If the bank's cookie is allowed to travel to other sites (its `SameSite` setting is `None` and it is `Secure`; with anything else, including the usual `Lax` default, the browser doesn't attach it), the browser attaches it. Without the same-origin policy, `evil.com` could **read your bank data**. So by default the browser hides cross-origin replies from the page, and CORS is the controlled way to allow the ones a server trusts.
 
-Now you open a different site, `https://evil.example`, in another tab. Its page runs this script:
+## The picture
 
-```js
-fetch('https://bank.example/api/accounts', { credentials: 'include' })
-  .then(r => r.json())
-  .then(data => sendToAttacker(data));
-```
+![CORS flow: the request goes out, the server replies, the browser checks the reply before the page may read it](../assets/diagrams/cors-flow-phone.svg)
 
-Your browser attaches the bank cookie to that request, because the cookie belongs to `bank.example` and the request goes to `bank.example`. The bank answers with your account data. If the browser handed that answer to the evil page, the attacker would read your bank data without knowing your password.
+## How it works, with an example
 
-So browsers enforce the **same-origin policy**: a page can read responses only from its own origin by default. CORS is the controlled way to relax that rule. The server opts in and lists the pages that may read its answers.
+Your shop's front end is on `https://shop.com`. Its API is on `https://api.com`.
 
-Two things CORS does **not** do here:
+1. The page runs `fetch("https://api.com/cart")`.
+2. The browser sends the request and adds `Origin: https://shop.com` on its own, so the server knows which page is asking.
+3. The server runs its code and replies. To allow the shop, it adds `Access-Control-Allow-Origin: https://shop.com`.
+4. The browser compares the two. If they match (or the value is `*`, meaning "any origin"), the page gets the data. If the header is missing or different, the page gets an error and the reply is thrown away.
 
-- It does not stop the request from being sent. The bank still receives it and still runs the code.
-- It does not decide who you are. That is the job of cookies, tokens, and login checks on the server.
+## The most common mistake
 
-## Picture
+> [!warning] CORS blocks reading, not sending
+> The server still receives the request and runs it. CORS only decides whether the *page* may **read** the reply. curl and Postman aren't browsers, so they ignore CORS completely. That's why an API "works in Postman but not in the browser."
 
-![The browser compares the page's Origin with the reply's Access-Control-Allow-Origin before the page may read the reply](../assets/diagrams/cors-request-reply-check.svg)
+## Preflight
 
-![Without an Allow-Origin header the page gets an error; with a matching one the page reads the body](../assets/diagrams/cors-open-vs-allow.svg)
+For "non-simple" requests, the browser first sends a small automatic **`OPTIONS`** request (an HTTP method that asks "what's allowed here?") to check permission. This is the **preflight**. The real request is sent only if the server says yes.
 
-## Plain version
+- **Simple request (no preflight):** `GET`, `HEAD` or `POST`, with only basic headers, and a body that's a form or plain text.
+- **Needs a preflight:** `PUT`, `PATCH` or `DELETE`, a JSON body (`Content-Type: application/json`), or a custom header such as `Authorization`.
 
-A bank teller answers a phone call from someone at another bank. The teller does answer, and the call does reach the desk. But before the teller reads the answer out to the caller, a rule checks whether the caller's bank is on the approved list the first bank wrote down. If it is not on the list, the answer is thrown away, and the caller hears only "request failed."
+![Preflight: OPTIONS first, then the real request](../assets/diagrams/cors-preflight-phone.svg)
 
-The approved list is the `Access-Control-Allow-Origin` header. The rule is applied by the browser, which plays the role of the caller's side of the phone.
+In the preflight, `Access-Control-Request-Method` and `Access-Control-Request-Headers` say what the real request *will* use. The server answers with `Access-Control-Allow-Methods` and `Access-Control-Allow-Headers`.
 
-## Precise definition
+## Cookies across sites
 
-**CORS** is a protocol, defined in the WHATWG Fetch Standard, in which a server uses `Access-Control-*` response headers to tell the browser:
+**Credentials** means cookies (and other login data) sent with a request. By default, `fetch` to another origin sends none. To send them:
 
-1. which origins may read a response from a page script, and
-2. whether the request may include credentials (cookies, HTTP auth, client certificates).
+- the page uses `fetch(url, { credentials: "include" })`;
+- the server replies `Access-Control-Allow-Credentials: true`;
+- `Access-Control-Allow-Origin` must be the **exact** origin. The **wildcard** `*` ("anyone") isn't allowed, because "any website may read this user's private data" is exactly what the same-origin policy exists to stop.
 
-An **origin** is the triple scheme + host + port. Two URLs are same-origin only if all three parts match exactly. (Origin is explained in [[networking/origin|Origin]].)
+## How to fix a CORS error
 
-| Term | Definition | Where it's used |
-|---|---|---|
-| Origin | scheme + host + port, e.g. `http://localhost:8000` | `Origin` request header; CORS checks; cookies use host only |
-| Same-origin policy | Default browser rule: a page script may read responses only from its own origin | Every browser; `fetch`, `XMLHttpRequest`, iframes, canvas |
-| Cross-origin request | A request from a page on origin A to a URL on origin B | Any API on another domain or port |
-| CORS-safelisted request header | A small set of harmless headers (`Accept`, `Accept-Language`, `Content-Language`, and some `Content-Type` values) that do not trigger a preflight | Decides simple vs preflighted |
-| Simple request | A cross-origin request that uses only safelisted methods and headers; sent directly | `GET` with no custom headers |
-| Preflight request | An `OPTIONS` request the browser sends first to ask the server for permission | `PUT`, `DELETE`, `Content-Type: application/json`, `Authorization` header |
-| Opaque response | A response the page cannot read (status, headers, body are hidden) | `fetch(..., { mode: 'no-cors' })` |
-| Credentials | Cookies, HTTP authentication, TLS client certificates sent with a request | `credentials: 'include'` on `fetch` |
+- **Fix it on the server:** allow your front end's origin, e.g. `app.use(cors({ origin: "https://shop.com" }))` in Express.
+- **In local development:** use your dev server's **proxy** (a middleman that forwards requests). The page calls `/api` on its own origin, and the dev server passes it to the real API, so there's no cross-origin request at all.
+- **Don't:** use a browser extension, turn off browser security, or use `mode: "no-cors"`. That last one only gives you an empty reply you can't read.
 
-## How it works
+## CORS is not CSRF protection
 
-The steps for a simple request, such as the lab's `fetch('http://localhost:9000/api/allow')` from a page on `http://localhost:8000`:
+**CSRF (Cross-Site Request Forgery)** is when another site makes your browser send a request you didn't mean to send, with your cookies attached, e.g. a hidden form on `evil.com` that POSTs to `bank.com/transfer`.
 
-1. The page script calls `fetch()` for a URL on another origin.
-2. The browser adds an `Origin` request header that names the page's origin. Page script cannot set or change this header.
-3. The browser sends the request. The server receives it and runs its normal code, whether or not CORS is configured.
-4. The server replies with its normal status and body, plus `Access-Control-*` headers if it wants to allow the page.
-5. The browser compares the `Origin` it sent with the reply's `Access-Control-Allow-Origin` value.
-6. **Match:** the `fetch` promise resolves and the page can read the status, the safelisted headers, and the body.
-7. **No match, or header missing:** the promise rejects with a `TypeError` (Chrome says "Failed to fetch"). The body is discarded in the browser and the page never sees it.
+CORS doesn't stop this, because CORS doesn't stop the request from being sent. A form POST is a simple request, so it goes out with no preflight, and the server runs it. Real CSRF defenses are **CSRF tokens** (a secret value only your own pages know) and **`SameSite` cookies** (a cookie setting that stops the browser from sending the cookie on requests that come from other sites).
 
-```mermaid
-sequenceDiagram
-  participant P as Page (localhost:8000)
-  participant B as Browser
-  participant S as API (localhost:9000)
-  P->>B: fetch("http://localhost:9000/api/allow")
-  B->>S: GET /api/allow, Origin: http://localhost:8000
-  S-->>B: 200 OK, Access-Control-Allow-Origin: http://localhost:8000, body
-  B->>B: Compare Origin with Allow-Origin
-  alt Match
-    B-->>P: Response (page can read status and body)
-  else No match or header missing
-    B-->>P: TypeError, body hidden
-  end
-```
+## Say it in an interview
 
-### Simple and preflighted requests
+> "Browsers follow the same-origin policy: a page can only read responses from its own origin, which is scheme plus host plus port. That stops a random site from reading your bank data using your cookies. CORS is how a server relaxes that. The browser sends an `Origin` header, and if the server replies with a matching `Access-Control-Allow-Origin`, the page can read the response. Otherwise the browser hides it. The request still reaches the server, so CORS isn't server-side security and isn't CSRF protection. For non-simple requests, like `PUT` or a JSON body, the browser first sends an `OPTIONS` preflight. For cookies, the server must also send `Allow-Credentials: true` with an exact origin, not a wildcard. You fix CORS on the server, or with a proxy in development."
 
-A request is **simple** when all of these hold:
+## Questions interviewers ask
 
-- the method is `GET`, `HEAD`, or `POST`,
-- the headers are only CORS-safelisted ones (`Accept`, `Accept-Language`, `Content-Language`, and `Content-Type` only with `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`),
-- there is no upload event listener and no streamed body.
+Tap a question to see the answer.
 
-A simple request is sent directly, with the check described above.
+> [!question]- What is CORS, and why does it exist?
+> A browser mechanism that lets a server allow other origins to read its replies. It exists because the same-origin policy blocks those reads by default, to stop sites from reading your data with your cookies.
 
-Anything else is **preflighted**. The browser first sends an `OPTIONS` request that asks permission. Typical triggers are `PUT`, `PATCH`, `DELETE`, `Content-Type: application/json` (very common for JSON APIs), and custom headers such as `Authorization`.
+> [!question]- Who enforces CORS, the browser or the server?
+> The browser. The server only sends headers. That's why curl and Postman ignore it.
 
-Preflight steps:
+> [!question]- Is the request blocked, or the response?
+> The response. The request reaches the server and runs. Only a failed preflight stops the real request.
 
-1. The page calls `fetch` with, for example, `PUT` and `Content-Type: application/json`.
-2. The browser sends `OPTIONS` with `Origin`, `Access-Control-Request-Method: PUT`, and `Access-Control-Request-Headers: content-type`.
-3. The server answers with a success status (usually `204 No Content`) and the allow headers: `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, and optionally `Access-Control-Max-Age`.
-4. The browser checks that the requested method and headers are allowed. The browser caches the answer for `Access-Control-Max-Age` seconds (browsers cap this value).
-5. If the check passes, the browser sends the real `PUT`. If the check fails, the real `PUT` is never sent.
+> [!question]- How do you fix a CORS error?
+> On the server: return `Access-Control-Allow-Origin` with the front end's origin (plus methods and headers for preflights). In development, use a proxy. Never fix it in the front end.
 
-```mermaid
-sequenceDiagram
-  participant P as Page
-  participant B as Browser
-  participant S as API
-  P->>B: fetch(PUT, Content-Type: application/json)
-  B->>S: OPTIONS /api/items, Origin, Access-Control-Request-Method: PUT, Access-Control-Request-Headers: content-type
-  S-->>B: 204 No Content, Allow-Origin, Allow-Methods: PUT, Allow-Headers: content-type, Max-Age: 600
-  B->>B: Check the preflight answer
-  B->>S: PUT /api/items, Origin, Content-Type: application/json, body
-  S-->>B: 200 OK, Access-Control-Allow-Origin
-  B-->>P: Response (page can read it)
-```
-
-> [!warning] This is a general example
-> The lab's `api.py` has no `OPTIONS` handler, and every lab button sends a simple `GET`. So the lab never shows a preflight. The sequence above is the standard flow, not a captured lab exchange.
-
-## The real thing
-
-### Raw exchange: `/api/open` (no CORS headers)
+> [!question]- What is a preflight, and when is it sent?
+> An automatic `OPTIONS` request that asks permission before a non-simple request: methods other than GET, HEAD or POST, a JSON body, or custom headers like `Authorization`.
 
-The request as the browser sends it, trimmed to the important lines. A real browser sends more headers, such as `User-Agent`.
-
-```http
-GET /api/open HTTP/1.1
-Host: localhost:9000
-Origin: http://localhost:8000
-Sec-Fetch-Mode: cors
-Sec-Fetch-Site: same-site
-Sec-Fetch-Dest: empty
-Accept: */*
-```
+> [!question]- What do Access-Control-Request-Method and Access-Control-Request-Headers do?
+> They're preflight request headers that tell the server which method and headers the real request will use, so the server can approve or refuse them.
 
-The reply, captured from the lab's `api.py` with `curl -i` (the `Server` and `Date` values are what this run printed):
+> [!question]- Why can't you use `*` with cookies?
+> Because it would let any website read a logged-in user's private data. With credentials, the server must name the exact origin.
 
-```http
-HTTP/1.0 200 OK
-Server: BaseHTTP Python/3.15.1
-Date: Fri, 30 Oct 2026 17:16:26 GMT
-Content-Type: application/json
-Content-Length: 17
+> [!question]- Does CORS protect against CSRF?
+> No. CORS hides the reply but the forged request still runs. Use CSRF tokens and `SameSite` cookies.
 
-{"route": "open"}
-```
+> [!question]- SOP vs CORS vs CSP?
+> **SOP:** the browser's default rule, where a page reads only its own origin. **CORS:** a server loosening SOP for its own replies. **CSP (Content Security Policy):** a header a site puts on its *own* pages to limit where they may load scripts from, a defense against XSS (an attacker getting their script to run inside your page).
 
-The server answered 200 and sent the body. There is no `Access-Control-Allow-Origin` line, so the browser refuses to let the page read it. The page's `fetch` rejects, and the console shows a CORS error.
+> [!question]- Is CORS a defense against XSS?
+> No, that's a known wrong answer. CORS is about reading cross-origin replies. XSS defenses are escaping output and CSP.
 
-### Raw exchange: `/api/allow` (origin allowed)
+## Mental map
 
-Request, same as above but for `/api/allow`:
+![CORS mental map](../assets/diagrams/cors-mental-map.svg)
 
-```http
-GET /api/allow HTTP/1.1
-Host: localhost:9000
-Origin: http://localhost:8000
-Sec-Fetch-Mode: cors
-Sec-Fetch-Site: same-site
-Sec-Fetch-Dest: empty
-Accept: */*
-```
-
-Reply, captured the same way:
-
-```http
-HTTP/1.0 200 OK
-Server: BaseHTTP Python/3.15.1
-Date: Fri, 30 Oct 2026 17:16:26 GMT
-Content-Type: application/json
-Content-Length: 18
-Access-Control-Allow-Origin: http://localhost:8000
-
-{"route": "allow"}
-```
-
-The browser compares `http://localhost:8000` (the request `Origin`) with `http://localhost:8000` (the allowed origin). They match exactly, so the page reads the body.
-
-`Sec-Fetch-Site: same-site` appears because `localhost:8000` and `localhost:9000` share the same scheme and site (ports do not count for "site"). It does not change the CORS check, which uses the full origin, port included.
-
-### Header reference
-
-> [!info]- Header reference
-> | Header | Sent by | Where | What it does | In the lab |
-> |---|---|---|---|---|
-> | `Origin` | Browser | Every cross-origin request from page script; preflight | Names the page's origin (scheme + host + port). Page script cannot change it. | Yes, every route |
-> | `Access-Control-Request-Method` | Browser | Preflight `OPTIONS` | The method the real request will use | No preflight in the lab |
-> | `Access-Control-Request-Headers` | Browser | Preflight `OPTIONS` | Non-safelisted headers the real request will send | No |
-> | `Access-Control-Allow-Origin` | Server | Response, and preflight response | The one origin allowed to read (exact string), or `*` for any origin without credentials | Yes, except `/api/open` |
-> | `Access-Control-Allow-Credentials` | Server | Response, and preflight response | `true` lets the browser send cookies on the request and let the page read the reply | Yes, on `/api/login`, `/api/me`, `/api/allow-creds`, `/api/wildcard-creds` |
-> | `Access-Control-Allow-Methods` | Server | Preflight response | Methods the real request may use | No |
-> | `Access-Control-Allow-Headers` | Server | Preflight response | Request headers the real request may send | No |
-> | `Access-Control-Max-Age` | Server | Preflight response | Seconds the browser may cache the preflight answer | No |
-> | `Access-Control-Expose-Headers` | Server | Response | Extra response headers that page script may read | No (see [[networking/cors-expose-headers|CORS exposed headers]]) |
-> | `Vary: Origin` | Server | Response | Tells caches that the reply depends on `Origin`. Needed when the server sends a different `Allow-Origin` per origin, so a cache does not serve one origin's answer to another | No |
-
-Field notes:
-
-- The allowed origin is compared as an exact string. `http://localhost:8000` matches. `localhost:8000` (no scheme), `http://localhost:8000/` (trailing slash), and `http://localhost` (no port) do not match.
-- `Access-Control-Allow-Origin: *` allows any origin to read a response, but only when the request carries no credentials. See [[networking/cors-credentials|CORS and credentials]].
-
-### Debugging
-
-Check these three places, in this order.
-
-1. **Server log.** The lab's `api.py` prints one line per request, for example `GET /api/allow Origin=http://localhost:8000`. If the line appears, the request reached the server and the `Origin` value is visible. If it does not appear, the request never arrived. Check the URL, the port, and whether the browser blocked the request before sending it (for example, a failed preflight).
-2. **Network tab.** Find the request. Check the request headers (is `Origin` there?) and the response headers (is `Access-Control-Allow-Origin` there, and is its value exact?). The status may show 200 while the page still fails. That is the signature of a CORS block: the server did its job, and the browser did not pass the reply to the page. Chrome often marks the row with a CORS error or as failed.
-3. **Console.** The real reason is printed here. Chrome's wording is roughly: `Access to fetch at '...' from origin '...' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.` The lab's page also runs `console.error(err)` on failure, so the same reason shows there.
-
-A quick check outside the browser:
-
-```bash
-curl -i -H "Origin: http://localhost:8000" http://localhost:9000/api/allow
-```
-
-`curl` shows exactly which headers the server sends. It does not enforce CORS, so a request that works in `curl` and fails in the browser points at CORS, not at the server being down.
-
-## Common misconceptions
-
-- **Wrong:** CORS stops the request from being sent.
-  **Right:** For a simple request, the browser sends it, the server runs, and the server replies. The browser then hides the reply from the page. The lab shows this: `api.py` prints the `GET /api/open` line even though the page is blocked. For a preflighted request, the browser does not send the real request if the preflight fails. That is the only case where the real request is held back.
-
-- **Wrong:** CORS is a server-side security wall that protects the API.
-  **Right:** CORS is enforced by the browser. `curl`, Postman, and other servers ignore it. Protect the API with authentication and authorization on the server. CORS only controls which web pages in a browser may read the answers.
-
-- **Wrong:** Fix CORS in the page's `fetch` (add a header, or change the mode).
-  **Right:** Only the server can send `Access-Control-Allow-Origin`. The page can only ask. `mode: 'no-cors'` does not fix anything: the request still goes out, but the page gets an opaque response it cannot read.
-
-- **Wrong:** `Access-Control-Allow-Origin: localhost:8000` works because the origin is "localhost".
-  **Right:** The value must be the exact origin with the scheme and the port: `http://localhost:8000`. The browser compares strings, so a missing `http://` or a trailing slash breaks the match.
-
-## Interview questions
-
-> [!question]- Q1. Why does the browser block a cross-origin response at all?
-> Because of the same-origin policy. A page on one site could otherwise call another site with the visitor's cookies and read private data, such as bank account details. The browser blocks reads by default. CORS is the controlled exception: the other server lists which origins may read its responses.
-
-> [!question]- Q2. Does CORS prevent the request from reaching the server?
-> No, for a simple request. The browser sends it, and the server runs its code and replies. The browser then withholds the reply from the page if the origin is not allowed. For preflighted requests, the real request is held back only if the preflight check fails. CORS is about what the page may read, not what the server receives.
-
-> [!question]- Q3. What is a preflight request, and when is it sent?
-> A preflight is an `OPTIONS` request the browser sends before the real request. It asks the server whether the method and headers are allowed from this origin. It is sent for requests that are not simple, such as `PUT`, `DELETE`, a `Content-Type: application/json` body, or an `Authorization` header. The answer can be cached for `Access-Control-Max-Age` seconds.
-
-> [!question]- Q4. A fetch fails with a CORS error, but curl gets the right data. Why?
-> curl does not enforce CORS, so it shows the response even when the browser would hide it. Check the response headers with `curl -i -H "Origin: ..."`. If `Access-Control-Allow-Origin` is missing or does not exactly match the page's origin, the browser blocks the page. The fix belongs on the server.
-
-> [!question]- Q5. Can frontend code fix a CORS error?
-> No. The header that allows the page is sent by the server, and the page cannot change the response. Frontend options like a proxy in the dev server are workarounds: the proxy makes the call from the same origin, so no CORS check happens. The real fix is the server's `Access-Control-*` headers.
-
-## Trigger card
-
-> [!example] When I see "blocked by CORS policy" in the console, it means the server answered but the browser did not let the page read the reply, because the reply's `Access-Control-Allow-Origin` is missing or does not exactly match the page's origin.
-
-## Compared with
-
-| | CORS | Same-origin policy | CSRF defence (SameSite, tokens) | Authentication |
-|---|---|---|---|---|
-| What it is | Server opt-in for cross-origin reads | Default browser rule: reads only from same origin | Stops a cross-site page from making a state-changing request succeed | Server checks who the caller is |
-| Who enforces it | Browser | Browser | Browser (SameSite) and server (tokens) | Server |
-| Stops the request being sent? | No | No | Sometimes (SameSite cookies not attached) | No |
-| Stops the page reading the reply? | Yes, unless allowed | Yes, unless CORS allows | No, the reply is not the target | No |
-| Protects the API from `curl`? | No | No | No | Yes |
-
-## Where it's used
-
-- Single-page apps (React, Vue, Angular) that call an API on another domain or port. In development, the front-end dev server often runs on one port and the API on another, so CORS is needed.
-- Font and asset CDNs. Browsers request `@font-face` files and some images in CORS mode, so CDNs send `Access-Control-Allow-Origin` headers to let other sites use them.
-- Canvas and images. A cross-origin image without CORS "taints" a `<canvas>`, and reading its pixels (`getImageData`) throws. An `<img crossorigin="anonymous">` plus a CORS-enabled image server fixes this.
-- Public APIs that want browser clients (weather, maps, open data) and send `Access-Control-Allow-Origin: *`.
-- Not used by `curl`, Postman, server-to-server calls, or most mobile native HTTP clients. Those do not enforce the same-origin policy.
-
-> [!info]- Sources
-> - Study session, 2026-10-30.
-> - MDN, [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
-> - WHATWG, [Fetch Standard](https://fetch.spec.whatwg.org/) (CORS protocol section).
-> - RFC 6454, [The Web Origin Concept](https://www.rfc-editor.org/rfc/rfc6454).
+**Want more?** The [[networking/deep/cors|detailed CORS page]] has the same sections with raw HTTP, the exact simple-request rules, server config, debugging, and more interview questions.
 
 <!-- series-nav:start -->
 ---
 
-← [[networking/origin|Origin]] · [[networking/cors-credentials|CORS and credentials]] →
+← [[networking/origin|Origin]] · [[networking/index|Back to Networking]] →
 <!-- series-nav:end -->

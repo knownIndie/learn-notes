@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="548" viewBox="0 0 360 548" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>TLS 1.3 handshake: ClientHello, ServerHello, certificate, then encrypted HTTP</title>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5e5d59"/></marker></defs>
+<rect x="1" y="1" width="358" height="546" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<line x1="76" y1="52" x2="76" y2="500" stroke="#b4b2a9" stroke-width="1.5" stroke-dasharray="4 4"/>
+<line x1="284" y1="52" x2="284" y2="500" stroke="#b4b2a9" stroke-width="1.5" stroke-dasharray="4 4"/>
+<rect x="16" y="16" width="120" height="36" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="76" y="39" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">Browser</text>
+<rect x="224" y="16" width="120" height="36" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="284" y="39" text-anchor="middle" font-size="13" font-weight="600" fill="#085041">Server</text>
+
+<text x="180" y="76" text-anchor="middle" font-size="12" font-weight="600" fill="#185FA5">1. ClientHello</text>
+<line x1="78" y1="88" x2="282" y2="88" stroke="#185FA5" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="104" text-anchor="middle" font-size="11" fill="#185FA5">key_share, SNI: shop.com</text>
+
+<text x="180" y="130" text-anchor="middle" font-size="12" font-weight="600" fill="#085041">2. ServerHello</text>
+<line x1="282" y1="142" x2="78" y2="142" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="158" text-anchor="middle" font-size="11" fill="#0F6E56">key_share (the server's half)</text>
+
+<rect x="40" y="170" width="280" height="50" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="180" y="190" text-anchor="middle" font-size="12" fill="#3C3489">Both sides now hold the same secret.</text>
+<text x="180" y="208" text-anchor="middle" font-size="12" fill="#3C3489">Everything after this is encrypted.</text>
+
+<text x="180" y="244" text-anchor="middle" font-size="12" font-weight="600" fill="#085041">3. Certificate (encrypted)</text>
+<line x1="282" y1="256" x2="78" y2="256" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="272" text-anchor="middle" font-size="11" fill="#0F6E56">leaf certificate + intermediate</text>
+
+<text x="180" y="294" text-anchor="middle" font-size="12" font-weight="600" fill="#085041">4. CertificateVerify + Finished</text>
+<line x1="282" y1="306" x2="78" y2="306" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="322" text-anchor="middle" font-size="11" fill="#0F6E56">signature proves the private key</text>
+
+<rect x="40" y="338" width="280" height="52" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="180" y="358" text-anchor="middle" font-size="12" fill="#633806">Browser checks the chain up to a</text>
+<text x="180" y="374" text-anchor="middle" font-size="12" fill="#633806">trusted root, the name and the dates.</text>
+
+<text x="180" y="412" text-anchor="middle" font-size="12" font-weight="600" fill="#185FA5">5. Client Finished + first request</text>
+<line x1="78" y1="424" x2="282" y2="424" stroke="#185FA5" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="440" text-anchor="middle" font-size="11" font-family="ui-monospace,Menlo,monospace" fill="#185FA5">GET /cart HTTP/1.1 (encrypted)</text>
+
+<text x="180" y="458" text-anchor="middle" font-size="12" font-weight="600" fill="#085041">6. Encrypted HTTP</text>
+<line x1="282" y1="470" x2="78" y2="470" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="486" text-anchor="middle" font-size="11" font-family="ui-monospace,Menlo,monospace" fill="#0F6E56">200 OK (encrypted)</text>
+
+<text x="180" y="518" text-anchor="middle" font-size="12" fill="#5e5d59">Steps 1 and 2 cost one round trip.</text>
+<text x="180" y="534" text-anchor="middle" font-size="12" fill="#5e5d59">Everything after step 2 is encrypted.</text>
+</svg>

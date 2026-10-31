@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="688" viewBox="0 0 360 688" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>HTTP caching mental map</title>
+<rect x="1" y="1" width="358" height="686" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="100" y="16" width="160" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">HTTP caching</text>
+<path d="M180 56 V60 H36 V620" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 102 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="60" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="90" font-weight="600" fill="#3C3489">What a cache is</text>
+<text x="68" y="107" fill="#534AB7">A stored copy of a reply, keyed by URL</text>
+<text x="68" y="123" fill="#534AB7">so the next request can reuse it</text>
+<path d="M36 176 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="146" width="288" height="60" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="164" font-weight="600" fill="#0C447C">Where caches live</text>
+<text x="68" y="181" fill="#185FA5">browser (private), CDN (shared)</text>
+<text x="68" y="197" fill="#185FA5">proxy in a company or ISP (shared)</text>
+<path d="M36 242 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="220" width="288" height="44" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="238" font-weight="600" fill="#633806">Fresh: age &lt; max-age</text>
+<text x="68" y="255" fill="#854F0B">Use the copy. No request is sent.</text>
+<path d="M36 308 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="278" width="288" height="60" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="296" font-weight="600" fill="#791F1F">Stale: age &gt;= max-age</text>
+<text x="68" y="313" fill="#A32D2D">Ask first: send If-None-Match</text>
+<text x="68" y="329" fill="#A32D2D">or If-Modified-Since</text>
+<path d="M36 382 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="352" width="288" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="370" font-weight="600" fill="#085041">Validators</text>
+<text x="68" y="387" fill="#0F6E56" font-family="ui-monospace,Menlo,monospace" font-size="11">ETag, sent back as If-None-Match</text>
+<text x="68" y="403" fill="#0F6E56">Last-Modified, sent as If-Modified-Since</text>
+<path d="M36 456 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="426" width="288" height="60" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="444" font-weight="600" fill="#27500A">304 or 200</text>
+<text x="68" y="461" fill="#3B6D11">304 Not Modified: same file, no body</text>
+<text x="68" y="477" fill="#3B6D11">200 OK: changed, new body and ETag</text>
+<path d="M36 538 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="500" width="288" height="76" rx="8" fill="#F1EFE8" stroke="#5F5E5A"/>
+<text x="68" y="518" font-weight="600" fill="#2C2C2A">Cache-Control</text>
+<text x="68" y="535" fill="#5F5E5A">max-age=N   fresh for N seconds</text>
+<text x="68" y="551" fill="#5F5E5A">no-cache   store, always check first</text>
+<text x="68" y="567" fill="#5F5E5A">no-store   never store at all</text>
+<path d="M36 620 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="590" width="288" height="60" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="608" font-weight="600" fill="#0C447C">Cache busting</text>
+<text x="68" y="625" fill="#185FA5">hash in name: app.3f9a.js</text>
+<text x="68" y="641" fill="#185FA5">new content, new URL, cache forever</text>
+</g>
+<text x="180" y="676" text-anchor="middle" font-size="11" fill="#8a8984">Fresh copy: no request. Stale: ask first.</text>
+</svg>

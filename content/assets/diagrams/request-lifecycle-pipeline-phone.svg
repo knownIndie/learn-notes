@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="778" viewBox="0 0 360 778" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Request lifecycle: ten steps from typing a URL to the page on screen</title>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5e5d59"/></marker></defs>
+<rect x="1" y="1" width="358" height="776" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="100" y="16" width="160" height="36" rx="18" fill="#185FA5"/>
+<text x="180" y="39" text-anchor="middle" font-size="13" font-weight="600" fill="#ffffff">Type URL, press Enter</text>
+<line x1="180" y1="52" x2="180" y2="72" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="72" width="280" height="48" rx="8" fill="#F1EFE8" stroke="#5F5E5A"/>
+<circle cx="62" cy="96" r="12" fill="#5F5E5A"/>
+<text x="62" y="100" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">1</text>
+<text x="84" y="92" font-size="14" font-weight="600" fill="#444441">Parse the URL</text>
+<text x="84" y="109" font-size="12" fill="#5F5E5A">scheme, host, port, path</text>
+<line x1="180" y1="120" x2="180" y2="136" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="136" width="280" height="48" rx="8" fill="#F1EFE8" stroke="#5F5E5A"/>
+<circle cx="62" cy="160" r="12" fill="#5F5E5A"/>
+<text x="62" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">2</text>
+<text x="84" y="156" font-size="14" font-weight="600" fill="#444441">Check browser cache</text>
+<text x="84" y="173" font-size="12" fill="#5F5E5A">fresh copy? no network needed</text>
+<line x1="180" y1="184" x2="180" y2="200" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="200" width="280" height="48" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<circle cx="62" cy="224" r="12" fill="#534AB7"/>
+<text x="62" y="228" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">3</text>
+<text x="84" y="220" font-size="14" font-weight="600" fill="#3C3489">DNS lookup</text>
+<text x="84" y="237" font-size="12" fill="#534AB7">name to IP address</text>
+<line x1="180" y1="248" x2="180" y2="264" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="264" width="280" height="48" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<circle cx="62" cy="288" r="12" fill="#0F6E56"/>
+<text x="62" y="292" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">4</text>
+<text x="84" y="284" font-size="14" font-weight="600" fill="#085041">TCP connection</text>
+<text x="84" y="301" font-size="12" fill="#0F6E56">3-way handshake, 1 round trip</text>
+<line x1="180" y1="312" x2="180" y2="328" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="328" width="280" height="48" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<circle cx="62" cy="352" r="12" fill="#A32D2D"/>
+<text x="62" y="356" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">5</text>
+<text x="84" y="348" font-size="14" font-weight="600" fill="#791F1F">TLS handshake</text>
+<text x="84" y="365" font-size="12" fill="#A32D2D">encrypt, check server identity</text>
+<line x1="180" y1="376" x2="180" y2="392" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="392" width="280" height="48" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<circle cx="62" cy="416" r="12" fill="#185FA5"/>
+<text x="62" y="420" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">6</text>
+<text x="84" y="412" font-size="14" font-weight="600" fill="#0C447C">HTTP request</text>
+<text x="84" y="429" font-size="12" fill="#185FA5">GET /cart with headers</text>
+<line x1="180" y1="440" x2="180" y2="456" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="456" width="280" height="48" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<circle cx="62" cy="480" r="12" fill="#854F0B"/>
+<text x="62" y="484" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">7</text>
+<text x="84" y="476" font-size="14" font-weight="600" fill="#633806">Server work</text>
+<text x="84" y="493" font-size="12" fill="#854F0B">load balancer, app, database</text>
+<line x1="180" y1="504" x2="180" y2="520" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="520" width="280" height="48" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<circle cx="62" cy="544" r="12" fill="#185FA5"/>
+<text x="62" y="548" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">8</text>
+<text x="84" y="540" font-size="14" font-weight="600" fill="#0C447C">HTTP response</text>
+<text x="84" y="557" font-size="12" fill="#185FA5">200 OK with the HTML</text>
+<line x1="180" y1="568" x2="180" y2="584" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="584" width="280" height="48" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<circle cx="62" cy="608" r="12" fill="#3B6D11"/>
+<text x="62" y="612" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">9</text>
+<text x="84" y="604" font-size="14" font-weight="600" fill="#27500A">Sub-resources</text>
+<text x="84" y="621" font-size="12" fill="#3B6D11">CSS, JS, images, fonts</text>
+<line x1="180" y1="632" x2="180" y2="648" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="648" width="280" height="48" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<circle cx="62" cy="672" r="12" fill="#3B6D11"/>
+<text x="62" y="676" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">10</text>
+<text x="84" y="668" font-size="14" font-weight="600" fill="#27500A">Render</text>
+<text x="84" y="685" font-size="12" fill="#3B6D11">parse, layout, paint</text>
+<line x1="180" y1="696" x2="180" y2="712" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="100" y="712" width="160" height="36" rx="18" fill="#3B6D11"/>
+<text x="180" y="735" text-anchor="middle" font-size="13" font-weight="600" fill="#ffffff">Page on screen</text>
+<text x="180" y="766" text-anchor="middle" font-size="12" fill="#5e5d59">Each step waits for the one before it</text>
+</svg>

@@ -2,14 +2,13 @@
 title: Learn notes
 ---
 
-Detailed notes on everything I'm learning: one page per concept, with pictures, the real artifacts (raw requests, packets, queries, formulas), where each thing is used, common mistakes, and interview questions with hidden answers.
+Short notes on everything I'm learning, written to be read on a phone and used in interviews.
+
+## How each topic works
+
+- **Quick page (5–7 minutes):** what it's for, the words you need, one picture, one example, the common mistake, a 60-second interview answer, interview questions (tap to reveal), and a mental map.
+- **Detailed page:** the same sections in the same order, with more depth under each one. Open it from the "Want more?" link when you need it.
 
 ## Subjects
 
-- [[networking/index|Networking]]: how a page loads (DNS, TCP, TLS, HTTP), caching, origins and CORS, with a hands-on CORS lab.
-
-## How to use these notes
-
-- **Review:** open a page, read the TL;DR, then try the interview questions before expanding the answers.
-- **Search** (top left) finds any term. The **graph** (right) shows how concepts connect.
-- Interactive diagrams run on this site; in Obsidian or on GitHub you see the static parts.
+- [[networking/index|Networking]]: how a page loads (HTTP, DNS, TCP and UDP, TLS), caching, origins and CORS.

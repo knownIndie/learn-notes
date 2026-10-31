@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="572" viewBox="0 0 360 572" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>HTTP message mental map</title>
+<rect x="1" y="1" width="358" height="570" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="120" y="16" width="120" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">HTTP</text>
+<path d="M120 36 H36 V504" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 102 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="60" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="90" font-weight="600" fill="#3C3489">Shape</text>
+<text x="68" y="107" fill="#534AB7">start line, headers, blank line, body</text>
+<text x="68" y="123" fill="#534AB7">same four parts in request and reply</text>
+<path d="M36 184 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="146" width="288" height="76" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="164" font-weight="600" fill="#0C447C">Methods</text>
+<text x="68" y="181" fill="#185FA5">GET reads, POST creates or acts</text>
+<text x="68" y="197" fill="#185FA5">safe: changes nothing on the server</text>
+<text x="68" y="213" fill="#185FA5">idempotent: same result on repeat</text>
+<path d="M36 274 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="236" width="288" height="76" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="254" font-weight="600" fill="#633806">Status codes</text>
+<text x="68" y="271" fill="#854F0B">1xx info, 2xx ok, 3xx go elsewhere</text>
+<text x="68" y="287" fill="#854F0B">4xx your request is wrong</text>
+<text x="68" y="303" fill="#854F0B">5xx the server failed</text>
+<path d="M36 356 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="326" width="288" height="60" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="344" font-weight="600" fill="#791F1F">401 vs 403</text>
+<text x="68" y="361" fill="#A32D2D">401: who are you? log in</text>
+<text x="68" y="377" fill="#A32D2D">403: I know you, still not allowed</text>
+<path d="M36 430 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="400" width="288" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="418" font-weight="600" fill="#085041">PUT vs PATCH</text>
+<text x="68" y="435" fill="#0F6E56">PUT replaces the whole resource</text>
+<text x="68" y="451" fill="#0F6E56">PATCH changes one field</text>
+<path d="M36 504 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="474" width="288" height="60" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="492" font-weight="600" fill="#27500A">Stateless</text>
+<text x="68" y="509" fill="#3B6D11">HTTP forgets each request</text>
+<text x="68" y="525" fill="#3B6D11">cookies add memory: Set-Cookie, Cookie</text>
+</g>
+<text x="180" y="560" text-anchor="middle" font-size="11" fill="#8a8984">Read the first digit of the status code first</text>
+</svg>

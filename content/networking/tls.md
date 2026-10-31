@@ -1,297 +1,146 @@
 ---
-title: TLS
-subject: networking
-tags: [networking, tls, security, https]
-aliases: [TLS, SSL, HTTPS, TLS 1.3, certificate chain, Transport Layer Security]
-created: 2026-10-30
-updated: 2026-10-30
-status: draft
-sources: ["study session 2026-10-30", "RFC 8446 (TLS 1.3)", "RFC 5246 (TLS 1.2)", "RFC 6066 (TLS extensions, SNI)", "RFC 5280 (X.509 certificate profile)"]
+title: TLS and HTTPS
+tags: [networking, tls, https, security]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 5 of 11
+> [!series]- Networking · 5 of 8
 > 1. [[networking/http-message|HTTP message]]
 > 2. [[networking/request-lifecycle|Request lifecycle]]
 > 3. [[networking/dns|DNS]]
-> 4. [[networking/tcp|TCP]]
-> 5. **TLS** · you are here
+> 4. [[networking/tcp|TCP and UDP]]
+> 5. **TLS and HTTPS** · you are here
 > 6. [[networking/http-caching|HTTP caching]]
 > 7. [[networking/origin|Origin]]
 > 8. [[networking/cors|CORS]]
-> 9. [[networking/cors-credentials|CORS and credentials]]
-> 10. [[networking/cors-expose-headers|CORS exposed headers]]
-> 11. [[networking/cors-lab|CORS lab]]
 <!-- series:end -->
 
-> [!tldr] In three lines
-> Transport Layer Security (TLS) runs inside a TCP connection and gives three guarantees: the bytes are encrypted, they cannot be changed without detection, and the server has proved it is the owner of its domain name. HTTPS is HTTP sent over TLS. TLS 1.3 finishes its handshake in 1 RTT after TCP.
->
-> [[#Interview questions|→ Self-test: 6 questions]]
+> [!abstract] What this page is for
+> **Intent:** understand what HTTPS adds to HTTP, how the TLS handshake works, and answer the common TLS and certificate interview questions.
+> **You'll learn:** the three guarantees · symmetric vs asymmetric · the TLS 1.3 handshake · certificates and trust · what an attacker sees · man-in-the-middle.
+> **Time:** about 7 minutes. The longer version is on the [[networking/deep/tls|detailed TLS page]].
+
+## Words you need first
+
+- **HTTPS**: HTTP sent over TLS. The same requests and replies travel inside an encrypted tunnel.
+- **TLS (Transport Layer Security)**: the protocol that encrypts a connection. It runs on top of [[networking/tcp|TCP]] (the reliable byte stream) and under HTTP. Its older name is SSL.
+- **Symmetric encryption**: one shared key locks and unlocks the data. It is fast, so it handles big downloads. AES is the usual example.
+- **Asymmetric encryption** (public-key): each side has a private value it keeps and a public value it shares. Each side combines its own private value with the other side's public value, and both get the same secret. The private values never travel. It is slow, so TLS uses it only at the start.
+- **Certificate**: a signed ID card for a server. It names the host, such as `shop.com`, and holds the server's public key.
+- **CA (Certificate Authority)**: an organization that checks a server owns its name, then signs its certificate.
+- **RTT (round trip time)**: one message to the other side and the reply back. For example, 100 ms.
+- **Man-in-the-middle (MITM)**: an attacker who sits between the client and the server and reads or changes the traffic.
 
 ## Why it exists
 
-TCP delivers bytes exactly as they were written, and anyone on the path can read them. Routers, Wi-Fi hotspots, internet providers and malicious software can all see the bytes. They can also change them, and a plain connection does not reveal whether the other end is the real server or an impostor.
+Plain HTTP sends bytes as they are. Anyone on the path can read or change them, such as the Wi-Fi owner or a router. A plain connection also does not show who answered.
 
-TLS fixes all three problems at once. Think of a sealed letter sent through the post. The seal stops others from reading it, a broken seal shows it was tampered with, and a signature from a notary the reader trusts shows who really wrote it.
+Say a user on coffee-shop Wi-Fi logs in to `shop.com`. Without TLS, the person on the same network reads the password, or sends a fake login page while pretending to be `shop.com`.
 
-## Picture
+TLS gives three guarantees:
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  C->>S: ClientHello, key_share, SNI example.com, ALPN h2
-  S-->>C: ServerHello, key_share
-  Note over C,S: Keys derived from the shared secret, rest is encrypted
-  S-->>C: EncryptedExtensions
-  S-->>C: Certificate, leaf and intermediate
-  S-->>C: CertificateVerify, signature over handshake
-  S-->>C: Finished
-  Note over C: Check chain, host name, dates and signature
-  C->>S: Finished
-  C->>S: Application data, GET / HTTP/1.1
-  S-->>C: Application data, 200 OK
-```
+1. **Encryption:** others cannot read the bytes.
+2. **Integrity:** a changed byte is detected, and the connection fails.
+3. **Server identity:** the server proves it owns `shop.com`.
 
-*The TLS 1.3 handshake. The client's first HTTP request can ride with its Finished, so the handshake costs one round trip.*
+## The picture
 
-## Plain version
+![TLS 1.3 handshake: ClientHello, ServerHello with keys agreed, certificate, then encrypted HTTP](../assets/diagrams/tls-handshake-phone.svg)
 
-Two people want to talk privately, but the phone line is public and one of them has never heard the other's voice.
+## How it works, with an example
 
-First, they agree on a secret without saying it out loud. Each side makes a random private number, sends a public value derived from it, and both compute the same secret. An eavesdropper hears the public values but cannot work out the secret. That step is key exchange.
+The user types `https://shop.com/cart`. DNS and TCP are already done. Now TLS starts.
 
-Next, the secret protects everything they say with fast locking and unlocking. That step is symmetric encryption.
+1. **ClientHello.** The browser sends the TLS versions it supports, its cipher options and a **key share** (its public value for the secret). It also sends `shop.com` in plain text, in a field called SNI (Server Name Indication). SNI lets one IP address serve many sites.
+2. **ServerHello.** The server replies with its own key share. Both sides compute the same secret. Everything after this is encrypted.
+3. **Certificate.** The server sends its certificate and proves it holds the matching private key.
+4. **Check.** The browser checks the certificate. If it passes, the browser sends **Finished**, and the first request goes out encrypted: `GET /cart`.
 
-Last, the server shows an ID card signed by an office the client already trusts. The client checks the signature and checks that the name on the card matches the name it dialled. That step is authentication.
+In plain words: two people agree on a secret over a public phone line, then talk privately with it.
 
-## Precise definition
+## The most common mistake
 
-TLS is the protocol that secures a TCP byte stream with encryption, integrity and server authentication. The terms it uses are listed below.
+> [!warning] HTTPS hides the page, not the visit
+> The path, query string, headers and body are encrypted. The network still sees the **IP address**, the **domain name** (in SNI and in the DNS lookup) and the **size and timing** of packets. Encryption is not anonymity.
 
-> [!info]- Terms reference
-> | Term | Definition | Where it's used |
-> |---|---|---|
-> | TLS | A protocol that secures a byte stream with encryption, integrity and authentication | Under HTTPS, SMTP, IMAP, database connections |
-> | Handshake | The first part of a TLS connection, where the sides agree on settings and keys | Start of every TLS session |
-> | Record layer | The framing that carries encrypted application data after the handshake | Every byte after the handshake |
-> | Cipher suite | A named set of algorithms, such as `TLS_AES_128_GCM_SHA256` | Chosen in the handshake |
-> | Key exchange | How both sides derive the same secret over a public channel. TLS 1.3 uses (EC)DHE, with ephemeral keys | ClientHello and ServerHello key_share |
-> | Symmetric encryption | Encryption with one shared key, fast enough for bulk data. AES-GCM and ChaCha20-Poly1305 are examples | Record layer |
-> | Forward secrecy | If the server's long-term key leaks later, past sessions stay secret, because each session used its own ephemeral key | TLS 1.3 by design |
-> | Certificate | A signed document that binds a public key to one or more names, such as `example.com`. Uses the X.509 format | Certificate message |
-> | Leaf certificate | The certificate for the server itself | Sent first in the Certificate message |
-> | Intermediate CA | A certificate authority whose certificate is signed by the root and which signs leaf certificates | Between leaf and root |
-> | Root CA | A trusted certificate authority whose certificate is pre-installed in the operating system or browser | Root store |
-> | Root store | The list of trusted root certificates shipped with an operating system, browser or application | Certificate checks |
-> | SNI (Server Name Indication) | The host name sent in plain text in the ClientHello, so one IP address can serve many certificates | ClientHello |
-> | ALPN (Application-Layer Protocol Negotiation) | Lets the client and server agree on the next protocol, such as `h2` or `http/1.1` | ClientHello and ServerHello |
-> | PSK and session ticket | A secret from an earlier session that lets a later connection skip parts of the handshake | Resumption |
-> | 0-RTT | Sending application data in the first flight of a resumed connection | Resumption, with a replay risk |
+## The handshake
 
-## How it works
+TLS 1.3 needs **1 round trip** after TCP. The client sends its key share in the first TLS message. The server answers with its key share, and the client sends Finished together with its first HTTP request. For a new connection, that means 1 RTT for TCP plus 1 RTT for TLS before the request leaves. With an RTT of 100 ms, that is 200 ms.
 
-### TLS 1.3 in 1 RTT
+TLS 1.2 needs **2 round trips**, because the client waits for the server's key data before it sends its own key. That extra wait is why TLS 1.3 is faster.
 
-1. **ClientHello.** After TCP is open, the client sends its supported TLS versions, its cipher suites, a random value, and a `key_share` with its ephemeral public key, for example for the X25519 curve. It also sends SNI with the host name and ALPN with the protocols it can speak.
-2. **ServerHello.** The server picks a cipher suite and sends its own `key_share`. Both sides now compute the same shared secret from the two key shares. Everything after this message is encrypted with keys derived from that secret.
-3. **EncryptedExtensions.** The server sends its chosen ALPN and other settings, encrypted.
-4. **Certificate.** The server sends its leaf certificate and any intermediate certificates. The certificate contains the public key and the names it is valid for.
-5. **CertificateVerify.** The server signs a hash of the whole handshake so far with the private key that matches the certificate. This proves it holds the key, and not only a copy of the certificate.
-6. **Finished.** The server sends a message authentication code over the handshake, which proves it derived the same keys.
-7. **Client checks.** The client verifies the chain of trust up to a trusted root, checks that the host name matches the certificate, checks the expiry dates, verifies the CertificateVerify signature, and verifies the server's Finished message.
-8. **Client Finished.** The client sends its own Finished message. It can send its first HTTP request in the same flight, so no extra round trip is needed.
+Why TLS uses both kinds of encryption:
 
-### The count of round trips
+- **Asymmetric math** is slow, but it lets strangers agree on a secret over a public line. TLS runs it once per connection.
+- **Symmetric encryption** is fast, so the agreed secret locks all the data.
+- The temporary agreement keys are thrown away after the session. This is **forward secrecy**: a later leak of the server's long-term key does not expose old sessions.
 
-TCP costs 1 RTT, as described on [[networking/tcp|TCP]]. TLS adds to that:
+## Certificates and trust
 
-- TLS 1.3 needs 1 RTT, because the client sends its key share in the first message and can send data with its Finished.
-- TLS 1.2 needs 2 RTT, because the client waits for the server's key exchange and Finished before it sends its own key and Finished.
+A certificate says: "this public key belongs to `shop.com`, and I, the CA, vouch for it until this date."
 
-$$T_{TLS1.3} = 1\,\text{RTT}, \qquad T_{TLS1.2} = 2\,\text{RTT}$$
-
-With RTT = 100 ms, TLS 1.3 adds 100 ms and TLS 1.2 adds 200 ms, before any HTTP request is sent. For a fresh connection with TCP and TLS 1.3, the total setup is:
-
-$$T_{setup} = 1\,\text{RTT}_{TCP} + 1\,\text{RTT}_{TLS1.3} = 2\,\text{RTT} = 200\,\text{ms}$$
-
-### TLS 1.2 handshake for comparison
-
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  C->>S: ClientHello
-  S-->>C: ServerHello, Certificate, ServerKeyExchange, ServerHelloDone
-  C->>S: ClientKeyExchange, ChangeCipherSpec, Finished
-  S-->>C: ChangeCipherSpec, Finished
-  C->>S: Application data
-```
-
-### Certificates and the chain of trust
-
-A certificate is a signed statement. The issuer signs the certificate's contents, which include the subject's name, the subject's public key, the names it covers and the validity dates. The client checks the signature with the issuer's public key. The issuer's own certificate is checked the same way, one level up, until the chain reaches a root that the client already trusts.
+Browsers and operating systems ship with a list of trusted root CAs, the **root store**. The server sends a chain that leads from its certificate up to a root:
 
 ```
-Root CA         (self-signed, in the root store)
-  |  signs
-Intermediate CA (signed by root, signs day to day)
-  |  signs
-Leaf certificate (for example.com, sent by the server)
+Root CA            (in the browser's root store)
+  signs
+Intermediate CA    (signs the day-to-day certificates)
+  signs
+shop.com leaf      (sent by the server)
 ```
 
-- **Root CAs** are kept offline and rarely used. Their certificates are shipped with the operating system or browser.
-- **Intermediates** do the daily signing. They can be revoked without replacing every root.
-- **The leaf** names the host, for example in its Subject Alternative Name list. The client checks that the host it dialled appears there.
+The browser checks that every signature is valid and the chain ends at a trusted root, that `shop.com` is in the certificate, that today is within the validity dates, and that the server signed the handshake with the matching private key.
 
-Trust is not granted to the server by the chain alone. The chain proves that a trusted authority vouches for the name. The CertificateVerify step proves that the server holds the private key.
+**Man-in-the-middle:** the attacker can relay bytes, but cannot get a trusted CA to certify `shop.com` for them, and cannot sign the handshake without the real private key. The browser shows an error.
 
-### Key exchange and symmetric encryption
+**HSTS (HTTP Strict Transport Security):** a header such as `Strict-Transport-Security: max-age=31536000`. It tells the browser to use HTTPS only for that domain for a year, so an attacker cannot push a plain `http://` version.
 
-- **Key exchange** (ECDHE in TLS 1.3) uses public-key math. It is slow compared with symmetric encryption, so it runs only once per connection, and it produces a shared secret without sending that secret over the wire.
-- **Symmetric encryption** (AES-GCM or ChaCha20-Poly1305) uses the shared key to encrypt and authenticate every record. It is fast enough for large downloads.
+A certificate proves only that a trusted CA checked that the server controls the name. It does not prove the site is honest.
 
-The ephemeral keys used for key exchange are thrown away after the session. That is what gives forward secrecy.
+## Say it in an interview
 
-### 0-RTT resumption
+> "HTTPS is HTTP over TLS. TLS gives encryption, integrity and server identity. It uses public-key math once to agree on a secret, then symmetric encryption for the data, because that's much faster. In TLS 1.3 the handshake takes one round trip after TCP: the client sends its key share and SNI, the server replies with its key share and certificate, and the client checks the chain up to a trusted root. The CA's signature is what stops a man-in-the-middle. An attacker on the network still sees the IP address, the domain name in SNI, and the sizes and timing."
 
-After a first connection, the server can send a session ticket. A later connection can present that ticket and send early data in its first flight, which saves a round trip.
+## Questions interviewers ask
 
-The risk is replay. An attacker who records the early data can send it again to the server, and the server cannot tell the copy from the original. For that reason, 0-RTT should carry only requests that are safe to repeat, such as an idempotent `GET` with no side effects. A payment or a form submission must not travel in 0-RTT data.
+> [!question]- What does TLS give you?
+> Encryption, so others can't read the data. Integrity, so changes are detected. Server identity, so the client knows it talks to the real owner of the name.
 
-## The real thing
+> [!question]- What is HTTPS?
+> HTTP sent over TLS, with the same messages inside.
 
-A summary of a TLS 1.3 connection from `openssl s_client`, trimmed. The CA names are fictional, and the session IDs are shortened.
+> [!question]- Why does TLS use both symmetric and asymmetric encryption?
+> Asymmetric (public-key) math lets two sides agree on a secret over a public channel, but it is slow. Symmetric encryption is fast. TLS uses the slow one once, then the fast one for the data.
 
-```
-$ openssl s_client -connect example.com:443 -servername example.com
-CONNECTED(00000003)
-depth=2 C = US, O = Example Root CA, CN = Example Root CA
-verify return:1
-depth=1 C = US, O = Example Intermediate, CN = Example TLS Issuer 1
-verify return:1
-depth=0 CN = example.com
-verify return:1
----
-Certificate chain
- 0 s:CN = example.com
-   i:C = US, O = Example Intermediate, CN = Example TLS Issuer 1
-   a:PKEY: EC, (prime256v1) 256 bits
-   v:NotBefore: Oct  1 00:00:00 2026 GMT; NotAfter: Dec 30 23:59:59 2026 GMT
----
-Server certificate
-subject=CN = example.com
-issuer=C = US, O = Example Intermediate, CN = Example TLS Issuer 1
----
-No client certificate CA names sent
-Peer signing digest: SHA256
-Peer signature type: ECDSA
-Negotiated TLS1.3 group: X25519
----
-SSL handshake has read 3412 bytes and written 1854 bytes
-Verification: OK
----
-New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
-Server public key is 256 bit
-Protocol: TLSv1.3
-Cipher    : TLS_AES_256_GCM_SHA384
-Session-ID: 6F1A...C9E2
-Session-ID-ctx:
-Resumption PSK: ...
-TLS session ticket lifetime hint: 7200 (seconds)
-Verify return code: 0 (ok)
-```
+> [!question]- How many round trips does the TLS 1.3 handshake take?
+> One after TCP. The client sends its key share first, and the server replies with its key share. TLS 1.2 needs two.
 
-> [!info]- openssl output reference
-> | Line | Field | What it means |
-> |---|---|---|
-> | `CONNECTED(00000003)` | Connection | The TCP connection opened. The number is the file descriptor used by the tool |
-> | `depth=2` to `depth=0` | Chain position | Depth 0 is the leaf. Depth 2 is the root. The chain is checked from the root down |
-> | `verify return:1` | Check result | Each level passed the check. 1 means success |
-> | `0 s:` | Subject | The name the leaf certificate was issued to, here `example.com` |
-> | `i:` | Issuer | The authority that signed the certificate. It matches the next certificate in the chain |
-> | `a:PKEY: EC` | Key type | The server's public key is an elliptic-curve key of 256 bits |
-> | `v:NotBefore` and `NotAfter` | Validity | The certificate is valid only within these dates |
-> | `Peer signature type: ECDSA` | Signature | The algorithm the server used for CertificateVerify |
-> | `Negotiated TLS1.3 group: X25519` | Key exchange | The curve for the ephemeral key exchange, the key_share |
-> | `SSL handshake has read 3412 bytes` | Size | Bytes received during the handshake, including the certificates |
-> | `Verification: OK` | Result | Chain, host name and signature checks all passed |
-> | `New, TLSv1.3` | Version | A new session with TLS 1.3 |
-> | `Cipher: TLS_AES_256_GCM_SHA384` | Cipher suite | AES-256 in GCM mode for the records, SHA-384 for the handshake hash |
-> | `Session-ID` and `Resumption PSK` | Resumption data | Values the client can use to resume the session later |
-> | `session ticket lifetime hint: 7200` | Ticket lifetime | The server suggests the client keep the ticket for 2 hours |
-> | `Verify return code: 0 (ok)` | Final result | No verification errors. A non-zero code names the failure |
+> [!question]- What is a certificate?
+> A signed document that binds a public key to one or more host names, with validity dates. A certificate authority (CA) signs it.
 
-## Common misconceptions
+> [!question]- What is the chain of trust?
+> The server's certificate is signed by an intermediate CA, which is signed by a root CA. The root is in the browser's or operating system's root store, so the browser can trust the whole chain.
 
-- **Wrong:** TLS only encrypts the data.
-  **Right:** TLS also checks that the data was not changed, and it proves the server's identity with a certificate and a signature. Encryption without authentication would let an attacker sit in the middle, and the connection would be encrypted to the attacker.
-- **Wrong:** HTTPS hides which site you visit.
-  **Right:** HTTPS hides the path and the content of the request and response. The host name appears in SNI in plain text in TLS 1.3 unless Encrypted Client Hello is used, which is not yet universal. The IP address and the DNS lookup are usually visible too.
-- **Wrong:** The padlock means the site is safe.
-  **Right:** The padlock means the connection is encrypted and the certificate is valid for the host shown. The site can still be malicious or hacked.
-- **Wrong:** A certificate proves the server is trustworthy.
-  **Right:** A certificate proves that a trusted authority checked that the server controls a name, at the time it was issued. It says nothing about the server's behaviour.
+> [!question]- What does the client check on a certificate?
+> The signatures up to a trusted root, that the host name matches, that the date is valid, and that the server proved it holds the private key.
 
-## Interview questions
+> [!question]- How do certificates stop a man-in-the-middle?
+> The attacker can't get a trusted CA to certify the real name, and can't sign the handshake without the real private key. So the client sees a bad certificate and refuses to connect.
 
-> [!question]- Q1. What three guarantees does TLS provide?
-> Confidentiality: the bytes are encrypted, so an observer cannot read them. Integrity: each record carries an authentication tag, so a change is detected. Authentication: the server proves that it holds the private key for a certificate that a trusted authority issued for the host name.
+> [!question]- What can someone on the network still see in HTTPS?
+> The IP address, the domain name (in SNI and often in the DNS lookup), and the size and timing of packets. They can't see the path, headers or body.
 
-> [!question]- Q2. Describe the TLS 1.3 handshake and count the round trips.
-> The client sends ClientHello with its key share and SNI. The server replies with ServerHello and its key share, and both sides derive the keys. The rest of the server's messages are encrypted: EncryptedExtensions, Certificate, CertificateVerify and Finished. The client checks the chain and the signature, then sends its Finished. That is one round trip after TCP, because the client's first HTTP request can ride with its Finished.
+> [!question]- What is HSTS?
+> A response header that tells the browser to use HTTPS only for that domain for a set time. It stops a downgrade to plain HTTP.
 
-> [!question]- Q3. How does a browser decide that a certificate is trusted?
-> It builds a chain from the leaf up to a root certificate. Each certificate must be signed by the next one up, and the chain must end at a root in the browser or operating system root store. The client also checks that the host name matches a name in the leaf, that the dates are valid, and, where the client supports revocation checks, that the certificate has not been revoked.
+## Mental map
 
-> [!question]- Q4. What is forward secrecy, and why does TLS 1.3 always provide it?
-> Forward secrecy means that a later leak of the server's long-term key does not expose past sessions. TLS 1.3 uses only ephemeral key exchange. Each session derives its own keys from fresh key shares, which are discarded afterwards. TLS 1.2 still allowed static RSA key exchange, where the session key is encrypted with the server's long-term key, so a later leak exposes the recorded sessions. TLS 1.3 removed that option.
+![TLS mental map](../assets/diagrams/tls-mental-map.svg)
 
-> [!question]- Q5. What is 0-RTT, and what is its risk?
-> 0-RTT lets a returning client send application data in its first flight, using a session ticket from an earlier connection. That saves one round trip. The risk is replay: an attacker can record that early data and send it again, and the server may process it twice. So 0-RTT is limited to requests that are safe to repeat.
-
-> [!question]- Q6. Does HTTPS hide the domain name from the network?
-> Not fully. The IP address is visible. The DNS lookup is often plain text. The host name appears in SNI during the handshake, unless Encrypted Client Hello is used. What HTTPS does hide is the path, the query string, the headers and the body.
-
-## Trigger card
-
-> [!example] When I see a certificate error in the browser, it means the handshake stopped before any HTTP request was sent, because the client could not verify the chain, the host name or the dates.
-
-## Compared with
-
-| | TLS 1.2 | TLS 1.3 |
-|---|---|---|
-| Round trips after TCP | 2 RTT | 1 RTT |
-| Key exchange | Ephemeral (ECDHE) or static RSA | Ephemeral only, so forward secrecy is always on |
-| Early data (0-RTT) | Not part of TLS 1.2 | Supported, with replay risk |
-| Weak ciphers | Some allowed | Removed, all suites are AEAD with modern hashes |
-| Status | Still common, but older | Current recommended version |
-
-| | Symmetric encryption | Key exchange |
-|---|---|---|
-| Key | One shared key | Each side has a private and a public value |
-| Speed | Fast, for bulk data | Slow, used once per connection |
-| Example | AES-GCM | ECDHE with X25519 |
-| Output | Ciphertext | A shared secret, never sent |
-
-## Where it's used
-
-- **HTTPS.** Browsers, `curl`, mobile apps and API clients use TLS for every HTTPS request.
-- **Databases.** PostgreSQL, MySQL and Redis accept TLS connections for remote clients.
-- **Email.** SMTP and IMAP use TLS, either from the start on a dedicated port or by upgrading an open connection with STARTTLS.
-- **Messaging and IoT.** MQTT brokers often require TLS to protect device credentials and data.
-- **VPN-like tunnels and proxies.** Many tools use TLS to wrap traffic that would otherwise be visible on the network.
-
-> [!info]- Sources
-> - study session, 2026-10-30
-> - RFC 8446, The Transport Layer Security (TLS) Protocol Version 1.3
-> - RFC 5246, The Transport Layer Security (TLS) Protocol Version 1.2
-> - RFC 6066, Transport Layer Security (TLS) Extensions, section 3 (Server Name Indication)
-> - RFC 5280, Internet X.509 Public Key Infrastructure Certificate and CRL Profile
+**Want more?** The [[networking/deep/tls|detailed TLS page]] adds raw handshake messages, certificate rules, session resumption, 0-RTT and harder questions.
 
 <!-- series-nav:start -->
 ---
 
-← [[networking/tcp|TCP]] · [[networking/http-caching|HTTP caching]] →
+← [[networking/tcp|TCP and UDP]] · [[networking/http-caching|HTTP caching]] →
 <!-- series-nav:end -->

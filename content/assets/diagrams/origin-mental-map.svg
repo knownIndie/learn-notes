@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="646" viewBox="0 0 360 646" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Origin mental map</title>
+<rect x="1" y="1" width="358" height="644" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="120" y="16" width="120" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Origin</text>
+<path d="M120 36 H36 V578" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 102 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="60" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="90" font-weight="600" fill="#3C3489">What it is</text>
+<text x="68" y="107" fill="#534AB7">scheme + host + port, all three</text>
+<text x="68" y="123" fill="#534AB7">path, query and # do not count</text>
+<path d="M36 184 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="146" width="288" height="76" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="164" font-weight="600" fill="#0C447C">The three parts</text>
+<text x="68" y="181" fill="#185FA5">scheme: https or http</text>
+<text x="68" y="197" fill="#185FA5">host: shop.com or localhost</text>
+<text x="68" y="213" fill="#185FA5">port: 443 if none is written</text>
+<path d="M36 266 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="236" width="288" height="60" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="254" font-weight="600" fill="#633806">Same origin?</text>
+<text x="68" y="271" fill="#854F0B">all three equal = same origin</text>
+<text x="68" y="287" fill="#854F0B">any part different = cross-origin</text>
+<path d="M36 348 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="310" width="288" height="76" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="328" font-weight="600" fill="#791F1F">SOP blocks reading</text>
+<text x="68" y="345" fill="#A32D2D">a cross-origin reply's body</text>
+<text x="68" y="361" fill="#A32D2D">another origin's iframe content</text>
+<text x="68" y="377" fill="#A32D2D">another origin's localStorage</text>
+<path d="M36 430 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="400" width="288" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="418" font-weight="600" fill="#085041">SOP allows</text>
+<text x="68" y="435" fill="#0F6E56">sending requests, following links</text>
+<text x="68" y="451" fill="#0F6E56">forms, images, scripts, CSS, iframes</text>
+<path d="M36 504 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="474" width="288" height="60" rx="8" fill="#F1EFE8" stroke="#5F5E5A"/>
+<text x="68" y="492" font-weight="600" fill="#2C2C2A">Origin vs site</text>
+<text x="68" y="509" fill="#5F5E5A">site = scheme + main domain</text>
+<text x="68" y="525" fill="#5F5E5A">ports ignored; used for SameSite</text>
+<path d="M36 578 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="548" width="288" height="60" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="566" font-weight="600" fill="#27500A">Cookies differ</text>
+<text x="68" y="583" fill="#3B6D11">scoped by host and path</text>
+<text x="68" y="599" fill="#3B6D11">the port is not part of the scope</text>
+</g>
+<text x="180" y="634" text-anchor="middle" font-size="11" fill="#8a8984">Same origin = all three parts equal</text>
+</svg>

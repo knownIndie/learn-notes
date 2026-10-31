@@ -1,218 +1,145 @@
 ---
-title: TCP
-subject: networking
-tags: [networking, tcp, transport]
-aliases: [TCP, Transmission Control Protocol, three-way handshake]
-created: 2026-10-30
-updated: 2026-10-30
-status: draft
-sources: ["study session 2026-10-30", "RFC 9293 (TCP)", "RFC 5681 (TCP congestion control)", "RFC 768 (UDP)"]
+title: TCP and UDP
+tags: [networking, tcp]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 4 of 11
+> [!series]- Networking · 4 of 8
 > 1. [[networking/http-message|HTTP message]]
 > 2. [[networking/request-lifecycle|Request lifecycle]]
 > 3. [[networking/dns|DNS]]
-> 4. **TCP** · you are here
-> 5. [[networking/tls|TLS]]
+> 4. **TCP and UDP** · you are here
+> 5. [[networking/tls|TLS and HTTPS]]
 > 6. [[networking/http-caching|HTTP caching]]
 > 7. [[networking/origin|Origin]]
 > 8. [[networking/cors|CORS]]
-> 9. [[networking/cors-credentials|CORS and credentials]]
-> 10. [[networking/cors-expose-headers|CORS exposed headers]]
-> 11. [[networking/cors-lab|CORS lab]]
 <!-- series:end -->
 
-> [!tldr] In three lines
-> The Transmission Control Protocol (TCP) turns the unreliable packet service of IP into a reliable, ordered stream of bytes between two ports. It needs a three-way handshake, which costs 1 RTT, before any data moves. It does not encrypt anything, so TLS runs on top of it.
->
-> [[#Interview questions|→ Self-test: 6 questions]]
+> [!abstract] What this page is for
+> **Intent:** explain what TCP does under every web request, and answer the TCP and UDP questions interviewers ask most.
+> **You'll learn:** what IP does underneath · ports · the three-way handshake · reliability · flow and congestion control · closing · SYN floods · TCP vs UDP.
+> **Time:** about 8 minutes. Every section has a longer version on the [[networking/deep/tcp|detailed TCP page]].
+
+## Words you need first
+
+- **IP (Internet Protocol):** the delivery system of the internet. It moves small pieces called **packets** between machine addresses, and it makes no promises. A packet can be lost, delayed or arrive out of order.
+- **TCP (Transmission Control Protocol):** a layer on top of IP. It turns unreliable packets into one reliable stream of bytes, in order, with no gaps.
+- **Port:** a number from 0 to 65535 that picks the program on a machine that gets the data. HTTPS servers listen on port 443.
+- **Socket:** the program's handle for one connection. The app writes bytes into it and reads bytes from it.
+- **Segment:** one TCP message: a small header plus some data, carried inside one IP packet.
+- **Sequence number (seq):** the position of a segment's first byte in the stream.
+- **ACK (acknowledgment):** a reply that says "I have everything before byte N, send N next." Written `ack=N`.
+- **SYN, FIN, RST:** segment flags. SYN opens a connection, FIN closes it politely, RST aborts it at once.
+- **RTT (round-trip time):** the time for a message to reach the other side and the reply to return.
+- **TLS (Transport Layer Security):** the encryption layer under HTTPS.
+- **UDP (User Datagram Protocol):** the other common transport. It sends single messages with no setup and no retries.
+- **QUIC and HTTP/3:** QUIC is a newer transport built on UDP. HTTP/3 is the newest HTTP version, and it runs over QUIC.
 
 ## Why it exists
 
-The network moves packets, not streams. A packet can be lost, delayed, duplicated or delivered out of order, and it can be dropped by a router with no notice. A web page or a database query needs every byte, in the right order, exactly once. Each application would otherwise have to solve these problems itself.
+IP moves packets, not streams. A web page or a database query needs every byte, in order, exactly once. TCP solves that once, in the operating system. The app writes bytes to a socket and reads bytes back. It never sees a lost packet.
 
-TCP solves them once, in the operating system. The application writes bytes to a socket and reads bytes from it. It never sees the packets, the losses or the reordering.
+## The picture
 
-## Picture
+![TCP handshake: SYN, SYN-ACK and ACK go down the page, then data flows](../assets/diagrams/tcp-handshake-phone.svg)
 
-```mermaid
-sequenceDiagram
-  participant C as Client port 51734
-  participant S as Server port 443
-  C->>S: SYN seq=1000
-  S-->>C: SYN-ACK seq=5000 ack=1001
-  C->>S: ACK seq=1001 ack=5001
-  C->>S: DATA seq=1001 len=20
-  S-->>C: ACK ack=1021
-  S->>C: DATA seq=5001 len=300
-  C-->>S: ACK ack=5301
-  C->>S: FIN seq=1021
-  S-->>C: ACK ack=1022
-  S->>C: FIN seq=5301
-  C-->>S: ACK ack=5302
-```
+## How it works, with an example
 
-*The three-way handshake, then data with sequence numbers, then the close.*
+Your phone app calls `api.shop.com` over HTTPS, which means port 443.
 
-## Plain version
+1. **Ports.** The phone picks a temporary port for its side, say 51734. The server listens on 443.
+2. **Handshake.** The phone sends SYN with a random start number, `seq=1000`. The server replies SYN-ACK with its own start number, `seq=5000`, and `ack=1001`. The phone replies ACK with `ack=5001`. The connection is open.
+3. **Data.** The request bytes are numbered from 1001. The server ACKs them, then sends the reply, numbered from 5001.
+4. **Reliability.** If an ACK does not arrive in time, the sender sends the data again.
+5. **Close.** When a side has no more data, it sends FIN, and the other side ACKs it.
 
-TCP is like a phone call compared with sending postcards.
+The handshake costs one round trip. With a 100 ms RTT, the request leaves the phone about 100 ms after the first SYN.
 
-A phone call starts with a dial and an answer. Both sides confirm they can hear each other ("hello?" "yes, hello"). Then the talk runs in order. If a word is lost on a bad line, the listener says "sorry, say that again" and the speaker repeats it. The call ends with a goodbye from each side.
+## The most common mistake
 
-Postcards arrive in any order, and some never arrive. Someone has to number them, check which ones are missing and ask for copies. TCP does that work for the application.
+> [!warning] TCP does not encrypt anything
+> The bytes travel as written, so anyone on the path can read them. Encryption comes from TLS, which runs on top of TCP.
 
-## Precise definition
+## The three-way handshake
 
-TCP is the transport protocol that gives an application a reliable, ordered byte stream over IP. The terms it uses are listed below.
+Three messages: SYN, SYN-ACK, ACK. Each side picks a random start number and tells the other side. The client's SYN carries its number. The server's SYN-ACK acknowledges it and carries the server's number. The client's ACK acknowledges the server's number. Two messages would leave the server unsure the client got its number.
 
-> [!info]- Terms reference
-> | Term | Definition | Where it's used |
-> |---|---|---|
-> | Segment | One TCP unit: a header plus a chunk of data, carried inside one IP packet | Every TCP message |
-> | Port | A 16-bit number that picks the application on a machine. Servers listen on well-known ports, such as 443 for HTTPS | Destination port in the header |
-> | Socket | The pair of an IP address and a port. A connection is identified by the two sockets, the four-tuple of source IP, source port, destination IP and destination port | `connect()`, `accept()` |
-> | Ephemeral port | A temporary port the client picks for its side of the connection, usually from a high range | Client side of every connection |
-> | Sequence number | The position of the first data byte in a segment within the byte stream, counted from the initial sequence number (ISN) | Ordering and loss detection |
-> | Acknowledgment number | The next byte the receiver expects. It acknowledges everything before it | Confirming delivery |
-> | SYN, ACK, FIN, RST | Control flags: open, acknowledge, close politely, abort | Handshake, data, closing |
-> | Window | How many bytes the receiver can accept now, advertised in each segment | Flow control |
-> | RTO (retransmission timeout) | How long the sender waits for an ACK before sending the data again | Recovery from loss |
-> | Flow control | Stops the sender from overwhelming the receiver's buffer | Window field |
-> | Congestion control | Stops the sender from overwhelming the network. It slows down when loss or delay shows congestion | Slow start, congestion avoidance |
-> | RTT (round-trip time) | Time from sending a segment to receiving its ACK | Timing for retransmission and cost of each step |
+## How TCP stays reliable
 
-## How it works
+- **Numbers.** Every byte has a sequence number, so the receiver can spot gaps and put bytes in order.
+- **Acknowledgments.** The receiver ACKs the next byte it expects. Early data waits until the gap fills.
+- **Retransmission.** If no ACK comes before a timer runs out, the sender resends. Three repeated ACKs for the same byte trigger an early resend.
+- **Flow control, in plain words.** The receiver says how much room its buffer has, in the window field. The sender never sends more than that. This protects the receiver.
+- **Congestion control, in plain words.** When packets are lost, the network is probably full, so the sender slows down, then speeds up slowly. This protects the network.
 
-1. **Pick the ports.** The client chooses an ephemeral port, such as 51734. The server listens on port 443.
-2. **Client sends SYN.** It sends a segment with the SYN flag set and its random initial sequence number, for example `seq=1000`. The SYN uses one sequence number even though it carries no data.
-3. **Server answers SYN-ACK.** It sends its own SYN with its ISN, for example `seq=5000`, and acknowledges the client's SYN with `ack=1001`, the next byte it expects.
-4. **Client sends ACK.** It acknowledges the server's SYN with `ack=5001`. The connection is now open, and data can flow in both directions. This is the 1 RTT cost.
-5. **Send data with sequence numbers.** The client sends its request bytes. Each segment carries the sequence number of its first byte. The receiver buffers out-of-order data and acknowledges the next byte it is missing.
-6. **Recover from loss.** If an ACK does not arrive before the RTO, the sender resends the segment. Three duplicate ACKs for the same byte trigger a fast retransmit, before the timer expires.
-7. **Control the rate.** The window field limits how much the sender may have in flight, which is flow control. The sender also limits its rate using congestion control, which starts slowly and grows the rate while the network is not dropping packets.
-8. **Close.** Each side sends a FIN when it has no more data. The other side ACKs it. A FIN uses one sequence number, like a SYN. A RST segment aborts the connection at once, for example when a port is closed.
+The detailed page gives the exact timer and window rules.
 
-### Why three messages
-
-Both sides need to pick a starting number and confirm that the other side received it. The client's SYN confirms its number to the server. The server's SYN-ACK confirms the client's number and sends the server's number. The client's ACK confirms the server's number. Two messages would leave the server unable to know whether the client ever saw its own number. Three is the smallest exchange that does both directions.
-
-### Flow control and congestion control
-
-These two are often mixed up.
-
-- **Flow control** protects the receiver. The receiver advertises its free buffer space in the window field. The sender never has more unacknowledged data in flight than that window.
-- **Congestion control** protects the network. The sender keeps a separate congestion window. It grows the window while ACKs arrive, and cuts it when loss or rising delay shows that a link is full. RFC 5681 describes slow start and congestion avoidance.
-
-The sender may send only up to the smaller of the two windows.
-
-### Keep-alive and connection reuse
-
-Opening a TCP connection costs a handshake. Keeping a connection open lets the next request skip that cost. HTTP/1.1 uses persistent connections by default, and sends one request after another on the same connection. HTTP/2 sends many requests at once on one connection. Idle connections are closed after a timeout.
-
-## The real thing
-
-The first segment of a connection, the SYN, dumped as the fields of the TCP header. The values are illustrative. Real initial sequence numbers are random, and real options vary by operating system.
-
-```
-TCP header (SYN, client -> server)
-  Source port:       51734
-  Destination port:  443
-  Sequence number:   1000
-  Ack number:        0          (not used, because ACK flag is 0)
-  Data offset:       10         (10 x 4 = 40 bytes of header)
-  Reserved:          0
-  Flags:             SYN
-  Window size:       64240
-  Checksum:          0x3c1a
-  Urgent pointer:    0
-  Options:           MSS 1460, SACK permitted, Timestamps, NOP, Window scale 7
-```
-
-Field table for the header format from RFC 9293, section 3.1:
-
-> [!info]- Header field reference
-> | Field | Size | Value in the example | What it means |
-> |---|---|---|---|
-> | Source port | 16 bits | 51734 | The client's ephemeral port |
-> | Destination port | 16 bits | 443 | The server's listening port |
-> | Sequence number | 32 bits | 1000 | Position of the first data byte, or the ISN in a SYN |
-> | Acknowledgment number | 32 bits | 0 | The next byte expected. Only valid when the ACK flag is set |
-> | Data offset | 4 bits | 10 | Length of the header in 32-bit words. Ten words means 40 bytes, including options. The minimum is 5 words, or 20 bytes |
-> | Reserved | 4 bits | 0 | Must be zero |
-> | Flags | 8 bits | SYN | Control bits: CWR, ECE, URG, ACK, PSH, RST, SYN, FIN, in that order |
-> | Window size | 16 bits | 64240 | Free receive buffer in bytes. Scaled by the window scale option |
-> | Checksum | 16 bits | 0x3c1a | Covers the header, the data and a pseudo-header with the IP addresses |
-> | Urgent pointer | 16 bits | 0 | Used only with the URG flag. Rarely used today |
-> | Options | 0 to 40 bytes | MSS 1460 and others | Extra settings. MSS is the largest segment size. SACK lets the receiver report gaps. Timestamps help measure RTT. Window scale raises the window above 65535 bytes |
-
-The fixed part of the header is 20 bytes. The data offset field allows up to 60 bytes in total, which leaves room for options.
-
-## Common misconceptions
-
-- **Wrong:** TCP encrypts the data.
-  **Right:** TCP sends the bytes exactly as written. Anyone on the path can read them and change them. Encryption comes from TLS, which runs on top of TCP. (See [[networking/tls|TLS]].)
-- **Wrong:** TCP guarantees delivery no matter what happens.
-  **Right:** TCP retransmits lost data, but only while the path works. If the network stays broken, the sender gives up after a timeout and the application gets an error.
-- **Wrong:** One TCP connection equals one HTTP request.
-  **Right:** A connection can carry many requests, one after another with keep-alive, or at the same time with HTTP/2 multiplexing.
-- **Wrong:** The handshake is free because it happens in the background.
-  **Right:** The client cannot send its request until the handshake finishes. On a link with a 100 ms RTT, the handshake alone costs 100 ms before the first byte of the request is sent.
-
-## Interview questions
-
-> [!question]- Q1. How does TCP provide reliability?
-> The sender numbers each byte with a sequence number. The receiver acknowledges the next byte it expects, and it buffers out-of-order data. The sender retransmits any segment that is not acknowledged before its timer expires, and it retransmits early after three duplicate ACKs. The receiver uses the sequence numbers to put the bytes back in order before passing them to the application.
-
-> [!question]- Q2. Walk through the three-way handshake. Why three messages?
-> The client sends SYN with its initial sequence number. The server replies with SYN-ACK, which carries its own initial sequence number and acknowledges the client's. The client sends ACK, which acknowledges the server's number. Three messages let both sides confirm the other's starting number. With two, the server could not know that the client received its own number.
-
-> [!question]- Q3. What is the difference between flow control and congestion control?
-> Flow control protects the receiver. The receiver advertises its free buffer in the window field, and the sender stays within it. Congestion control protects the network. The sender limits its rate based on loss and delay signals, using a congestion window that grows slowly and shrinks on loss.
-
-> [!question]- Q4. Why does connection reuse matter for web pages?
-> Each new connection costs a handshake, and HTTPS adds a TLS handshake on top. A page with many requests to one host benefits when those requests share one connection. Keep-alive lets HTTP/1.1 send requests one after another on the same connection, and HTTP/2 can run them at the same time.
-
-> [!question]- Q5. When would you choose UDP over TCP?
-> When the application can tolerate loss or prefers a fresh packet over a late one, and when the handshake cost matters. Live video and voice, games and DNS queries are common cases. The application then handles any retries or ordering it needs. QUIC builds reliability on top of UDP for this reason.
-
-> [!question]- Q6. Does TCP encrypt the data?
-> No. TCP provides ordering and reliability only. Encryption and authentication come from TLS, which runs inside the TCP stream.
-
-## Trigger card
-
-> [!example] When I see a slow first byte from a host I have not used recently, it means the setup cost is in TCP, because the handshake takes one round trip before any request can be sent.
-
-## Compared with
+## TCP vs UDP
 
 | | TCP | UDP |
 |---|---|---|
-| Connection | Handshake first, then a connection | No connection, each datagram stands alone |
-| Reliability | Retransmits lost data | No retransmission. The application handles loss |
-| Order | Delivers bytes in order | Delivers datagrams as they arrive, possibly out of order |
+| Setup | Handshake first, 1 RTT | None. Each message stands alone |
+| Lost data | Retransmitted | Never retransmitted. The app decides |
+| Order | Bytes arrive in order | Messages arrive as they come |
+| Flow and congestion control | Built in | None |
 | Header size | 20 bytes minimum | 8 bytes |
-| Flow and congestion control | Yes | No, the application must add it |
-| Typical uses | Web pages, APIs, databases, mail | DNS queries, video calls, games, QUIC |
-| Latency cost | 1 RTT to open | None |
+| Typical uses | Web pages, APIs, databases, email | Video calls, games, DNS, QUIC and HTTP/3 |
 
-## Where it's used
+**Use TCP** when every byte must arrive: web pages, API responses, downloads, database traffic.
 
-- **HTTP/1.1 and HTTP/2.** Browsers, `curl` and servers exchange HTTP over TCP connections, with TLS on top for HTTPS.
-- **Databases.** PostgreSQL, MySQL and Redis clients connect over TCP.
-- **SSH, SMTP and IMAP.** Remote shells and mail delivery and access run over TCP.
-- **File transfer.** SFTP runs over SSH, which runs over TCP.
-- **HTTP/3 is the exception.** It uses QUIC over UDP, which builds its own reliability and encryption instead of using TCP.
+**Use UDP** when a late message is worse than a lost one:
 
-> [!info]- Sources
-> - study session, 2026-10-30
-> - RFC 9293, Transmission Control Protocol (TCP)
-> - RFC 5681, TCP Congestion Control
-> - RFC 768, User Datagram Protocol
+- **Video and voice calls:** a frame two seconds late is useless, so the app skips it.
+- **Games:** the newest player position matters more than the old one.
+- **DNS:** one small question and one small answer. A handshake would cost more than the lookup.
+- **QUIC and HTTP/3:** QUIC runs over UDP so it can build its own encryption and avoid TCP's stall, where one lost packet holds up every later byte.
+
+## Say it in an interview
+
+> "TCP gives an application a reliable, ordered byte stream over IP. IP delivers packets with no promises, so TCP numbers every byte, acknowledges what arrives and retransmits what doesn't. Before data flows, it does a three-way handshake, SYN, SYN-ACK, ACK, which costs one round trip and exchanges random start numbers. Flow control keeps the sender within the receiver's buffer. Congestion control slows the sender when the network drops packets. UDP skips all of that, so it fits where a late packet is worse than a lost one, such as video calls, games, DNS and QUIC."
+
+## Questions interviewers ask
+
+Tap a question to see the answer.
+
+> [!question]- What is TCP, and what does IP do underneath?
+> IP delivers packets between addresses with no guarantees. TCP gives the app a reliable, ordered stream of bytes.
+
+> [!question]- Walk through the three-way handshake. Why three messages?
+> SYN carries the client's start number. SYN-ACK carries the server's start number and acknowledges the client's. ACK acknowledges the server's. Both sides confirm each other's number.
+
+> [!question]- How does TCP stay reliable?
+> Every byte is numbered. The receiver ACKs the next byte it expects and reorders what arrives. The sender resends anything not ACKed before a timer runs out, or early after three repeated ACKs.
+
+> [!question]- Flow control vs congestion control?
+> Flow control protects the receiver: the sender stays within the advertised window. Congestion control protects the network: the sender slows when packets are lost.
+
+> [!question]- How does a connection close?
+> Each side sends FIN when it has nothing more to send, and the other side ACKs it. RST is the abort: it ends the connection at once.
+
+> [!question]- What is a port, and what is a socket?
+> A port is a number that picks the program on a machine. A socket is the program's handle for one connection.
+
+> [!question]- TCP vs UDP?
+> TCP sets up a connection, retransmits lost data and delivers bytes in order. UDP sends independent messages with no setup, no retries and no ordering.
+
+> [!question]- When would you choose UDP?
+> When a late packet is worse than a lost one, such as video calls, games and DNS. The app adds only the reliability it needs. QUIC uses UDP for this reason.
+
+> [!question]- Does TCP encrypt data?
+> No. Encryption comes from TLS, which runs inside the TCP stream.
+
+> [!question]- What is a SYN flood?
+> An attack where many SYNs arrive, often with fake addresses, and the handshake is never finished. The server keeps a half-open entry for each until its queue fills. SYN cookies are the defense: the server stores no state until a valid final ACK comes back.
+
+## Mental map
+
+![TCP mental map](../assets/diagrams/tcp-mental-map.svg)
+
+**Want more?** The [[networking/deep/tcp|detailed TCP page]] has the same sections with raw headers, exact timers, TIME_WAIT, SYN cookies and harder questions.
 
 <!-- series-nav:start -->
 ---
 
-← [[networking/dns|DNS]] · [[networking/tls|TLS]] →
+← [[networking/dns|DNS]] · [[networking/tls|TLS and HTTPS]] →
 <!-- series-nav:end -->
