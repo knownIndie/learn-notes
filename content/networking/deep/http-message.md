@@ -251,3 +251,15 @@ The ten from the [[networking/http-message#Questions interviewers ask|quick page
 ![HTTP message mental map](../../assets/diagrams/http-message-mental-map.svg)
 
 The same map as the quick page. Each branch is a section above.
+
+## Watch
+
+![](https://www.youtube.com/watch?v=j18oOIcUDYQ)
+
+KobbyKernel, about 14 minutes: what a request and a response are made of, and persistent vs non-persistent connections.
+
+Longer, hands-on:
+
+![](https://www.youtube.com/watch?v=iYM2zFP3Zn0)
+
+Traversy Media, about 38 minutes: HTTP methods, headers and status codes, then real requests in the browser's dev tools and Postman.

@@ -5,15 +5,16 @@ tags: [networking, origin]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 7 of 8
-> 1. [[networking/http-message|HTTP message]]
-> 2. [[networking/request-lifecycle|Request lifecycle]]
-> 3. [[networking/dns|DNS]]
-> 4. [[networking/tcp|TCP and UDP]]
-> 5. [[networking/tls|TLS and HTTPS]]
-> 6. [[networking/http-caching|HTTP caching]]
-> 7. **Origin** · you are here
-> 8. [[networking/cors|CORS]]
+> [!series]- Networking · 8 of 9
+> 1. [[networking/revision|Networking quick revision]]
+> 2. [[networking/http-message|HTTP message]]
+> 3. [[networking/request-lifecycle|Request lifecycle]]
+> 4. [[networking/dns|DNS]]
+> 5. [[networking/tcp|TCP and UDP]]
+> 6. [[networking/tls|TLS and HTTPS]]
+> 7. [[networking/http-caching|HTTP caching]]
+> 8. **Origin** · you are here
+> 9. [[networking/cors|CORS]]
 <!-- series:end -->
 
 > [!abstract] What this page is for
@@ -133,6 +134,12 @@ Tap a question to see the answer.
 ## Mental map
 
 ![Origin mental map](../assets/diagrams/origin-mental-map.svg)
+
+## Watch
+
+![](https://www.youtube.com/watch?v=ZfiOXd_3WIc)
+
+Cyber Security Entertainment, about 4 minutes: what the same-origin policy is and which attacks it stops.
 
 **Want more?** The [[networking/deep/origin|detailed Origin page]] has the same sections with the raw `Origin` header, cookie attributes, `Origin: null`, and harder interview questions.
 

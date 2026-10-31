@@ -225,3 +225,9 @@ The nine from the quick page, plus these harder ones. Tap to reveal.
 ![Origin mental map](../../assets/diagrams/origin-mental-map.svg)
 
 The same map as the quick page. Each branch is a section above.
+
+## Watch
+
+![](https://www.youtube.com/watch?v=ZfiOXd_3WIc)
+
+Cyber Security Entertainment, about 4 minutes: what the same-origin policy is and which attacks it stops.

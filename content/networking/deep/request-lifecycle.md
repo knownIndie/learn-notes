@@ -191,3 +191,9 @@ The ten from the quick page, plus these harder ones. Tap to reveal.
 ![Request lifecycle mental map](../../assets/diagrams/request-lifecycle-mental-map.svg)
 
 The same map as the quick page. Each branch is a section above.
+
+## Watch
+
+![](https://www.youtube.com/watch?v=AlkDbnbv7dk)
+
+ByteByteGo, short video: the whole journey from typing a URL to the page on screen, with DNS, TCP, TLS and HTTP.

@@ -199,3 +199,9 @@ The ten from the quick page, plus these harder ones. Tap to reveal.
 ![TCP mental map](../../assets/diagrams/tcp-mental-map.svg)
 
 The same map as the quick page. Each branch is a section above.
+
+## Watch
+
+![](https://www.youtube.com/watch?v=uwoD5YsGACg)
+
+PowerCert Animated Videos, short video: TCP vs UDP, with the handshake, reliability and when each one is used.

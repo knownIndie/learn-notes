@@ -4,15 +4,16 @@ tags: [networking, http-message]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 1 of 8
-> 1. **HTTP message** · you are here
-> 2. [[networking/request-lifecycle|Request lifecycle]]
-> 3. [[networking/dns|DNS]]
-> 4. [[networking/tcp|TCP and UDP]]
-> 5. [[networking/tls|TLS and HTTPS]]
-> 6. [[networking/http-caching|HTTP caching]]
-> 7. [[networking/origin|Origin]]
-> 8. [[networking/cors|CORS]]
+> [!series]- Networking · 2 of 9
+> 1. [[networking/revision|Networking quick revision]]
+> 2. **HTTP message** · you are here
+> 3. [[networking/request-lifecycle|Request lifecycle]]
+> 4. [[networking/dns|DNS]]
+> 5. [[networking/tcp|TCP and UDP]]
+> 6. [[networking/tls|TLS and HTTPS]]
+> 7. [[networking/http-caching|HTTP caching]]
+> 8. [[networking/origin|Origin]]
+> 9. [[networking/cors|CORS]]
 <!-- series:end -->
 
 > [!abstract] What this page is for
@@ -156,10 +157,16 @@ Tap a question to see the answer.
 
 ![HTTP message mental map](../assets/diagrams/http-message-mental-map.svg)
 
+## Watch
+
+![](https://www.youtube.com/watch?v=j18oOIcUDYQ)
+
+KobbyKernel, about 14 minutes: what a request and a response are made of, and persistent vs non-persistent connections.
+
 **Want more?** The [[networking/deep/http-message|detailed HTTP message page]] has the raw request and response, every header that matters, exact rules for safe and idempotent methods, the full status code table, and harder questions.
 
 <!-- series-nav:start -->
 ---
 
-← [[networking/index|Networking]] · [[networking/request-lifecycle|Request lifecycle]] →
+← [[networking/revision|Networking quick revision]] · [[networking/request-lifecycle|Request lifecycle]] →
 <!-- series-nav:end -->

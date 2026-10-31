@@ -4,15 +4,16 @@ tags: [networking, tls, https, security]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 5 of 8
-> 1. [[networking/http-message|HTTP message]]
-> 2. [[networking/request-lifecycle|Request lifecycle]]
-> 3. [[networking/dns|DNS]]
-> 4. [[networking/tcp|TCP and UDP]]
-> 5. **TLS and HTTPS** · you are here
-> 6. [[networking/http-caching|HTTP caching]]
-> 7. [[networking/origin|Origin]]
-> 8. [[networking/cors|CORS]]
+> [!series]- Networking · 6 of 9
+> 1. [[networking/revision|Networking quick revision]]
+> 2. [[networking/http-message|HTTP message]]
+> 3. [[networking/request-lifecycle|Request lifecycle]]
+> 4. [[networking/dns|DNS]]
+> 5. [[networking/tcp|TCP and UDP]]
+> 6. **TLS and HTTPS** · you are here
+> 7. [[networking/http-caching|HTTP caching]]
+> 8. [[networking/origin|Origin]]
+> 9. [[networking/cors|CORS]]
 <!-- series:end -->
 
 > [!abstract] What this page is for
@@ -136,6 +137,12 @@ A certificate proves only that a trusted CA checked that the server controls the
 ## Mental map
 
 ![TLS mental map](../assets/diagrams/tls-mental-map.svg)
+
+## Watch
+
+![](https://www.youtube.com/watch?v=86cQJ0MMses)
+
+Computerphile, about 17 minutes: how a TLS handshake sets up an encrypted connection between client and server.
 
 **Want more?** The [[networking/deep/tls|detailed TLS page]] adds raw handshake messages, certificate rules, session resumption, 0-RTT and harder questions.
 

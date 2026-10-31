@@ -4,15 +4,16 @@ tags: [networking, request-lifecycle]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 2 of 8
-> 1. [[networking/http-message|HTTP message]]
-> 2. **Request lifecycle** · you are here
-> 3. [[networking/dns|DNS]]
-> 4. [[networking/tcp|TCP and UDP]]
-> 5. [[networking/tls|TLS and HTTPS]]
-> 6. [[networking/http-caching|HTTP caching]]
-> 7. [[networking/origin|Origin]]
-> 8. [[networking/cors|CORS]]
+> [!series]- Networking · 3 of 9
+> 1. [[networking/revision|Networking quick revision]]
+> 2. [[networking/http-message|HTTP message]]
+> 3. **Request lifecycle** · you are here
+> 4. [[networking/dns|DNS]]
+> 5. [[networking/tcp|TCP and UDP]]
+> 6. [[networking/tls|TLS and HTTPS]]
+> 7. [[networking/http-caching|HTTP caching]]
+> 8. [[networking/origin|Origin]]
+> 9. [[networking/cors|CORS]]
 <!-- series:end -->
 
 > [!abstract] What this page is for
@@ -121,6 +122,12 @@ Tap a question to see the answer.
 ## Mental map
 
 ![Request lifecycle mental map](../assets/diagrams/request-lifecycle-mental-map.svg)
+
+## Watch
+
+![](https://www.youtube.com/watch?v=AlkDbnbv7dk)
+
+ByteByteGo, short video: the whole journey from typing a URL to the page on screen, with DNS, TCP, TLS and HTTP.
 
 **Want more?** The [[networking/deep/request-lifecycle|detailed request lifecycle page]] has the same sections with raw messages, exact round-trip math, and more interview questions.
 

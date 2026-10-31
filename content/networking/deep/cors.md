@@ -234,3 +234,9 @@ The ten from the [[networking/cors#Questions interviewers ask|quick page]], plus
 ![CORS mental map](../../assets/diagrams/cors-mental-map.svg)
 
 The same map as the quick page. Each branch is a section above.
+
+## Watch
+
+![](https://www.youtube.com/watch?v=PNtFSVU-YTI)
+
+Web Dev Simplified, about 6 minutes: what CORS is and how it relates to the same-origin policy.

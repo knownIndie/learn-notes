@@ -5,15 +5,16 @@ tags: [networking, cors]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 8 of 8
-> 1. [[networking/http-message|HTTP message]]
-> 2. [[networking/request-lifecycle|Request lifecycle]]
-> 3. [[networking/dns|DNS]]
-> 4. [[networking/tcp|TCP and UDP]]
-> 5. [[networking/tls|TLS and HTTPS]]
-> 6. [[networking/http-caching|HTTP caching]]
-> 7. [[networking/origin|Origin]]
-> 8. **CORS** · you are here
+> [!series]- Networking · 9 of 9
+> 1. [[networking/revision|Networking quick revision]]
+> 2. [[networking/http-message|HTTP message]]
+> 3. [[networking/request-lifecycle|Request lifecycle]]
+> 4. [[networking/dns|DNS]]
+> 5. [[networking/tcp|TCP and UDP]]
+> 6. [[networking/tls|TLS and HTTPS]]
+> 7. [[networking/http-caching|HTTP caching]]
+> 8. [[networking/origin|Origin]]
+> 9. **CORS** · you are here
 <!-- series:end -->
 
 > [!abstract] What this page is for
@@ -124,6 +125,12 @@ Tap a question to see the answer.
 ## Mental map
 
 ![CORS mental map](../assets/diagrams/cors-mental-map.svg)
+
+## Watch
+
+![](https://www.youtube.com/watch?v=PNtFSVU-YTI)
+
+Web Dev Simplified, about 6 minutes: what CORS is and how it relates to the same-origin policy.
 
 **Want more?** The [[networking/deep/cors|detailed CORS page]] has the same sections with raw HTTP, the exact simple-request rules, server config, debugging, and more interview questions.
 

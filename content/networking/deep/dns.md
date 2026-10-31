@@ -217,3 +217,9 @@ The ten from the [[networking/dns#Questions interviewers ask|quick page]], plus 
 ![DNS mental map](../../assets/diagrams/dns-mental-map.svg)
 
 The same map as the quick page. Each branch is a section above.
+
+## Watch
+
+![](https://www.youtube.com/watch?v=UVR9lhUGAyU)
+
+Fireship, about 2 minutes: what DNS is and how a domain name becomes an IP address.

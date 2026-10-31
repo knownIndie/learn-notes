@@ -4,15 +4,16 @@ tags: [networking, http-caching]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 6 of 8
-> 1. [[networking/http-message|HTTP message]]
-> 2. [[networking/request-lifecycle|Request lifecycle]]
-> 3. [[networking/dns|DNS]]
-> 4. [[networking/tcp|TCP and UDP]]
-> 5. [[networking/tls|TLS and HTTPS]]
-> 6. **HTTP caching** · you are here
-> 7. [[networking/origin|Origin]]
-> 8. [[networking/cors|CORS]]
+> [!series]- Networking · 7 of 9
+> 1. [[networking/revision|Networking quick revision]]
+> 2. [[networking/http-message|HTTP message]]
+> 3. [[networking/request-lifecycle|Request lifecycle]]
+> 4. [[networking/dns|DNS]]
+> 5. [[networking/tcp|TCP and UDP]]
+> 6. [[networking/tls|TLS and HTTPS]]
+> 7. **HTTP caching** · you are here
+> 8. [[networking/origin|Origin]]
+> 9. [[networking/cors|CORS]]
 <!-- series:end -->
 
 > [!abstract] What this page is for
@@ -148,6 +149,12 @@ Tap a question to see the answer.
 ## Mental map
 
 ![HTTP caching mental map](../assets/diagrams/http-caching-mental-map.svg)
+
+## Watch
+
+![](https://www.youtube.com/watch?v=HiBDZgTNpXY)
+
+the roadmap, about 14 minutes: HTTP caching, Cache-Control headers, and cache validation.
 
 **Want more?** The [[networking/deep/http-caching|detailed HTTP caching page]] has the raw headers, `Vary`, exact revalidation rules, `stale-while-revalidate`, and more interview questions.
 

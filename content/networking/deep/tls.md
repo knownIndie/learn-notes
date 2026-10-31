@@ -236,3 +236,9 @@ The ten from the [[networking/tls#Questions interviewers ask|quick page]], plus 
 ## Mental map
 
 ![TLS mental map](../../assets/diagrams/tls-mental-map.svg)
+
+## Watch
+
+![](https://www.youtube.com/watch?v=86cQJ0MMses)
+
+Computerphile, about 17 minutes: how a TLS handshake sets up an encrypted connection between client and server.

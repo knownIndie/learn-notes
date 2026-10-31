@@ -4,15 +4,16 @@ tags: [networking, dns]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 3 of 8
-> 1. [[networking/http-message|HTTP message]]
-> 2. [[networking/request-lifecycle|Request lifecycle]]
-> 3. **DNS** · you are here
-> 4. [[networking/tcp|TCP and UDP]]
-> 5. [[networking/tls|TLS and HTTPS]]
-> 6. [[networking/http-caching|HTTP caching]]
-> 7. [[networking/origin|Origin]]
-> 8. [[networking/cors|CORS]]
+> [!series]- Networking · 4 of 9
+> 1. [[networking/revision|Networking quick revision]]
+> 2. [[networking/http-message|HTTP message]]
+> 3. [[networking/request-lifecycle|Request lifecycle]]
+> 4. **DNS** · you are here
+> 5. [[networking/tcp|TCP and UDP]]
+> 6. [[networking/tls|TLS and HTTPS]]
+> 7. [[networking/http-caching|HTTP caching]]
+> 8. [[networking/origin|Origin]]
+> 9. [[networking/cors|CORS]]
 <!-- series:end -->
 
 > [!abstract] What this page is for
@@ -132,6 +133,12 @@ Tap a question to see the answer.
 ## Mental map
 
 ![DNS mental map](../assets/diagrams/dns-mental-map.svg)
+
+## Watch
+
+![](https://www.youtube.com/watch?v=UVR9lhUGAyU)
+
+Fireship, about 2 minutes: what DNS is and how a domain name becomes an IP address.
 
 **Want more?** The [[networking/deep/dns|detailed DNS page]] has the same sections with the raw dig output, transport details, load balancing, and more interview questions.
 

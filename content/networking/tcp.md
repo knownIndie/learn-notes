@@ -4,15 +4,16 @@ tags: [networking, tcp]
 ---
 
 <!-- series:start -->
-> [!series]- Networking · 4 of 8
-> 1. [[networking/http-message|HTTP message]]
-> 2. [[networking/request-lifecycle|Request lifecycle]]
-> 3. [[networking/dns|DNS]]
-> 4. **TCP and UDP** · you are here
-> 5. [[networking/tls|TLS and HTTPS]]
-> 6. [[networking/http-caching|HTTP caching]]
-> 7. [[networking/origin|Origin]]
-> 8. [[networking/cors|CORS]]
+> [!series]- Networking · 5 of 9
+> 1. [[networking/revision|Networking quick revision]]
+> 2. [[networking/http-message|HTTP message]]
+> 3. [[networking/request-lifecycle|Request lifecycle]]
+> 4. [[networking/dns|DNS]]
+> 5. **TCP and UDP** · you are here
+> 6. [[networking/tls|TLS and HTTPS]]
+> 7. [[networking/http-caching|HTTP caching]]
+> 8. [[networking/origin|Origin]]
+> 9. [[networking/cors|CORS]]
 <!-- series:end -->
 
 > [!abstract] What this page is for
@@ -135,6 +136,12 @@ Tap a question to see the answer.
 ## Mental map
 
 ![TCP mental map](../assets/diagrams/tcp-mental-map.svg)
+
+## Watch
+
+![](https://www.youtube.com/watch?v=uwoD5YsGACg)
+
+PowerCert Animated Videos, short video: TCP vs UDP, with the handshake, reliability and when each one is used.
 
 **Want more?** The [[networking/deep/tcp|detailed TCP page]] has the same sections with raw headers, exact timers, TIME_WAIT, SYN cookies and harder questions.
 

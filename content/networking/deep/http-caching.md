@@ -251,3 +251,9 @@ The ten from the [[networking/http-caching#Questions interviewers ask|quick page
 ![HTTP caching mental map](../../assets/diagrams/http-caching-mental-map.svg)
 
 The same map as the quick page. Each branch is a section above.
+
+## Watch
+
+![](https://www.youtube.com/watch?v=HiBDZgTNpXY)
+
+the roadmap, about 14 minutes: HTTP caching, Cache-Control headers, and cache validation.
