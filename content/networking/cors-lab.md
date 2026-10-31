@@ -45,7 +45,7 @@ The lab has three files and one setup:
 
 | File | Role | Port |
 |---|---|---|
-| [index.html](cors-lab-files/index.html) | The page. Buttons call the API with `fetch` and show the result. | Served on `8000` |
+| [index.html](https://github.com/knownIndie/learn-notes/blob/main/content/networking/cors-lab-files/index.html) | The page. Buttons call the API with `fetch` and show the result. | Served on `8000` |
 | [frontend.py](cors-lab-files/frontend.py) | Serves the folder `cors-lab-files/` as static files, so the page has a real origin, `http://localhost:8000`. | `8000` |
 | [api.py](cors-lab-files/api.py) | The API. Each route sends a different combination of CORS headers. | `9000` |
 
@@ -182,7 +182,7 @@ Each route is short. Each one shows one rule. The code is from [api.py](cors-lab
 
 ### The page code
 
-The buttons in [index.html](cors-lab-files/index.html) each call one `fetch`, and `run()` shows the result:
+The buttons in [index.html](https://github.com/knownIndie/learn-notes/blob/main/content/networking/cors-lab-files/index.html) each call one `fetch`, and `run()` shows the result:
 
 ```js
 async function run(call) {
@@ -271,7 +271,7 @@ This is the server's view. Every call arrived. The browser decided which replies
 
 > [!info]- Sources
 > - Study session, 2026-10-30.
-> - Lab files in this folder: [api.py](cors-lab-files/api.py), [frontend.py](cors-lab-files/frontend.py), [index.html](cors-lab-files/index.html).
+> - Lab files in this folder: [api.py](cors-lab-files/api.py), [frontend.py](cors-lab-files/frontend.py), [index.html](https://github.com/knownIndie/learn-notes/blob/main/content/networking/cors-lab-files/index.html).
 > - MDN, [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 
 <!-- series-nav:start -->

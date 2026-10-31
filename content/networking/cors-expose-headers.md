@@ -88,7 +88,7 @@ sequenceDiagram
 
 ### Why the lab shows `Access-Control-Allow-Origin: null`
 
-The lab's page runs this code (from [index.html](cors-lab-files/index.html)):
+The lab's page runs this code (from [index.html](https://github.com/knownIndie/learn-notes/blob/main/content/networking/cors-lab-files/index.html)):
 
 ```js
 const res = await call();
