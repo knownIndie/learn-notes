@@ -123,12 +123,12 @@ Application code and most headers do not change between versions. DevTools still
 - **GET** and HEAD must not change state. Caches and crawlers rely on this.
 - **POST** is the catch-all. Sending it twice can create two orders. Payment APIs fix this with an `Idempotency-Key` header: the server remembers the key and returns the first result on a repeat.
 - **PUT** is the full replacement. If you omit a field, the server should treat it as removed or reset. That is why PUT needs the whole resource.
-- **PATCH** sends a partial change. The change "add 1 to the count" is not idempotent: sending it twice adds 2. A change "set the name to Ana" is idempotent. So PATCH is not guaranteed either way.
+- **PATCH** sends a partial change. The change "add 1 to the count" is not idempotent: sending it twice adds 2. A change "set the name to Sam" is idempotent. So PATCH is not guaranteed either way.
 
 **Commands to try:**
 
 ```bash
-curl -X PUT -H "Content-Type: application/json" -d '{"name":"Ana"}' https://api.com/profile
+curl -X PUT -H "Content-Type: application/json" -d '{"name":"Sam"}' https://api.com/profile
 curl -I https://api.com/cart    # sends HEAD, shows headers only
 curl -X OPTIONS -i https://api.com/cart
 ```
