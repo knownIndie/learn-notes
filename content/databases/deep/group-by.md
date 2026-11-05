@@ -1,5 +1,5 @@
 ---
-title: Aggregates: GROUP BY and HAVING (detailed)
+title: "Aggregates: GROUP BY and HAVING (detailed)"
 tags: [databases, group-by]
 ---
 
