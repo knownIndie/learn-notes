@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="604" viewBox="0 0 360 604" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Databases and SQL mental map</title>
+<rect x="1" y="1" width="358" height="602" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="88" y="16" width="184" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Databases and SQL</text>
+<path d="M88 36 H36 V528" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 110 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="76" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="90" font-weight="600" fill="#633806">Transactions</text>
+<text x="68" y="107" fill="#854F0B">Atomic, not isolated: lost update</text>
+<text x="68" y="123" fill="#854F0B">FOR UPDATE: writers wait, reads don't</text>
+<text x="68" y="139" fill="#854F0B">RR/SERIALIZABLE: 40001, retry from BEGIN</text>
+<path d="M36 200 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="162" width="288" height="76" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="180" font-weight="600" fill="#0C447C">Joins</text>
+<text x="68" y="197" fill="#185FA5">Inner: only pairs; left: keep all + NULL</text>
+<text x="68" y="213" fill="#185FA5">Never ordered: LEFT JOIN, o.id IS NULL</text>
+<text x="68" y="229" fill="#185FA5">Match in ON; NOT IN breaks on NULL</text>
+<path d="M36 290 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="252" width="288" height="76" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="270" font-weight="600" fill="#3C3489">GROUP BY</text>
+<text x="68" y="287" fill="#534AB7">One pile per key, one total per pile</text>
+<text x="68" y="303" fill="#534AB7">Key = one row PER what; never revenue</text>
+<text x="68" y="319" fill="#534AB7">count(o.id), not count(*), after left join</text>
+<path d="M36 372 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="342" width="288" height="60" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="360" font-weight="600" fill="#791F1F">WHERE vs HAVING</text>
+<text x="68" y="377" fill="#A32D2D">WHERE: rows, before piles</text>
+<text x="68" y="393" fill="#A32D2D">HAVING: piles, after the totals</text>
+<path d="M36 446 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="416" width="288" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="434" font-weight="600" fill="#085041">rank() top N</text>
+<text x="68" y="451" fill="#0F6E56">PARTITION BY group ORDER BY value DESC</text>
+<text x="68" y="467" fill="#0F6E56">Rank in a CTE, filter rnk outside</text>
+<path d="M36 528 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="490" width="288" height="76" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="508" font-weight="600" fill="#27500A">Running total and LAG</text>
+<text x="68" y="525" fill="#3B6D11">sum(x) OVER (ORDER BY day); OVER () = all</text>
+<text x="68" y="541" fill="#3B6D11">lag(x) OVER (PARTITION BY g ORDER BY t)</text>
+<text x="68" y="557" fill="#3B6D11">First row of each partition is NULL</text>
+</g>
+<text x="180" y="592" text-anchor="middle" font-size="11" fill="#8a8984">Group or partition by what you count PER</text>
+</svg>

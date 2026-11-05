@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="614" viewBox="0 0 360 614" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Joins mental map</title>
+<rect x="1" y="1" width="358" height="612" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="120" y="16" width="120" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Joins</text>
+<path d="M120 36 H36 V546" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 102 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="60" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="90" font-weight="600" fill="#3C3489">What a join is</text>
+<text x="68" y="107" fill="#534AB7">Pairs rows from two tables where ON matches</text>
+<text x="68" y="123" fill="#534AB7">Link column: foreign key on the many side</text>
+<path d="M36 176 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="146" width="288" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="164" font-weight="600" fill="#085041">Inner join</text>
+<text x="68" y="181" fill="#0F6E56">Only pairs that match on both sides</text>
+<text x="68" y="197" fill="#0F6E56">Symmetric: A JOIN B = B JOIN A</text>
+<path d="M36 250 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="220" width="288" height="60" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="238" font-weight="600" fill="#633806">Left join</text>
+<text x="68" y="255" fill="#854F0B">Keeps every row of the left table</text>
+<text x="68" y="271" fill="#854F0B">No partner: right side is NULL</text>
+<path d="M36 324 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="294" width="288" height="60" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="312" font-weight="600" fill="#791F1F">Anti-join: never / no</text>
+<text x="68" y="329" fill="#A32D2D" font-family="ui-monospace,Menlo,monospace" font-size="11">LEFT JOIN ... WHERE orders.id IS NULL</text>
+<text x="68" y="345" fill="#A32D2D" font-family="ui-monospace,Menlo,monospace" font-size="11">Test the right id, never the left</text>
+<path d="M36 398 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="368" width="288" height="60" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="386" font-weight="600" fill="#791F1F">The NULL trap</text>
+<text x="68" y="403" fill="#A32D2D">NOT IN with one NULL in the list: no rows</text>
+<text x="68" y="419" fill="#A32D2D">NOT EXISTS and IS NULL are NULL-safe</text>
+<path d="M36 472 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="442" width="288" height="60" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="460" font-weight="600" fill="#27500A">ON vs WHERE</text>
+<text x="68" y="477" fill="#3B6D11">Match condition goes in ON</text>
+<text x="68" y="493" fill="#3B6D11">Right-table filter in WHERE = inner join</text>
+<path d="M36 546 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="516" width="288" height="60" rx="8" fill="#F1EFE8" stroke="#5F5E5A"/>
+<text x="68" y="534" font-weight="600" fill="#2C2C2A">Duplicates</text>
+<text x="68" y="551" fill="#5F5E5A">One row per matching pair</text>
+<text x="68" y="567" fill="#5F5E5A">Riya, 3 orders: 3 rows</text>
+</g>
+<text x="180" y="602" text-anchor="middle" font-size="11" fill="#8a8984">Match in ON, filter in WHERE, test the right id</text>
+</svg>

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="356" viewBox="0 0 360 356" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Same four rows, three OVER clauses: OVER () gives the whole total, ORDER BY gives the running total, PARTITION BY restarts per restaurant</title>
+<rect x="1" y="1" width="358" height="354" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<text x="180" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#2C2C2A">Same four rows, three OVER clauses</text>
+<rect x="14" y="40" width="78" height="210" rx="8" fill="#F1EFE8"/>
+<rect x="100" y="40" width="64" height="210" rx="8" fill="#E6F1FB"/>
+<rect x="170" y="40" width="62" height="210" rx="8" fill="#FAEEDA"/>
+<rect x="248" y="40" width="98" height="210" rx="8" fill="#E1F5EE"/>
+<text x="36" y="58" text-anchor="middle" font-size="10" font-weight="600" fill="#5F5E5A">order</text>
+<text x="72" y="58" text-anchor="middle" font-size="10" font-weight="600" fill="#5F5E5A">total</text>
+<text x="132" y="58" text-anchor="middle" font-size="11" font-weight="600" fill="#0C447C">OVER ()</text>
+<text x="132" y="72" text-anchor="middle" font-size="10" fill="#185FA5">whole pile</text>
+<text x="201" y="58" text-anchor="middle" font-size="11" font-weight="600" fill="#854F0B">ORDER BY</text>
+<text x="201" y="72" text-anchor="middle" font-size="10" fill="#854F0B">created_at</text>
+<text x="297" y="58" text-anchor="middle" font-size="11" font-weight="600" fill="#0F6E56">PARTITION BY</text>
+<text x="297" y="72" text-anchor="middle" font-size="10" fill="#0F6E56">restaurant</text>
+<g stroke="#e3e1d9" stroke-width="1">
+<line x1="14" y1="128" x2="346" y2="128"/>
+<line x1="14" y1="168" x2="346" y2="168"/>
+<line x1="14" y1="208" x2="346" y2="208"/>
+</g>
+<g font-family="ui-monospace,Menlo,monospace" font-size="13" text-anchor="middle">
+<text x="36" y="113" fill="#2C2C2A">101</text>
+<text x="72" y="113" fill="#2C2C2A">700</text>
+<text x="132" y="113" fill="#185FA5">1710</text>
+<text x="201" y="113" fill="#854F0B">700</text>
+<text x="297" y="113" fill="#0F6E56">700</text>
+<text x="36" y="153" fill="#2C2C2A">102</text>
+<text x="72" y="153" fill="#2C2C2A">360</text>
+<text x="132" y="153" fill="#185FA5">1710</text>
+<text x="201" y="153" fill="#854F0B">1060</text>
+<text x="297" y="153" fill="#0F6E56">360</text>
+<text x="36" y="193" fill="#2C2C2A">104</text>
+<text x="72" y="193" fill="#2C2C2A">400</text>
+<text x="132" y="193" fill="#185FA5">1710</text>
+<text x="201" y="193" font-weight="700" fill="#854F0B">1460</text>
+<text x="297" y="193" fill="#0F6E56">1100</text>
+<text x="36" y="233" fill="#2C2C2A">105</text>
+<text x="72" y="233" fill="#2C2C2A">250</text>
+<text x="132" y="233" fill="#185FA5">1710</text>
+<text x="201" y="233" fill="#854F0B">1710</text>
+<text x="297" y="233" fill="#0F6E56">1350</text>
+</g>
+<rect x="178" y="180" width="46" height="26" rx="6" fill="none" stroke="#854F0B" stroke-width="1.5"/>
+<path d="M240 94 H236 V206 H240" fill="none" stroke="#854F0B" stroke-width="1.5"/>
+<text x="18" y="262" font-size="11.5" font-weight="600" fill="#854F0B">Row 104's window in ORDER BY: rows 101, 102, 104</text>
+<text x="18" y="278" font-family="ui-monospace,Menlo,monospace" font-size="11" fill="#854F0B">700 + 360 + 400 = 1460</text>
+<g font-size="11" fill="#5F5E5A">
+<text x="18" y="302">OVER (): the whole pile, on every row</text>
+<text x="18" y="318">ORDER BY: from the first row to this row</text>
+<text x="18" y="334">PARTITION BY: restarts for each restaurant</text>
+</g>
+</svg>

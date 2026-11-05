@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="620" viewBox="0 0 360 620" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Transactions mental map</title>
+<rect x="1" y="1" width="358" height="618" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="113" y="16" width="134" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Transactions</text>
+<path d="M113 36 H36 V552" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 110 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="76" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="90" font-weight="600" fill="#0C447C">Transactions: all or nothing</text>
+<text x="68" y="107" fill="#185FA5">BEGIN ... COMMIT: all steps or none</text>
+<text x="68" y="123" fill="#185FA5">Atomicity, not isolation</text>
+<text x="68" y="139" fill="#185FA5">Does NOT keep other transactions out</text>
+<path d="M36 200 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="162" width="288" height="76" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="180" font-weight="600" fill="#633806">Lost update</text>
+<text x="68" y="197" fill="#854F0B">Read a value, change it in app code</text>
+<text x="68" y="213" fill="#854F0B">Write back: the earlier write is lost</text>
+<text x="68" y="229" fill="#854F0B">Last writer wins, from a stale copy</text>
+<path d="M36 290 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="252" width="288" height="76" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="270" font-weight="600" fill="#3C3489">Isolation levels and retry</text>
+<text x="68" y="287" fill="#534AB7">READ COMMITTED (default): no re-check</text>
+<text x="68" y="303" fill="#534AB7">REPEATABLE READ: snapshot, error 40001</text>
+<text x="68" y="319" fill="#534AB7">Retry the WHOLE transaction from BEGIN</text>
+<path d="M36 380 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="342" width="288" height="76" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="360" font-weight="600" fill="#085041">FOR UPDATE row lock</text>
+<text x="68" y="377" fill="#0F6E56">Other writers and FOR UPDATE wait</text>
+<text x="68" y="393" fill="#0F6E56">Plain SELECT is not blocked</text>
+<text x="68" y="409" fill="#0F6E56">Pessimistic: wait. Optimistic: retry</text>
+<path d="M36 470 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="432" width="288" height="76" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="450" font-weight="600" fill="#27500A">Choose</text>
+<text x="68" y="467" fill="#3B6D11">Hot row, many buyers: FOR UPDATE</text>
+<text x="68" y="483" fill="#3B6D11">Rare conflicts: REPEATABLE READ + retry</text>
+<text x="68" y="499" fill="#3B6D11">Or one atomic UPDATE ... AND stock &gt;= 1</text>
+<path d="M36 552 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="522" width="288" height="60" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="540" font-weight="600" fill="#791F1F">Risk</text>
+<text x="68" y="557" fill="#A32D2D">Slow call inside a lock: others queue</text>
+<text x="68" y="573" fill="#A32D2D">3 s x 50 buyers = timeouts, pool empty</text>
+</g>
+<text x="180" y="608" text-anchor="middle" font-size="11" fill="#8a8984">Keep locked work short: call slow APIs outside</text>
+</svg>

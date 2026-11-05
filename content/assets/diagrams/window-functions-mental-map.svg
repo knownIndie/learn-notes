@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="620" viewBox="0 0 360 620" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Window functions mental map</title>
+<rect x="1" y="1" width="358" height="618" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="93" y="16" width="174" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Window functions</text>
+<path d="M93 36 H36 V544" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 110 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="76" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="90" font-weight="600" fill="#085041">Slots recipe</text>
+<text x="68" y="107" fill="#0F6E56">Keep rows? Yes = window, no = GROUP BY</text>
+<text x="68" y="123" fill="#0F6E56">1 function, 2 PARTITION BY (per),</text>
+<text x="68" y="139" fill="#0F6E56">3 ORDER BY inside OVER (so far, top)</text>
+<path d="M36 192 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="162" width="288" height="60" rx="8" fill="#F1EFE8" stroke="#5F5E5A"/>
+<text x="68" y="180" font-weight="600" fill="#2C2C2A">Where it runs</text>
+<text x="68" y="197" fill="#5F5E5A">After FROM, WHERE, GROUP BY, HAVING</text>
+<text x="68" y="213" fill="#5F5E5A">So it can't go in WHERE</text>
+<path d="M36 274 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="236" width="288" height="76" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="254" font-weight="600" fill="#0C447C">rank() and top N per group</text>
+<text x="68" y="271" fill="#185FA5">CTE, then filter rnk in the outer query</text>
+<text x="68" y="287" fill="#185FA5">PARTITION BY restarts the count at 1</text>
+<text x="68" y="303" fill="#185FA5">Ties: rank skips, dense_rank doesn't</text>
+<path d="M36 364 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="326" width="288" height="76" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="344" font-weight="600" fill="#633806">Running total</text>
+<text x="68" y="361" fill="#854F0B">sum(x) OVER (ORDER BY day)</text>
+<text x="68" y="377" fill="#854F0B">OVER () = whole pile on every row</text>
+<text x="68" y="393" fill="#854F0B">Group by the day first, then window</text>
+<path d="M36 454 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="416" width="288" height="76" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="434" font-weight="600" fill="#27500A">LAG: compare with previous</text>
+<text x="68" y="451" fill="#3B6D11">lag(x) OVER (PARTITION BY group</text>
+<text x="68" y="467" fill="#3B6D11">ORDER BY time)</text>
+<text x="68" y="483" fill="#3B6D11">First row in each pile is NULL</text>
+<path d="M36 544 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="506" width="288" height="76" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="524" font-weight="600" fill="#791F1F">Common slips</text>
+<text x="68" y="541" fill="#A32D2D">PARTITION BY price, not restaurant</text>
+<text x="68" y="557" fill="#A32D2D">Group by orders.id: one pile per order</text>
+<text x="68" y="573" fill="#A32D2D">PARTITION BY missing: rank keeps going</text>
+</g>
+<text x="180" y="608" text-anchor="middle" font-size="11" fill="#8a8984">Keep every row. GROUP BY squashes them.</text>
+</svg>

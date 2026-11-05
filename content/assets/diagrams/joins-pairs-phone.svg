@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="492" viewBox="0 0 360 492" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Joins: customers matched to orders. Arjun has no order, so the inner join drops him and the left join keeps him with NULL</title>
+<rect x="1" y="1" width="358" height="490" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<text x="80" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#185FA5" font-family="ui-monospace,Menlo,monospace">customers</text>
+<text x="280" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#534AB7" font-family="ui-monospace,Menlo,monospace">orders</text>
+<line x1="130" y1="70" x2="230" y2="70" stroke="#3B6D11" stroke-width="1.5"/>
+<line x1="130" y1="70" x2="230" y2="166" stroke="#3B6D11" stroke-width="1.5"/>
+<line x1="130" y1="70" x2="230" y2="262" stroke="#3B6D11" stroke-width="1.5"/>
+<line x1="130" y1="118" x2="230" y2="118" stroke="#3B6D11" stroke-width="1.5"/>
+<line x1="130" y1="166" x2="230" y2="214" stroke="#3B6D11" stroke-width="1.5"/>
+<g>
+<rect x="30" y="52" width="100" height="36" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="80" y="75" text-anchor="middle" font-size="13" font-weight="600" fill="#0C447C">1 Riya</text>
+</g>
+<g>
+<rect x="30" y="100" width="100" height="36" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="80" y="123" text-anchor="middle" font-size="13" font-weight="600" fill="#0C447C">2 Kabir</text>
+</g>
+<g>
+<rect x="30" y="148" width="100" height="36" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="80" y="171" text-anchor="middle" font-size="13" font-weight="600" fill="#0C447C">3 Meera</text>
+</g>
+<g>
+<rect x="30" y="196" width="100" height="36" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="80" y="219" text-anchor="middle" font-size="13" font-weight="600" fill="#791F1F">4 Arjun</text>
+</g>
+<text x="80" y="250" text-anchor="middle" font-size="11" fill="#A32D2D">no order</text>
+<g>
+<rect x="230" y="52" width="100" height="36" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="280" y="75" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">order 101</text>
+</g>
+<g>
+<rect x="230" y="100" width="100" height="36" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="280" y="123" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">order 102</text>
+</g>
+<g>
+<rect x="230" y="148" width="100" height="36" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="280" y="171" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">order 103</text>
+</g>
+<g>
+<rect x="230" y="196" width="100" height="36" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="280" y="219" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">order 104</text>
+</g>
+<g>
+<rect x="230" y="244" width="100" height="36" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="280" y="267" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">order 105</text>
+</g>
+<text x="180" y="300" text-anchor="middle" font-size="11" fill="#5e5d59">one line = one matching pair (customer_id = id)</text>
+<g>
+<rect x="20" y="318" width="320" height="50" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="180" y="338" text-anchor="middle" font-size="13" font-weight="600" fill="#085041">INNER JOIN: 5 pairs, Arjun dropped</text>
+<text x="180" y="356" text-anchor="middle" font-size="11.5" fill="#0F6E56">only rows with a partner on both sides</text>
+</g>
+<g>
+<rect x="20" y="382" width="320" height="66" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="180" y="402" text-anchor="middle" font-size="13" font-weight="600" fill="#633806">LEFT JOIN: 6 rows, Arjun + NULL</text>
+<text x="180" y="420" text-anchor="middle" font-size="11.5" fill="#854F0B">Arjun stays, his order columns are NULL</text>
+<text x="180" y="436" text-anchor="middle" font-size="11.5" fill="#854F0B">Riya shows 3 times: one row per order</text>
+</g>
+<text x="180" y="470" text-anchor="middle" font-size="11" fill="#8a8984">Left join keeps unmatched rows; inner join does not.</text>
+</svg>

@@ -12,3 +12,4 @@ Short notes on everything I'm learning, written to be read on a phone and used i
 ## Subjects
 
 - [[networking/index|Networking]]: how a page loads (HTTP, DNS, TCP and UDP, TLS), caching, origins and CORS.
+- [[databases/index|Databases and SQL]]: transactions and concurrency (lost updates, isolation, locks), joins, GROUP BY and HAVING, window functions.

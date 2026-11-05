@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="540" viewBox="0 0 360 540" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>GROUP BY mental map</title>
+<rect x="1" y="1" width="358" height="538" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<rect x="120" y="16" width="120" height="40" rx="20" fill="#185FA5"/>
+<text x="180" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">GROUP BY</text>
+<path d="M120 36 H36 V472" stroke="#b4b2a9" stroke-width="2" fill="none"/>
+<g font-size="12">
+<path d="M36 102 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="72" width="288" height="60" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="68" y="90" font-weight="600" fill="#27500A">Aggregates</text>
+<text x="68" y="107" fill="#3B6D11">sum, count, avg, min, max</text>
+<text x="68" y="123" fill="#3B6D11">one value per pile, or for the whole table</text>
+<path d="M36 176 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="146" width="288" height="60" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="68" y="164" font-weight="600" fill="#0C447C">Run order</text>
+<text x="68" y="181" fill="#185FA5">FROM/JOIN, WHERE, GROUP BY, aggregates</text>
+<text x="68" y="197" fill="#185FA5">HAVING, SELECT, ORDER BY</text>
+<path d="M36 250 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="220" width="288" height="60" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="68" y="238" font-weight="600" fill="#3C3489">GROUP BY: one pile per key</text>
+<text x="68" y="255" fill="#534AB7">Key = the thing you want ONE ROW PER</text>
+<text x="68" y="271" fill="#534AB7">sum(qty * price): per row, then per pile</text>
+<path d="M36 324 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="294" width="288" height="60" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="68" y="312" font-weight="600" fill="#791F1F">Most common slip</text>
+<text x="68" y="329" fill="#A32D2D">GROUP BY adds and multiplies nothing</text>
+<text x="68" y="345" fill="#A32D2D">Never group by qty, price or revenue</text>
+<path d="M36 398 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="368" width="288" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="68" y="386" font-weight="600" fill="#085041">count(*) vs count(column)</text>
+<text x="68" y="403" fill="#0F6E56">count(*) counts rows, NULLs included</text>
+<text x="68" y="419" fill="#0F6E56">count(col) skips NULLs: use after LEFT JOIN</text>
+<path d="M36 472 H56" stroke="#b4b2a9" stroke-width="2"/>
+<rect x="56" y="442" width="288" height="60" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="68" y="460" font-weight="600" fill="#633806">WHERE vs HAVING</text>
+<text x="68" y="477" fill="#854F0B">WHERE: one row's own value, before piles</text>
+<text x="68" y="493" fill="#854F0B">HAVING: totals, after the piles</text>
+</g>
+<text x="180" y="528" text-anchor="middle" font-size="11" fill="#8a8984">Piles first, then one total per pile</text>
+</svg>

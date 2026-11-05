@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="560" viewBox="0 0 360 560" font-family="system-ui, -apple-system, sans-serif">
+<title>How a query runs, step by step, with the page that covers each step, all inside a transaction</title>
+<rect x="1" y="1" width="358" height="558" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<text x="180" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#2b2b2b">The order a query runs in</text>
+<rect x="14" y="38" width="332" height="470" rx="10" fill="#FAEEDA" stroke="#854F0B" stroke-dasharray="5 4"/>
+<text x="26" y="58" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#854F0B">BEGIN ... COMMIT  (Transactions)</text>
+<g font-size="12">
+<rect x="30" y="70" width="300" height="50" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="42" y="90" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#185FA5">1 FROM + JOIN</text>
+<text x="42" y="108" fill="#185FA5">join tables; no partner, no row (Joins)</text>
+<rect x="30" y="132" width="300" height="50" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="42" y="152" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#185FA5">2 WHERE</text>
+<text x="42" y="170" fill="#185FA5">drop rows by their own value (Joins)</text>
+<rect x="30" y="194" width="300" height="50" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="42" y="214" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#534AB7">3 GROUP BY + sum/count</text>
+<text x="42" y="232" fill="#534AB7">a pile per key, a total each (GROUP BY)</text>
+<rect x="30" y="256" width="300" height="50" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="42" y="276" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#534AB7">4 HAVING</text>
+<text x="42" y="294" fill="#534AB7">drop whole piles by their total (GROUP BY)</text>
+<rect x="30" y="318" width="300" height="50" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="42" y="338" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#0F6E56">5 window: OVER (...)</text>
+<text x="42" y="356" fill="#0F6E56">rank, running total, LAG (Windows)</text>
+<rect x="30" y="380" width="300" height="50" rx="8" fill="#ffffff" stroke="#8a8780"/>
+<text x="42" y="400" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#444">6 SELECT</text>
+<text x="42" y="418" fill="#444">pick and name the columns</text>
+<rect x="30" y="442" width="300" height="50" rx="8" fill="#ffffff" stroke="#8a8780"/>
+<text x="42" y="462" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#444">7 ORDER BY</text>
+<text x="42" y="480" fill="#444">sort the final rows</text>
+</g>
+<text x="180" y="530" text-anchor="middle" font-size="12" fill="#2b2b2b">Filter on a rank? Rank in a CTE, filter outside,</text>
+<text x="180" y="548" text-anchor="middle" font-size="12" fill="#2b2b2b">because step 2 runs before step 5.</text>
+</svg>
