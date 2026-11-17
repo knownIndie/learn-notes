@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="446" viewBox="0 0 360 446" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Cache stampede: 500 requests miss one expired key, one gets the NX lock and queries the database, the rest wait and hit the cache</title>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5e5d59"/></marker></defs>
+<rect x="1" y="1" width="358" height="444" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<g><rect x="40" y="16" width="280" height="50" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="180" y="36" text-anchor="middle" font-size="13" font-weight="600" fill="#791F1F">menu:42 expires at 12:00:00</text>
+<text x="180" y="54" text-anchor="middle" font-size="11" fill="#A32D2D">500 requests miss at the same moment</text></g>
+<line x1="180" y1="66" x2="180" y2="88" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<g><rect x="40" y="90" width="280" height="50" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="180" y="110" text-anchor="middle" font-size="12" font-weight="600" fill="#085041">All 500 try for the lock</text>
+<text x="180" y="128" text-anchor="middle" font-size="11" fill="#0F6E56" font-family="ui-monospace,Menlo,monospace">SET lock:menu:42 1 NX EX 10</text></g>
+<line x1="110" y1="140" x2="110" y2="178" stroke="#3B6D11" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="250" y1="140" x2="250" y2="178" stroke="#854F0B" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="102" y="164" text-anchor="end" font-size="11" font-weight="600" fill="#3B6D11">1st: OK</text>
+<text x="258" y="164" font-size="11" font-weight="600" fill="#854F0B">others: null</text>
+<g><rect x="16" y="180" width="158" height="90" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="95" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#27500A">Winner (one request)</text>
+<text x="95" y="218" text-anchor="middle" font-size="11" fill="#3B6D11">queries Postgres once</text>
+<text x="95" y="236" text-anchor="middle" font-size="11" fill="#3B6D11" font-family="ui-monospace,Menlo,monospace">SET menu:42 EX 300</text>
+<text x="95" y="254" text-anchor="middle" font-size="11" fill="#3B6D11" font-family="ui-monospace,Menlo,monospace">then DEL lock:menu:42</text></g>
+<g><rect x="186" y="180" width="158" height="90" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="265" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#633806">499 losers</text>
+<text x="265" y="218" text-anchor="middle" font-size="11" fill="#854F0B">wait about 50 ms</text>
+<text x="265" y="236" text-anchor="middle" font-size="11" fill="#854F0B">read menu:42 again</text>
+<text x="265" y="254" text-anchor="middle" font-size="11" fill="#854F0B">then hit: no query</text></g>
+<line x1="95" y1="270" x2="95" y2="306" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="265" y1="270" x2="265" y2="306" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<g><rect x="40" y="308" width="280" height="50" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="180" y="328" text-anchor="middle" font-size="13" font-weight="600" fill="#0C447C">Everyone gets the menu</text>
+<text x="180" y="346" text-anchor="middle" font-size="11" fill="#185FA5">one Postgres query instead of 500</text></g>
+<text x="180" y="384" text-anchor="middle" font-size="11" fill="#5e5d59">The lock has EX 10, so if the winner crashes,</text>
+<text x="180" y="401" text-anchor="middle" font-size="11" fill="#5e5d59">it expires by itself and a later request retries.</text>
+<text x="180" y="421" text-anchor="middle" font-size="11" fill="#5e5d59">Jitter would not help here: one key, one moment.</text>
+</svg>

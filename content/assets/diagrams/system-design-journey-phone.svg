@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="520" viewBox="0 0 360 520" font-family="system-ui, -apple-system, sans-serif">
+<title>One request through a backend: rate limiter, cache, database, and the race-condition rule that protects every counter and write</title>
+<rect x="1" y="1" width="358" height="518" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<text x="180" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#2b2b2b">One request through the backend</text>
+<rect x="30" y="40" width="300" height="50" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="42" y="60" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#534AB7">1 Request arrives</text>
+<text x="42" y="78" font-size="12" fill="#534AB7">POST /login or GET /menu/42</text>
+<line x1="180" y1="90" x2="180" y2="106" stroke="#888780" stroke-width="1.2"/>
+<rect x="30" y="108" width="300" height="66" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="42" y="128" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#854F0B">2 Rate limiter (Redis)</text>
+<text x="42" y="146" font-size="12" fill="#854F0B">too many? 429 + Retry-After, stop here</text>
+<text x="42" y="163" font-size="12" fill="#854F0B">page: Rate limiting</text>
+<line x1="180" y1="174" x2="180" y2="190" stroke="#888780" stroke-width="1.2"/>
+<rect x="30" y="192" width="300" height="66" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="42" y="212" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#0F6E56">3 Cache (Redis GET)</text>
+<text x="42" y="230" font-size="12" fill="#0F6E56">hit: return in a few ms. miss: go to 4</text>
+<text x="42" y="247" font-size="12" fill="#0F6E56">page: Caching with Redis</text>
+<line x1="180" y1="258" x2="180" y2="274" stroke="#888780" stroke-width="1.2"/>
+<rect x="30" y="276" width="300" height="82" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="42" y="296" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#185FA5">4 Postgres (source of truth)</text>
+<text x="42" y="314" font-size="12" fill="#185FA5">read: SELECT, then SET key with EX + jitter</text>
+<text x="42" y="331" font-size="12" fill="#185FA5">write: commit first, then DEL the keys</text>
+<text x="42" y="348" font-size="12" fill="#185FA5">page: Caching with Redis</text>
+<rect x="14" y="376" width="332" height="128" rx="10" fill="#FCEBEB" stroke="#A32D2D" stroke-dasharray="5 4"/>
+<text x="26" y="396" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#A32D2D">5 Many requests at once</text>
+<text x="26" y="416" font-size="12" fill="#A32D2D">every count, cooldown and rebuild must be</text>
+<text x="26" y="433" font-size="12" fill="#A32D2D">one atomic step:</text>
+<text x="26" y="452" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#A32D2D">INCR · Lua script · SET NX EX</text>
+<text x="26" y="469" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#A32D2D">SELECT ... FOR UPDATE · conditional upsert</text>
+<text x="26" y="490" font-size="12" fill="#A32D2D">page: Race conditions in limits and codes</text>
+</svg>

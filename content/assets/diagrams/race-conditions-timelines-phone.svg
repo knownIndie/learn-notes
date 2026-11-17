@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="620" viewBox="0 0 360 620" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Two timelines. Top: verify with SELECT FOR UPDATE, row lock makes the second guess wait, the 5-guess cap holds. Bottom: resend with check then write and no lock, two clicks send two emails and the first code dies.</title>
+<rect x="1" y="1" width="358" height="618" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<text x="180" y="20" text-anchor="middle" font-size="11" fill="#8a8984">time runs down</text>
+
+<!-- Lane 1: safe -->
+<rect x="14" y="32" width="332" height="264" rx="10" fill="none" stroke="#0F6E56" stroke-width="1.5"/>
+<text x="28" y="52" font-size="13" font-weight="700" fill="#085041">VERIFY with SELECT ... FOR UPDATE: SAFE</text>
+<text x="28" y="70" font-size="11" fill="#0F6E56">Two wrong guesses at once. failed_attempts is 4.</text>
+
+<rect x="28" y="84" width="150" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="40" y="102" font-size="11" font-weight="600" fill="#0C447C">t1: locks row</text>
+<text x="40" y="118" font-size="11" fill="#185FA5">reads failed = 4</text>
+<rect x="192" y="84" width="150" height="44" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="204" y="102" font-size="11" font-weight="600" fill="#633806">t2: asks for lock</text>
+<text x="204" y="118" font-size="11" fill="#854F0B">waits, row is taken</text>
+
+<rect x="28" y="136" width="150" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="40" y="154" font-size="11" font-weight="600" fill="#0C447C">t3: wrong, writes 5</text>
+<text x="40" y="170" font-size="11" fill="#185FA5">COMMIT, lock freed</text>
+<rect x="192" y="136" width="150" height="44" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="204" y="154" font-size="11" font-weight="600" fill="#633806">t3: still waiting</text>
+<text x="204" y="170" font-size="11" fill="#854F0B">for A's COMMIT</text>
+
+<rect x="192" y="188" width="150" height="44" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="204" y="206" font-size="11" font-weight="600" fill="#633806">t4: lock granted</text>
+<text x="204" y="222" font-size="11" fill="#854F0B">reads 5: too many</text>
+
+<rect x="28" y="244" width="314" height="44" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="185" y="262" text-anchor="middle" font-size="12" font-weight="700" fill="#27500A">Cap holds: at most 5 wrong guesses</text>
+<text x="185" y="278" text-anchor="middle" font-size="11" fill="#3B6D11">B's code is never checked</text>
+
+<!-- Lane 2: unsafe -->
+<rect x="14" y="312" width="332" height="258" rx="10" fill="none" stroke="#A32D2D" stroke-width="1.5"/>
+<text x="28" y="332" font-size="13" font-weight="700" fill="#791F1F">RESEND: check, then write: UNSAFE</text>
+<text x="28" y="350" font-size="11" fill="#A32D2D">Two clicks at the same moment. No lock.</text>
+
+<rect x="28" y="362" width="150" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="40" y="380" font-size="11" font-weight="600" fill="#0C447C">t1: check cooldown</text>
+<text x="40" y="396" font-size="11" fill="#185FA5">60 s passed: OK</text>
+<rect x="192" y="362" width="150" height="44" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="204" y="380" font-size="11" font-weight="600" fill="#633806">t2: check cooldown</text>
+<text x="204" y="396" font-size="11" fill="#854F0B">60 s passed: OK</text>
+
+<rect x="28" y="414" width="150" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="40" y="432" font-size="11" font-weight="600" fill="#0C447C">t3: upsert code X</text>
+<text x="40" y="448" font-size="11" fill="#185FA5">send email 1</text>
+<rect x="192" y="414" width="150" height="44" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="204" y="432" font-size="11" font-weight="600" fill="#633806">t4: upsert code Y</text>
+<text x="204" y="448" font-size="11" fill="#854F0B">send email 2</text>
+
+<rect x="28" y="466" width="150" height="44" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="40" y="484" font-size="11" font-weight="600" fill="#791F1F">email 1 has code X</text>
+<text x="40" y="500" font-size="11" fill="#A32D2D">X no longer works</text>
+<rect x="192" y="466" width="150" height="44" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="204" y="484" font-size="11" font-weight="600" fill="#791F1F">stored hash is Y now</text>
+<text x="204" y="500" font-size="11" fill="#A32D2D">typed X = failed try</text>
+
+<rect x="28" y="518" width="314" height="44" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="185" y="536" text-anchor="middle" font-size="12" font-weight="700" fill="#791F1F">Two emails. Cooldown bypassed.</text>
+<text x="185" y="552" text-anchor="middle" font-size="11" fill="#A32D2D">The second upsert overwrote code_hash</text>
+
+<text x="180" y="598" text-anchor="middle" font-size="11" fill="#8a8984">Check and write as one atomic step, or it is a race</text>
+</svg>

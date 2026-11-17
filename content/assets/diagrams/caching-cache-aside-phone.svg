@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="520" viewBox="0 0 360 520" role="img" font-family="system-ui,-apple-system,Segoe UI,sans-serif">
+<title>Cache-aside read path: GET Redis, a hit returns, a miss reads Postgres, then SET with EX and return</title>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5e5d59"/></marker></defs>
+<rect x="1" y="1" width="358" height="518" rx="12" fill="#faf9f5" stroke="#e3e1d9"/>
+<g><rect x="40" y="16" width="280" height="44" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="180" y="35" text-anchor="middle" font-size="13" font-weight="600" fill="#0C447C">Request: menu for restaurant 42</text>
+<text x="180" y="51" text-anchor="middle" font-size="11" fill="#185FA5">getMenu(42) runs in the app</text></g>
+<line x1="180" y1="60" x2="180" y2="82" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="190" y="75" font-size="11" fill="#5e5d59">1. check the cache first</text>
+<g><rect x="40" y="84" width="280" height="50" rx="8" fill="#EEEDFE" stroke="#534AB7"/>
+<text x="180" y="104" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">Redis</text>
+<text x="180" y="123" text-anchor="middle" font-size="11" fill="#534AB7" font-family="ui-monospace,Menlo,monospace">GET menu:42</text></g>
+<line x1="180" y1="134" x2="180" y2="154" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<g><rect x="40" y="156" width="280" height="44" rx="8" fill="#FAEEDA" stroke="#854F0B"/>
+<text x="180" y="176" text-anchor="middle" font-size="13" font-weight="600" fill="#633806">Is there a value in Redis?</text>
+<text x="180" y="192" text-anchor="middle" font-size="11" fill="#854F0B">a key that has not expired</text></g>
+<line x1="110" y1="200" x2="110" y2="238" stroke="#3B6D11" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="250" y1="200" x2="250" y2="238" stroke="#A32D2D" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="100" y="222" text-anchor="end" font-size="12" font-weight="600" fill="#3B6D11">yes: hit</text>
+<text x="260" y="222" font-size="12" font-weight="600" fill="#A32D2D">no: miss</text>
+<g><rect x="16" y="240" width="158" height="50" rx="8" fill="#EAF3DE" stroke="#3B6D11"/>
+<text x="95" y="260" text-anchor="middle" font-size="12" font-weight="600" fill="#27500A">Hit: return the menu</text>
+<text x="95" y="277" text-anchor="middle" font-size="11" fill="#3B6D11">no database query</text></g>
+<g><rect x="186" y="240" width="158" height="50" rx="8" fill="#FCEBEB" stroke="#A32D2D"/>
+<text x="265" y="260" text-anchor="middle" font-size="12" font-weight="600" fill="#791F1F">Miss: read Postgres</text>
+<text x="265" y="277" text-anchor="middle" font-size="11" fill="#A32D2D">one SELECT query</text></g>
+<line x1="265" y1="290" x2="265" y2="314" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="272" y="306" font-size="11" fill="#5e5d59">2. then fill</text>
+<g><rect x="40" y="316" width="280" height="50" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+<text x="180" y="336" text-anchor="middle" font-size="13" font-weight="600" fill="#085041">3. SET menu:42 value EX 300</text>
+<text x="180" y="354" text-anchor="middle" font-size="11" fill="#0F6E56">the copy expires after 300 seconds</text></g>
+<line x1="180" y1="366" x2="180" y2="390" stroke="#5e5d59" stroke-width="1.5" marker-end="url(#a)"/>
+<g><rect x="40" y="392" width="280" height="50" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+<text x="180" y="412" text-anchor="middle" font-size="13" font-weight="600" fill="#0C447C">4. Return the rows to the page</text>
+<text x="180" y="430" text-anchor="middle" font-size="11" fill="#185FA5">the next read for this restaurant is a hit</text></g>
+<path d="M16 265 H8 V417 H40" fill="none" stroke="#3B6D11" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="180" y="469" text-anchor="middle" font-size="11" fill="#5e5d59">Redis down? The GET fails: catch it and read</text>
+<text x="180" y="486" text-anchor="middle" font-size="11" fill="#5e5d59">Postgres directly. Slower, but the app still works.</text>
+<text x="180" y="503" text-anchor="middle" font-size="11" fill="#5e5d59">Writes are separate: commit, then DEL the key.</text>
+</svg>
