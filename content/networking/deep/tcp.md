@@ -35,7 +35,9 @@ The same three steps as the quick page. The rest of this page zooms into what ea
 
 ## How it works, with an example
 
-The same `api.shop.com` example, with the header fields and the state changes.
+**Simply:** Your phone app calls `api.shop.com` over HTTPS, on port 443, a fixed number. Both sides do a handshake, a greeting, then send numbered data.
+
+**What to know:** The same `api.shop.com` example, with the header fields and the state changes.
 
 Connection states on each side, in order:
 
@@ -81,7 +83,9 @@ RST aborts the connection at once, with no FIN exchange. The usual cases are a S
 
 ## The three-way handshake
 
-Both sides pick an ISN. RFC 6528 requires ISNs to be generated unpredictably, so an off-path attacker cannot guess them. A fixed ISN would let an attacker forge segments into a live stream.
+**Simply:** The two computers greet each other, like walkie-talkie users. One says "Start, my number is 1000" (SYN). The other says "Got it, mine is 5000" (SYN-ACK). The first replies "Got it" (ACK).
+
+**What to know:** Both sides pick an ISN. RFC 6528 requires ISNs to be generated unpredictably, so an off-path attacker cannot guess them. A fixed ISN would let an attacker forge segments into a live stream.
 
 Each SYN uses one sequence number even though it carries no data. The SYN-ACK's `ack` field is the client's ISN plus one. The client's ACK's `ack` field is the server's ISN plus one. Two messages would not work: the server would have no proof that the client received its ISN. Three is the smallest exchange that confirms both directions.
 
@@ -96,6 +100,10 @@ The server keeps a half-open entry for every SYN it answers, until the final ACK
 Other defenses: a larger SYN queue (Linux `tcp_max_syn_backlog`), shorter half-open timeouts, and rate limits at a firewall.
 
 ## How TCP stays reliable
+
+**Simply:** TCP keeps the stream reliable like a courier who numbers every box. The receiver sends an ACK, a receipt that names the next box it expects, so one receipt can cover several boxes. A box with no receipt in time is sent again: retransmission.
+
+**What to know:**
 
 **Acknowledgments.** ACKs are cumulative. A receiver that gets bytes 1001 to 1020, then 1041 to 1060, can only ACK 1021. The later bytes are held.
 
@@ -123,7 +131,9 @@ Modern Linux usually uses CUBIC, which keeps the same idea with a different grow
 
 ## TCP vs UDP
 
-The quick table, with more rows and detail.
+**Simply:** TCP is like a registered letter: setup and receipts. Every piece arrives in order. UDP is like shouting across a room. No setup or receipts, so a missed message is gone. Use UDP when late is worse than lost.
+
+**What to know:** The quick table, with more rows and detail.
 
 | | TCP | UDP |
 |---|---|---|

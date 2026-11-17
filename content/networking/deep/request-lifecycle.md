@@ -38,7 +38,9 @@ The same ten steps as the quick page. The rest of this page zooms into each box:
 
 ## How it works, with an example
 
-The same `https://shop.com/cart` example as the quick page, as the messages that cross the wire. The IP address `203.0.113.10` comes from the documentation range in RFC 5737, so real values will differ.
+**Simply:** Typing a web address is a chain of steps, like ordering a delivery: look up the address (DNS), open a phone line (TCP), lock it and check the shop (TLS), then ask for the item (HTTP).
+
+**What to know:** The same `https://shop.com/cart` example as the quick page, as the messages that cross the wire. The IP address `203.0.113.10` comes from the documentation range in RFC 5737, so real values will differ.
 
 ```
  #  layer  direction            content
@@ -96,6 +98,10 @@ sequenceDiagram
 
 ## The steps one by one
 
+**Simply:** Think of a checklist at a shop counter. Each step waits for the one before, from reading the order to laying out the goods.
+
+**What to know:**
+
 1. **Parse the URL.** Default ports are 80 for http and 443 for https. The `#fragment` part (for example `#reviews`) is never sent to the server. The browser may also decide first whether the input is a URL or a search query.
 2. **Check the browser cache.** Each stored response has a freshness lifetime, set by `Cache-Control: max-age` or `Expires`. Within that lifetime the copy is fresh and used with no network. After it, the copy is stale and must be checked. Before any of this, the browser checks its HSTS list (HTTP Strict Transport Security, a memory of sites that must use https). For an HSTS site, a plain `http://` address is upgraded to https before anything is sent.
 3. **DNS lookup.** The browser checks its own DNS cache, then the operating system's, then asks a recursive resolver. The resolver walks the hierarchy: root server, then the `.com` servers, then the authoritative server for `shop.com`. An IPv4 answer is an A record, and an IPv6 answer is an AAAA record. The resolver usually sends its queries over UDP port 53, and very large answers can move to TCP. The TTL on each record tells caches how long they may keep it.
@@ -140,7 +146,9 @@ These numbers ignore transfer time for large bodies and server processing time. 
 
 ## Second visit: what gets skipped
 
-The quick page's table, with more detail behind each row.
+**Simply:** A second visit skips much of the first visit's work. The browser often still has the address, the open line, and a saved copy.
+
+**What to know:** The quick page's table, with more detail behind each row.
 
 - **DNS.** The cached answer is valid until its TTL ends. After that, the next lookup asks the resolver again.
 - **TCP.** Browsers keep idle connections for a short time. A reused connection needs no handshake. An idle connection that the server has closed must be replaced, which costs the full handshake again.

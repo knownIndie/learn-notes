@@ -58,7 +58,9 @@ The same four steps as the quick page. The rest of this page zooms into each box
 
 ## How it works, with an example
 
-The same `https://shop.com/cart` example, with the handshake messages named.
+**Simply:** Think of two people talking privately in a crowded room. They agree on a secret code that listeners cannot follow, then talk only in that code. The server also shows an ID card the browser checks. The first messages that set this up are the TLS handshake.
+
+**What to know:** The same `https://shop.com/cart` example, with the handshake messages named.
 
 **1. ClientHello** (plain text). Its fields include:
 
@@ -129,6 +131,10 @@ Verify return code: 0 (ok)
 
 ## The handshake
 
+**Simply:** One round trip (RTT) is one message out and one reply back. TLS 1.3 needs one after TCP opens, and the older TLS 1.2 needs two.
+
+**What to know:**
+
 **TLS 1.3 round trips.** The client sends ClientHello one RTT after TCP starts. The server's answer arrives one RTT later, and the client's Finished and first request go out then. For a new connection, the setup before the request leaves is:
 
 ```
@@ -161,6 +167,10 @@ TLS 1.2 (new session)
 The cost is **replay risk**. An attacker who records that flight can send it again, and the server cannot always tell the copy from the original. So 0-RTT should carry only requests that are safe to repeat, such as an idempotent `GET` with no side effects. A payment or form submission must never travel as early data. Many servers turn 0-RTT off or add an anti-replay cache.
 
 ## Certificates and trust
+
+**Simply:** A certificate is an ID card for a website, signed by a certificate authority (CA). A CA is an office that checks the site owns its name first. A signed card proves the name, not that the site is honest.
+
+**What to know:**
 
 **Inside a certificate.** It is written in the X.509 format (RFC 5280). Its main fields are:
 

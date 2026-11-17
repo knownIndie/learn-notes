@@ -47,7 +47,9 @@ Both messages have the same four parts: a **start line**, **headers**, a **blank
 
 ## How it works, with an example
 
-Your shop page on `shop.com` runs `fetch("https://api.com/cart")`.
+**Simply:** Asking over HTTP is like sending a paper order slip. The browser writes a request with a method, a path and headers, and the server writes back a status such as 200 OK with the answer.
+
+**What to know:** Your shop page on `shop.com` runs `fetch("https://api.com/cart")`.
 
 1. The browser writes the request line: `GET /cart HTTP/1.1`. The method is GET, the path is `/cart`.
 2. It adds headers, such as `Host: api.com` and `Origin: https://shop.com`, then a blank line. A GET has no body.
@@ -62,7 +64,9 @@ Your shop page on `shop.com` runs `fetch("https://api.com/cart")`.
 
 ## Methods
 
-The method says what to do. Two properties matter:
+**Simply:** A method is the verb of the request, like GET to read or POST to create. A safe method changes nothing. An idempotent method has the same effect on the server whether you send it once or many times, like a lift button that still calls one lift.
+
+**What to know:** Two properties matter:
 
 | Method | Purpose | Safe | Idempotent | Typical use |
 |---|---|---|---|---|
@@ -79,7 +83,9 @@ The method says what to do. Two properties matter:
 
 ## Status codes
 
-The first digit is the family:
+**Simply:** Every reply has a three-digit status code, like a note from a kitchen. The first digit is the family: 2 means it worked, 3 means go elsewhere, 4 means your request is wrong, and 5 means the server failed.
+
+**What to know:**
 
 | Family | Meaning | Examples |
 |---|---|---|
@@ -113,7 +119,9 @@ Common codes:
 
 ## Stateless and cookies
 
-HTTP is **stateless**. Each request stands alone. Sites still need to know you are logged in, so they add state with **cookies**. The server sends `Set-Cookie: session=abc123` in a response. The browser stores it, then sends `Cookie: session=abc123` with each later request to that site. The server reads the cookie and finds your session. Cookies are the memory.
+**Simply:** The server forgets each request once it answers, so sites use a cookie to remember you. A cookie is a small value the browser stores and sends back each time, like a coat-check ticket.
+
+**What to know:** The server sends `Set-Cookie: session=abc123` in a response. The browser stores it, then sends `Cookie: session=abc123` with each later request to that site. The server reads the cookie and finds your session. Cookies are the memory.
 
 ## Say it in an interview
 

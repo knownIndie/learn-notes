@@ -47,7 +47,9 @@ The same-origin policy stops this: a page may only read what its own origin sent
 
 ## How it works, with an example
 
-Your shop's page is at `https://shop.com/cart`. Its script wants data from `https://api.shop.com/items`.
+**Simply:** Picture a shop with its front counter at shop.com and its stock room at api.shop.com. Before a page reads data from another address, the browser compares the two addresses part by part. If one part differs, the request is cross-origin, which means it goes to a different origin. The browser adds an `Origin` label that the page cannot change, and it checks the server's reply before the page may read it.
+
+**What to know:** Your shop's page is at `https://shop.com/cart`. Its script wants data from `https://api.shop.com/items`.
 
 1. The browser compares the two URLs part by part. Scheme: `https` and `https`, the same. Host: `shop.com` and `api.shop.com`, different.
 2. Because one part differs, the request is cross-origin.
@@ -61,6 +63,10 @@ Your shop's page is at `https://shop.com/cart`. Its script wants data from `http
 
 ## Same origin or not?
 
+**Simply:** Think of an office building. The domain name (the host) is the building, the scheme (http or https) is the entrance, and the port is the door number. Two addresses are the same origin only if all three match. The room you walk to (the path) does not count.
+
+**What to know:** Compare the three parts of each pair, as in this table.
+
 | Page URL | Other URL | Same origin? | What differs |
 |---|---|---|---|
 | `https://shop.com/cart` | `https://shop.com/help` | Yes | Nothing. The path does not count |
@@ -71,7 +77,9 @@ Your shop's page is at `https://shop.com/cart`. Its script wants data from `http
 
 ## What the policy blocks and allows
 
-The policy limits **reading**. It does not limit **sending**.
+**Simply:** Think of a postal service. The same-origin policy is the browser's rule that sets these limits. A page can send a letter to another address and can show a picture from another origin, but it cannot read the reply that comes back. The policy limits reading. It does not limit sending.
+
+**What to know:** Here is what is blocked and what is allowed.
 
 **Blocked**: page JavaScript cannot read:
 - the body of a cross-origin `fetch` or XHR reply, unless [[networking/cors|CORS]] allows it;
@@ -85,7 +93,9 @@ The policy limits **reading**. It does not limit **sending**.
 
 ## Origin vs site
 
-Origin is strict: scheme, host and port must all match. Site is looser: scheme and main domain, ports ignored. Cookies follow their own rule: host and path, with no port.
+**Simply:** Think of a company with several offices. An origin is one exact office address: scheme, host and port. A site is the whole company, so shop.com and api.shop.com are different origins but the same site. Port numbers do not change the site.
+
+**What to know:** Origin is strict: scheme, host and port must all match. Site is looser: scheme and main domain, ports ignored. Cookies follow their own rule: host and path, with no port.
 
 | | Origin | Site | Cookie scope |
 |---|---|---|---|

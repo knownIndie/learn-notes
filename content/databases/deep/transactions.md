@@ -34,6 +34,10 @@ The top half is the bug. The bottom half is the lock that stops it.
 
 ## How it works, with an example
 
+**Simply:** Checkout is a few steps: read the stock, check it, save the order, and write the new stock. It is like a shop counter for one buyer. With many buyers at once, the steps can mix, and a sale can go wrong.
+
+**What to know:** The gap between a read and a write is where races happen. Transactions, isolation, and locks keep the stock count right.
+
 The checkout code is the same in every section: read the stock, check it, insert an order, write the new stock. Each section below asks one question about that code, and gives the table at each step.
 
 ## The most common mistake
@@ -47,7 +51,9 @@ The checkout code is the same in every section: read the stock, check it, insert
 
 ## Transactions: all or nothing
 
-**Plain version:** a bank transfer takes money from one account and puts it in another. Both or neither. A shoe order and its stock change are one bundle.
+**Simply:** A transaction is a group of steps that all save together, or none do. It is like a bank transfer: money leaves one account and arrives in the other, or neither happens. The database calls this atomic: all or nothing.
+
+**What to know:** Statements between BEGIN and COMMIT are saved together, or on ROLLBACK none are. A transaction does not stop other transactions from reading or writing at the same time. That is isolation's job.
 
 **Example:**
 
@@ -109,7 +115,9 @@ Edge cases: every query in the callback needs `await`, or it can run after the t
 
 ## Lost update
 
-**Plain version:** two cashiers read "5 pairs left" from one notebook page. Each sells one and writes the new count. The second write covers the first, and one sale vanishes.
+**Simply:** Two cashiers read "5 pairs left" from one notebook page. Each sells one and writes the new count. The second write covers the first, so one sale vanishes. This is a lost update.
+
+**What to know:** A lost update happens when two read-modify-writes touch the same row, and the later write, built on a stale value, overwrites the earlier one. READ COMMITTED does not block it, and no error is raised. A row lock, one atomic UPDATE, or a retry under REPEATABLE READ stops it.
 
 **Example:** both buyers run the same read-modify-write.
 
@@ -169,7 +177,9 @@ Edge case: saving a whole object writes every column. Update only the columns yo
 
 ## Isolation levels and retry
 
-**Plain version:** isolation decides what a running transaction may see of the others.
+**Simply:** Isolation decides what a running transaction may see of the others. Under READ COMMITTED, each statement sees the latest saved (committed) data. Under REPEATABLE READ, the transaction keeps one snapshot, a photo of the data taken at its first query. If it tries to write a row that changed after that photo, the database refuses with error 40001, and the app must retry the whole transaction.
+
+**What to know:** READ COMMITTED (the Postgres default) lets each statement see the newest committed data, so a lost update passes silently. REPEATABLE READ takes one snapshot at the first query, and a write that conflicts with a later change fails with 40001. The fix is to retry the whole transaction from BEGIN.
 
 - **READ COMMITTED** (default): each statement sees the latest committed data. Nothing re-checks the earlier decision, so the lost update happens silently.
 - **REPEATABLE READ**: one snapshot, taken at the first query (not at BEGIN). A write to a row that changed after that snapshot fails with 40001. The fix is to retry the whole transaction.
@@ -256,7 +266,9 @@ Two one-line extras:
 
 ## FOR UPDATE vs SERIALIZABLE and retry
 
-**Plain version:** two ways to stop the lost update.
+**Simply:** There are two ways to stop a lost update. The pessimistic way locks the row first with SELECT ... FOR UPDATE, so the second buyer waits until the first one finishes. The optimistic way takes no lock. The conflicting write fails, and the app retries it. Pick the lock for a busy row, and the retry when conflicts are rare.
+
+**What to know:** SELECT ... FOR UPDATE takes a row lock that lasts until COMMIT or ROLLBACK, so other writers and other FOR UPDATE calls wait. Under REPEATABLE READ or SERIALIZABLE, a conflict shows up at write time as 40001, and the loop retries.
 
 - **Pessimistic:** lock first. `SELECT ... FOR UPDATE` locks the row until COMMIT, and the second buyer waits at the shelf.
 - **Optimistic:** no lock. A conflict is found at write time (40001 under REPEATABLE READ or SERIALIZABLE), and the loop retries.

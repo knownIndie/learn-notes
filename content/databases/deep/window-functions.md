@@ -32,6 +32,10 @@ The same picture as the quick page. The OVER () column is the whole pile. The OR
 
 ## How it works, with an example
 
+**Simply:** A window function gives every row a value that uses related rows, and it does not squash the rows the way GROUP BY does. Think of a shop counter where every bill stays on the counter, and each bill gets a note from its own group, such as its rank or its running total. Window functions run after WHERE, GROUP BY and HAVING, so you cannot filter a rank in WHERE.
+
+**What to know:** You write a window function with OVER, which says which rows make up its window. PARTITION BY splits the rows into piles and restarts the function in each pile, and ORDER BY inside OVER sets the order inside each pile. The window runs after WHERE, GROUP BY and HAVING and before the final ORDER BY, so it cannot go in WHERE.
+
 The same slots recipe and run order as the quick page: FROM and JOIN, WHERE, GROUP BY, HAVING, the window functions, SELECT, then the final ORDER BY. Because the window comes after GROUP BY, it can use aggregates such as `sum(...)` in its ORDER BY.
 
 > **Slots recipe.** Keep the rows? Yes, so use a window function. No, use GROUP BY.
@@ -46,7 +50,9 @@ The same slots recipe and run order as the quick page: FROM and JOIN, WHERE, GRO
 
 ## rank() and top N per group
 
-**Plain version:** each restaurant has its own shelf of dishes. Put the dishes on each shelf in order, best first, and start counting at 1 on every shelf.
+**Simply:** Each restaurant has its own shelf of dishes. PARTITION BY sets up one shelf for each restaurant, and rank() puts the dishes on each shelf in order, best first, counting from 1 on every shelf. The top dish of each restaurant is the one with rank 1, so you keep only rank 1.
+
+**What to know:** rank() numbers the rows inside each PARTITION BY pile, in the order set by ORDER BY inside OVER, and the numbering restarts for each pile. WHERE runs before the window, so put rank() in a CTE and filter the rank outside.
 
 **Example.** Top dish by revenue in each restaurant, delivered orders only (the SQL and Drizzle are the same as on the quick page).
 
@@ -152,7 +158,9 @@ Step 5, the outer `WHERE rnk = 1`. Result: Spice Hub, Paneer Tikka, 750 and Dosa
 
 ## Running total
 
-**Plain version:** a bank passbook. Each line shows the amount and the balance so far. The balance on line 3 is line 1 + line 2 + line 3.
+**Simply:** A running total adds up the rows so far, in order, and writes the total on each row. Think of a bank passbook, where every line shows the amount and the balance so far. In SQL, sum() with ORDER BY inside OVER does this, so each row adds everything up to itself.
+
+**What to know:** `sum(x) OVER (ORDER BY time)` adds the current row to all the rows before it in that order. `OVER ()` gives the whole total on every row, and with no OVER at all, the rows collapse into one row.
 
 **Example.** `order_totals` has one row per delivered order. Here are the four ways to write OVER, with a fifth column that adds PARTITION BY restaurant_id:
 
@@ -262,7 +270,9 @@ There is no 2026-10-29 row. Its only order was cancelled, so no rows were left f
 
 ## LAG: compare with the previous row
 
-**Plain version:** a class register that shows each student's last score next to today's. For each restaurant, look at the previous order from that same restaurant only.
+**Simply:** LAG looks back at the row before the current one and gives you its value. Think of a class register that shows each student's last score next to today's score. PARTITION BY makes LAG stop at each group's edge, so each order is only compared with the last order from the same restaurant.
+
+**What to know:** `lag(x) OVER (PARTITION BY group ORDER BY time)` returns the previous row's x inside the same group, and NULL when that group has no earlier row. ORDER BY inside OVER decides which row counts as the previous one. Only PARTITION BY restarts LAG for each group.
 
 **Example.** The SQL and Drizzle are the same as on the quick page. The piles are:
 
@@ -306,7 +316,7 @@ Order 102 now shows 250, which is Spice Hub's last order. The comparison crosses
 
 **Why this, not that**
 
-- **PARTITION BY restaurant_id vs restaurant_id in ORDER BY:** ORDER BY only sorts. Only PARTITION BY restarts LAG for each group. The wrong table above is the proof.
+- **PARTITION BY restaurant_id vs restaurant_id in ORDER BY:** ORDER BY decides which row counts as the previous one, but it never restarts LAG. Only PARTITION BY restarts LAG for each group. The wrong table above is the proof.
 - **Window vs GROUP BY:** the window keeps all four order rows. GROUP BY would keep two rows, one per restaurant, and the comparison would be lost.
 - **Default value, one line:** `lag(total, 1, 0)` returns 0 instead of NULL when there is no previous row. Order 102's change would then be 360 - 0 = 360, which is only right if "nothing before" should count as zero.
 - **LEAD, one line:** `lead(total)` reads the next row instead. For order 101 in Spice Hub it returns 400, the total of order 104.

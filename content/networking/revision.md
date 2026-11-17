@@ -57,6 +57,7 @@ Every topic is one step of loading a page:
 ## Topic by topic
 
 ### 1. HTTP message
+- **Simply:** HTTP is a letter format. The browser sends a request (what it wants, plus labels called headers), and the server sends back a response with a status code saying how it went.
 - A request is a **start line** (`GET /cart HTTP/1.1`), **headers**, a **blank line**, then an optional **body**. A response is the same, but its start line has the status (`HTTP/1.1 200 OK`).
 - **Methods:** GET reads, POST creates, PUT replaces, PATCH changes part, DELETE removes. **Safe** = changes nothing (GET, HEAD, OPTIONS; HEAD is GET without the body). **Idempotent** = repeating it has the same effect as once (GET, HEAD, OPTIONS, PUT, DELETE). POST isn't idempotent, and PATCH isn't guaranteed to be.
 - **Status families:** 2xx worked, 3xx go elsewhere, 4xx your request is wrong, 5xx the server failed. **401** = who are you? **403** = I know you, still no.
@@ -65,6 +66,7 @@ Every topic is one step of loading a page:
 - [[networking/http-message|Quick]] · [[networking/deep/http-message|Detailed]]
 
 ### 2. Request lifecycle
+- **Simply:** typing a URL kicks off a chain: find the server's address (DNS), open a connection (TCP), lock it (TLS), then ask for the page (HTTP). Each step must finish before the next.
 - Type URL → cache check → DNS → TCP handshake → TLS handshake → HTTP request → server (load balancer, app, database) → response → browser renders and fetches CSS, JS, images.
 - A first HTTPS visit costs about **4 round trips** before the first byte (DNS from the resolver's cache, TCP, TLS 1.3, HTTP). A full DNS lookup adds several more.
 - A second visit is faster: cached DNS, reused connection, cached files.
@@ -72,6 +74,7 @@ Every topic is one step of loading a page:
 - [[networking/request-lifecycle|Quick]] · [[networking/deep/request-lifecycle|Detailed]]
 
 ### 3. DNS
+- **Simply:** DNS is the internet's phone book. A resolver looks up `shop.com` step by step (root, then `.com`, then the site's own server) and hands back its IP address.
 - Browser cache → OS cache → **recursive resolver** → it asks the **root** server, then the **TLD** server (`.com`), then the **authoritative** server, which holds the real record.
 - **Records:** A (IPv4 address), AAAA (IPv6), CNAME (alias to another name), MX (mail server), NS (who's authoritative), TXT (notes, e.g. verification).
 - Answers are cached for their **TTL**, which is why DNS changes take time to spread.
@@ -80,6 +83,7 @@ Every topic is one step of loading a page:
 - [[networking/dns|Quick]] · [[networking/deep/dns|Detailed]]
 
 ### 4. TCP and UDP
+- **Simply:** TCP is a phone call: set up first, nothing lost, everything in order. UDP is a postcard: just sent, faster, but it can get lost.
 - **Three-way handshake:** SYN → SYN-ACK → ACK, one round trip; both sides exchange random starting sequence numbers.
 - **Reliable:** every byte is numbered, the receiver ACKs (acknowledges) what arrived, and the sender resends what wasn't ACKed.
 - **Flow control** protects the receiver's buffer; **congestion control** protects the network.
@@ -88,6 +92,7 @@ Every topic is one step of loading a page:
 - [[networking/tcp|Quick]] · [[networking/deep/tcp|Detailed]]
 
 ### 5. TLS and HTTPS
+- **Simply:** TLS puts the conversation in a locked box. The server shows a certificate to prove who it is, and both sides agree on a key so nobody in between can read or change the data.
 - TLS gives **encryption** (nobody can read it), **integrity** (nobody can change it unnoticed) and **identity** (the server proves it's really shop.com).
 - **Asymmetric** keys (public and private) are used once to agree a secret; fast **symmetric** encryption protects everything after.
 - **TLS 1.3** handshake: 1 round trip (TLS 1.2 needed 2).
@@ -96,6 +101,7 @@ Every topic is one step of loading a page:
 - [[networking/tls|Quick]] · [[networking/deep/tls|Detailed]]
 
 ### 6. HTTP caching
+- **Simply:** the browser keeps a copy of a reply. `Cache-Control` says how long the copy stays fresh, and an ETag lets the browser ask "has this changed?" and get a short `304` if not.
 - `Cache-Control: max-age=N` = the copy is **fresh** for N seconds; reuse it with no request.
 - After that it's **stale**: the browser revalidates with `If-None-Match: <ETag>`. Unchanged → **304 Not Modified** (no body); changed → 200 with the new copy.
 - **no-cache** = store it, but check with the server every time. **no-store** = never store it.
@@ -104,6 +110,7 @@ Every topic is one step of loading a page:
 - [[networking/http-caching|Quick]] · [[networking/deep/http-caching|Detailed]]
 
 ### 7. Origin and same-origin policy
+- **Simply:** an origin is one exact address: scheme, host and port. The browser lets a page read replies only from its own origin, so another site can't read your data.
 - **Origin** = scheme + host + port. The path doesn't count. `http` vs `https`, `api.shop.com` vs `shop.com`, or port 8443 vs 443 each make a different origin.
 - The **same-origin policy** blocks a page from *reading* another origin's replies, iframe content and storage. It still allows loading images, scripts and CSS, submitting forms and following links.
 - **Site** (scheme + main domain) is looser than origin; cookies' `SameSite` uses site.
@@ -111,6 +118,7 @@ Every topic is one step of loading a page:
 - [[networking/origin|Quick]] · [[networking/deep/origin|Detailed]]
 
 ### 8. CORS
+- **Simply:** CORS is the server's permission slip. The browser says which origin is asking, and the server's reply says which origins may read it. If they match, the page can read the reply.
 - The browser adds `Origin: https://shop.com`; the server replies `Access-Control-Allow-Origin: https://shop.com`; if they match, the page may read the reply.
 - **Preflight:** for PUT, PATCH or DELETE, a JSON body or custom headers, the browser first sends `OPTIONS` to ask.
 - **Cookies** cross-origin need `credentials: "include"`, `Access-Control-Allow-Credentials: true`, an exact origin (no `*`), and a `SameSite=None; Secure` cookie.

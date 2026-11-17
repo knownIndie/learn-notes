@@ -37,6 +37,10 @@ GROUP BY gives one row per group. Often you need every row plus a number about i
 
 ## How it works, with an example
 
+**Simply:** A window function gives every row a value that uses related rows, and it does not squash the rows the way GROUP BY does. Think of a shop counter where every bill stays on the counter, and each bill gets a note from its own group, such as its rank or its running total. Window functions run after WHERE, GROUP BY and HAVING, so you cannot filter a rank in WHERE.
+
+**What to know:** You write a window function with OVER, which says which rows make up its window. PARTITION BY splits the rows into piles and restarts the function in each pile, and ORDER BY inside OVER sets the order inside each pile. The window runs after WHERE, GROUP BY and HAVING and before the final ORDER BY, so it cannot go in WHERE.
+
 A window function runs after FROM, WHERE, GROUP BY and HAVING, and before the final ORDER BY. That is why it can't go in WHERE. To write one, use the slots recipe:
 
 > **Slots recipe.** Keep the rows? Yes, so use a window function. No, use GROUP BY.
@@ -51,7 +55,9 @@ A window function runs after FROM, WHERE, GROUP BY and HAVING, and before the fi
 
 ## rank() and top N per group
 
-**Plain version:** each restaurant has its own shelf of dishes. Put the dishes on each shelf in order, best first, and start counting at 1 on every shelf.
+**Simply:** Each restaurant has its own shelf of dishes. PARTITION BY sets up one shelf for each restaurant, and rank() puts the dishes on each shelf in order, best first, counting from 1 on every shelf. The top dish of each restaurant is the one with rank 1, so you keep only rank 1.
+
+**What to know:** rank() numbers the rows inside each PARTITION BY pile, in the order set by ORDER BY inside OVER, and the numbering restarts for each pile. WHERE runs before the window, so put rank() in a CTE and filter the rank outside.
 
 **Example.** Top dish by revenue in each restaurant, delivered orders only.
 
@@ -119,7 +125,9 @@ Result (rnk = 1): Spice Hub, Paneer Tikka, 750 and Dosa Den, Masala Dosa, 360.
 
 ## Running total
 
-**Plain version:** a bank passbook. Every line shows the amount and the balance so far. The balance on line 3 is line 1 + line 2 + line 3.
+**Simply:** A running total adds up the rows so far, in order, and writes the total on each row. Think of a bank passbook, where every line shows the amount and the balance so far. In SQL, sum() with ORDER BY inside OVER does this, so each row adds everything up to itself.
+
+**What to know:** `sum(x) OVER (ORDER BY time)` adds the current row to all the rows before it in that order. `OVER ()` gives the whole total on every row, and with no OVER at all, the rows collapse into one row.
 
 **Example.** Here is `order_totals`, a helper table with one row per delivered order (its columns are order_id, restaurant_id, created_at and total). Four ways to write the window:
 
@@ -212,7 +220,9 @@ There is no 2026-10-29 row. Its only order was cancelled, so WHERE removed it, a
 
 ## LAG: compare with the previous row
 
-**Plain version:** a class register that shows each student's last score next to today's. Look only at the previous order from the same restaurant.
+**Simply:** LAG looks back at the row before the current one and gives you its value. Think of a class register that shows each student's last score next to today's score. PARTITION BY makes LAG stop at each group's edge, so each order is only compared with the last order from the same restaurant.
+
+**What to know:** `lag(x) OVER (PARTITION BY group ORDER BY time)` returns the previous row's x inside the same group, and NULL when that group has no earlier row. ORDER BY inside OVER decides which row counts as the previous one. Only PARTITION BY restarts LAG for each group.
 
 **Example.** Each order's total and the change from that restaurant's previous order.
 
@@ -265,7 +275,7 @@ Order 102 now compares with Spice Hub's last order (250). Put the group in PARTI
 > It is the first row in its own partition, so there is no row before it inside the group. A common slip is to say "no order came before it", which is wrong: 101 came earlier, but in another partition.
 
 > [!question]- Why does the restaurant need PARTITION BY and not just ORDER BY?
-> ORDER BY only sorts the rows. Only PARTITION BY restarts LAG for each group. Without it, order 102 reads Spice Hub's last order.
+> ORDER BY inside OVER decides which row counts as the previous one. Only PARTITION BY restarts LAG for each group. Without it, order 102 reads Spice Hub's last order.
 
 ## Say it in an interview
 

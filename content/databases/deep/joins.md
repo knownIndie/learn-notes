@@ -36,6 +36,10 @@ The same picture as the quick page. The inner join strip shows 5 pairs. The left
 
 ## How it works, with an example
 
+**Simply:** A join combines rows from two tables when a column matches. Each order holds its customer's id, which is a foreign key: a column that stores another table's key. Think of a student card that names its class. Many students share one class, so the link sits on the student side.
+
+**What to know:** A join pairs rows where its ON condition is true. Here that condition is customers.id = orders.customer_id.
+
 The same three tables as the quick page (`customers`, `restaurants`, `orders`). The full `orders` table has `customer_id` and `restaurant_id` as foreign keys. These are the only join keys used here:
 
 - `orders.customer_id` points at `customers.id`
@@ -65,7 +69,9 @@ CROSS JOIN b              -- every combination; no ON. 4 customers x 5 orders = 
 
 ## Inner join and WHERE: two filters
 
-**Plain version:** the join is a bouncer. It lets in only pairs that have a partner on both sides. WHERE is a second check on the pairs already inside. Removing the second check does not let back in the rows the bouncer refused.
+**Simply:** Think of a bouncer at a club door. The join is the bouncer: it lets in only rows that have a partner in the other table, and turns away the rest. WHERE is a second check on the rows already inside. Taking WHERE away would not let back in the rows the bouncer refused.
+
+**What to know:** The join runs first, using its ON condition, and drops rows with no partner. WHERE runs after the join and only checks the rows the join kept, so it can never bring back a dropped row.
 
 **Example:** every delivered order, with the customer and restaurant names, newest first.
 
@@ -151,7 +157,9 @@ Result, after ORDER BY (newest first):
 
 ## Left join and anti-join: who never ordered
 
-**Plain version:** a class register. Every student has a line. An absent student has a blank (NULL) in the marks column, not a missing line. To find the absent students, look for the blank cells.
+**Simply:** Think of a class register. Every student has a line, even when absent, and an absent student gets a blank called NULL. A left join works the same way: it keeps every row of the left table, with NULL where nothing matches. To find the rows with no match, look for the blanks, which means keeping the rows where the other table's id IS NULL.
+
+**What to know:** A left join keeps every row of the left table and fills the right side with NULL where nothing matches. Test the right table's id, such as orders.id IS NULL, and put the match in ON, because a right-table filter in WHERE turns the left join into an inner join.
 
 **Example:** customers who never ordered.
 

@@ -49,9 +49,9 @@ Solid arrows are queries. Dashed arrows are replies. The numbers are the order o
 
 ## How it works, with an example
 
-You type `https://shop.com` in your browser. The browser needs an IP address before it can connect. It does not know the address yet, so it asks DNS. Often the answer is already cached. If not, a chain of servers finds it.
+**Simply:** You type `https://shop.com` in your browser. The browser needs an IP address, the number computers use. It asks DNS, the phone book of the internet, through a helper called a recursive resolver.
 
-Your browser never has to know where shop.com's records live. It asks one helper, and the helper does the walk.
+**What to know:** Your browser never has to know where shop.com's records live. It asks one helper, and the helper does the walk.
 
 ## The most common mistake
 
@@ -60,7 +60,9 @@ Your browser never has to know where shop.com's records live. It asks one helper
 
 ## The lookup step by step
 
-The browser and operating system check their caches first. If a valid answer is there, the lookup ends. Otherwise:
+**Simply:** Your computer checks its notes first. If not, the resolver asks a chain of servers. The root points to the `.com` server, which points to the authoritative name server, the owner of shop.com's records.
+
+**What to know:** The browser and operating system check their caches first. If a valid answer is there, the lookup ends. Otherwise:
 
 1. The browser asks the recursive resolver: "What is the address of shop.com?" This is a **recursive query**: the client wants the final answer, and the server does all the work.
 2. The resolver asks a root server.
@@ -75,6 +77,10 @@ Steps 2 to 7 are **iterative queries**: each server answers with the best it kno
 
 ## Record types
 
+**Simply:** DNS stores records, like lines on a contact card. Each record has a type, such as A for an IP address, MX for the mail server, or TXT for plain text.
+
+**What to know:** The table lists each type.
+
 | Type | What it holds | One-line example |
 |---|---|---|
 | A | An IPv4 address | `shop.com. A 203.0.113.10` |
@@ -86,7 +92,9 @@ Steps 2 to 7 are **iterative queries**: each server answers with the best it kno
 
 ## Caching and TTL
 
-Every answer carries a TTL, in seconds. The browser, the operating system and the resolver each keep the answer, so most lookups never reach the authoritative server.
+**Simply:** Each saved answer has a timer, the TTL (time to live), in seconds. Think of milk with a use-by date. The browser, the operating system and the resolver keep the answer, so most lookups never reach the authoritative server.
+
+**What to know:**
 
 **Why DNS changes take time:** suppose shop.com moves to a new IP address, and the old record had a TTL of 3600 seconds. Caches may keep the old IP for up to an hour. Until they expire, some users still reach the old server. Teams lower the TTL well before a planned change, then raise it again after the move.
 

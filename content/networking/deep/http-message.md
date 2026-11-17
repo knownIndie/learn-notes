@@ -34,7 +34,9 @@ The same picture as the quick page. The parts it labels are the parts the rest o
 
 ## How it works, with an example
 
-The same `shop.com` → `api.com` example, as the raw bytes on the wire.
+**Simply:** Asking over HTTP is like sending a paper order slip. The browser writes a request with a method, a path and headers, and the server writes back a status such as 200 OK with the answer.
+
+**What to know:** The same `shop.com` → `api.com` example, as the raw bytes on the wire.
 
 **Request** (the browser writes it, your page code cannot change `Host` or `Origin`). There's no `Cookie` line: a cross-origin `fetch` sends cookies only with `credentials: "include"` (see [[networking/cors#Cookies across sites|CORS]]):
 
@@ -102,6 +104,10 @@ Application code and most headers do not change between versions. DevTools still
 
 ## Methods
 
+**Simply:** A method is the verb of the request, like GET to read or POST to create. A safe method changes nothing. An idempotent method has the same effect on the server whether you send it once or many times, like a lift button that still calls one lift.
+
+**What to know:**
+
 **Exact definitions** (RFC 9110, section 9):
 
 - A **safe** method is one the client does not ask the server to change anything for. Safe methods are GET, HEAD, OPTIONS and TRACE.
@@ -134,6 +140,10 @@ curl -X OPTIONS -i https://api.com/cart
 ```
 
 ## Status codes
+
+**Simply:** Every reply has a three-digit status code, like a note from a kitchen. The first digit is the family: 2 means it worked, 3 means go elsewhere, 4 means your request is wrong, and 5 means the server failed.
+
+**What to know:**
 
 **The five families** (RFC 9110, section 15):
 
@@ -182,6 +192,10 @@ curl -o /dev/null -s -w '%{http_code}\n' https://api.com/cart   # prints just th
 ```
 
 ## Stateless and cookies
+
+**Simply:** The server forgets each request once it answers, so sites use a cookie to remember you. A cookie is a small value the browser stores and sends back each time, like a coat-check ticket.
+
+**What to know:**
 
 **Stateless** means the server keeps no memory of earlier requests between messages. Each request must carry everything the server needs: the method, the path, the credentials. This makes it easy to put many servers behind a load balancer, because any server can answer any request.
 

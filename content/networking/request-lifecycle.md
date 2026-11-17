@@ -43,7 +43,9 @@ A browser starts with a name, `shop.com`. Networks route packets to IP addresses
 
 ## How it works, with an example
 
-You type `https://shop.com/cart` and press Enter. The browser reads the URL and has no fresh copy of the page. It asks DNS for the address of `shop.com` and gets `203.0.113.10`. It opens a TCP pipe to that address, which takes 1 round trip. It runs TLS over the pipe, which takes 1 more, and checks that the certificate names `shop.com`. It sends `GET /cart` over the secure pipe, and the server answers `200 OK` with the HTML one round trip later. The browser then fetches the files the HTML names and draws the page.
+**Simply:** Typing a web address is a chain of steps, like ordering a delivery: look up the address (DNS), open a phone line (TCP), lock it and check the shop (TLS), then ask for the item (HTTP).
+
+**What to know:** You type `https://shop.com/cart` and press Enter. The browser reads the URL and has no fresh copy of the page. It asks DNS for the address of `shop.com` and gets `203.0.113.10`. It opens a TCP pipe to that address, which takes 1 round trip. It runs TLS over the pipe, which takes 1 more, and checks that the certificate names `shop.com`. It sends `GET /cart` over the secure pipe, and the server answers `200 OK` with the HTML one round trip later. The browser then fetches the files the HTML names and draws the page.
 
 Added up, a first visit costs about 4 round trips: DNS 1, TCP 1, TLS 1, HTTP 1.
 
@@ -53,6 +55,10 @@ Added up, a first visit costs about 4 round trips: DNS 1, TCP 1, TLS 1, HTTP 1.
 > Many people say "the browser sends a request and gets the page." The page is the end of a long chain. DNS, TCP and TLS come first. And the HTML is only the start: each stylesheet, script and image is another request. A normal page makes many requests, often dozens.
 
 ## The steps one by one
+
+**Simply:** Think of a checklist at a shop counter. Each step waits for the one before, from reading the order to laying out the goods.
+
+**What to know:**
 
 1. **Parse the URL.** The browser splits it into scheme, host, port and path. For https with no port, it uses 443. No network traffic yet.
 2. **Check the browser cache.** If it holds a fresh copy of the page, it shows that copy and skips the rest. See [[networking/http-caching|HTTP caching]].
@@ -67,7 +73,9 @@ Added up, a first visit costs about 4 round trips: DNS 1, TCP 1, TLS 1, HTTP 1.
 
 ## Second visit: what gets skipped
 
-A second visit can skip most of the first visit's work.
+**Simply:** A second visit skips much of the first visit's work. The browser often still has the address, the open line, and a saved copy.
+
+**What to know:**
 
 - **DNS.** The answer is still cached until its TTL runs out, so no query is needed.
 - **TCP and TLS.** If the pipe is still open, the browser reuses it.

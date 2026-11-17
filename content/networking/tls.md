@@ -50,14 +50,14 @@ TLS gives three guarantees:
 
 ## How it works, with an example
 
-The user types `https://shop.com/cart`. DNS and TCP are already done. Now TLS starts.
+**Simply:** Think of two people talking privately in a crowded room. They agree on a secret code that listeners cannot follow, then talk only in that code. The server also shows an ID card the browser checks. The first messages that set this up are the TLS handshake.
+
+**What to know:** The user types `https://shop.com/cart`. DNS and TCP are already done. Now TLS starts.
 
 1. **ClientHello.** The browser sends the TLS versions it supports, its cipher options and a **key share** (its public value for the secret). It also sends `shop.com` in plain text, in a field called SNI (Server Name Indication). SNI lets one IP address serve many sites.
 2. **ServerHello.** The server replies with its own key share. Both sides compute the same secret. Everything after this is encrypted.
 3. **Certificate.** The server sends its certificate and proves it holds the matching private key.
 4. **Check.** The browser checks the certificate. If it passes, the browser sends **Finished**, and the first request goes out encrypted: `GET /cart`.
-
-In plain words: two people agree on a secret over a public phone line, then talk privately with it.
 
 ## The most common mistake
 
@@ -66,7 +66,9 @@ In plain words: two people agree on a secret over a public phone line, then talk
 
 ## The handshake
 
-TLS 1.3 needs **1 round trip** after TCP. The client sends its key share in the first TLS message. The server answers with its key share, and the client sends Finished together with its first HTTP request. For a new connection, that means 1 RTT for TCP plus 1 RTT for TLS before the request leaves. With an RTT of 100 ms, that is 200 ms.
+**Simply:** One round trip (RTT) is one message out and one reply back. TLS 1.3 needs one after TCP opens, and the older TLS 1.2 needs two.
+
+**What to know:** TLS 1.3 needs **1 round trip** after TCP. The client sends its key share in the first TLS message. The server answers with its key share, and the client sends Finished together with its first HTTP request. For a new connection, that means 1 RTT for TCP plus 1 RTT for TLS before the request leaves. With an RTT of 100 ms, that is 200 ms.
 
 TLS 1.2 needs **2 round trips**, because the client waits for the server's key data before it sends its own key. That extra wait is why TLS 1.3 is faster.
 
@@ -78,7 +80,9 @@ Why TLS uses both kinds of encryption:
 
 ## Certificates and trust
 
-A certificate says: "this public key belongs to `shop.com`, and I, the CA, vouch for it until this date."
+**Simply:** A certificate is an ID card for a website, signed by a certificate authority (CA). A CA is an office that checks the site owns its name first. A signed card proves the name, not that the site is honest.
+
+**What to know:** A certificate says: "this public key belongs to `shop.com`, and I, the CA, vouch for it until this date."
 
 Browsers and operating systems ship with a list of trusted root CAs, the **root store**. The server sends a chain that leads from its certificate up to a root:
 

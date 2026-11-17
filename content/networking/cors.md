@@ -41,7 +41,9 @@ You're logged in to `bank.com`, so your browser holds its cookie. You open `evil
 
 ## How it works, with an example
 
-Your shop's front end is on `https://shop.com`. Its API is on `https://api.com`.
+**Simply:** Picture a shop asking a warehouse for items. The browser adds an `Origin` label, and the warehouse must send that origin back in an `Access-Control-Allow-Origin` header. This is CORS (Cross-Origin Resource Sharing). The page may read the reply only if the origin matches.
+
+**What to know:** Your shop's front end is on `https://shop.com`. Its API is on `https://api.com`.
 
 1. The page runs `fetch("https://api.com/cart")`.
 2. The browser sends the request and adds `Origin: https://shop.com` on its own, so the server knows which page is asking.
@@ -55,7 +57,9 @@ Your shop's front end is on `https://shop.com`. Its API is on `https://api.com`.
 
 ## Preflight
 
-For "non-simple" requests, the browser first sends a small automatic **`OPTIONS`** request (an HTTP method that asks "what's allowed here?") to check permission. This is the **preflight**. The real request is sent only if the server says yes.
+**Simply:** Some requests are not simple, such as a `PUT` or a JSON body. The browser first sends a small `OPTIONS` request to ask what is allowed. This check is the preflight, like calling a shop ahead. The real request goes out only after a yes.
+
+**What to know:**
 
 - **Simple request (no preflight):** `GET`, `HEAD` or `POST`, with only basic headers, and a body that's a form or plain text.
 - **Needs a preflight:** `PUT`, `PATCH` or `DELETE`, a JSON body (`Content-Type: application/json`), or a custom header such as `Authorization`.
@@ -66,7 +70,11 @@ In the preflight, `Access-Control-Request-Method` and `Access-Control-Request-He
 
 ## Cookies across sites
 
-**Credentials** means cookies (and other login data) sent with a request. By default, `fetch` to another origin sends none. To send them:
+**Simply:** Credentials means cookies and other login data. A membership card stays at home by default. To send it, the page must ask, and the server must name one exact origin and allow credentials.
+
+**What to know:**
+
+To send them:
 
 - the page uses `fetch(url, { credentials: "include" })`;
 - the server replies `Access-Control-Allow-Credentials: true`;
@@ -74,13 +82,19 @@ In the preflight, `Access-Control-Request-Method` and `Access-Control-Request-He
 
 ## How to fix a CORS error
 
+**Simply:** Think of a guest list at a door. Fix it on the server, which must name the front end's origin. In development, a proxy passes calls on to the real API.
+
+**What to know:**
+
 - **Fix it on the server:** allow your front end's origin, e.g. `app.use(cors({ origin: "https://shop.com" }))` in Express.
 - **In local development:** use your dev server's **proxy** (a middleman that forwards requests). The page calls `/api` on its own origin, and the dev server passes it to the real API, so there's no cross-origin request at all.
 - **Don't:** use a browser extension, turn off browser security, or use `mode: "no-cors"`. That last one only gives you an empty reply you can't read.
 
 ## CORS is not CSRF protection
 
-**CSRF (Cross-Site Request Forgery)** is when another site makes your browser send a request you didn't mean to send, with your cookies attached, e.g. a hidden form on `evil.com` that POSTs to `bank.com/transfer`.
+**Simply:** CSRF (Cross-Site Request Forgery) is when another site makes your browser send a request you did not mean to send, with your cookies attached. Think of a forged check: the bank pays it, even though the forger never sees the bank's reply.
+
+**What to know:** For example, a hidden form on `evil.com` that POSTs to `bank.com/transfer`.
 
 CORS doesn't stop this, because CORS doesn't stop the request from being sent. A form POST is a simple request, so it goes out with no preflight, and the server runs it. Real CSRF defenses are **CSRF tokens** (a secret value only your own pages know) and **`SameSite` cookies** (a cookie setting that stops the browser from sending the cookie on requests that come from other sites).
 

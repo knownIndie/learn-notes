@@ -46,7 +46,9 @@ IP moves packets, not streams. A web page or a database query needs every byte, 
 
 ## How it works, with an example
 
-Your phone app calls `api.shop.com` over HTTPS, which means port 443.
+**Simply:** Your phone app calls `api.shop.com` over HTTPS, on port 443, a fixed number. Both sides do a handshake, a greeting, then send numbered data.
+
+**What to know:**
 
 1. **Ports.** The phone picks a temporary port for its side, say 51734. The server listens on 443.
 2. **Handshake.** The phone sends SYN with a random start number, `seq=1000`. The server replies SYN-ACK with its own start number, `seq=5000`, and `ack=1001`. The phone replies ACK with `ack=5001`. The connection is open.
@@ -63,9 +65,15 @@ The handshake costs one round trip. With a 100 ms RTT, the request leaves the ph
 
 ## The three-way handshake
 
-Three messages: SYN, SYN-ACK, ACK. Each side picks a random start number and tells the other side. The client's SYN carries its number. The server's SYN-ACK acknowledges it and carries the server's number. The client's ACK acknowledges the server's number. Two messages would leave the server unsure the client got its number.
+**Simply:** The two computers greet each other, like walkie-talkie users. One says "Start, my number is 1000" (SYN). The other says "Got it, mine is 5000" (SYN-ACK). The first replies "Got it" (ACK).
+
+**What to know:** Three messages: SYN, SYN-ACK, ACK. Each side picks a random start number and tells the other side. The client's SYN carries its number. The server's SYN-ACK acknowledges it and carries the server's number. The client's ACK acknowledges the server's number. Two messages would leave the server unsure the client got its number.
 
 ## How TCP stays reliable
+
+**Simply:** TCP keeps the stream reliable like a courier who numbers every box. The receiver sends an ACK, a receipt that names the next box it expects, so one receipt can cover several boxes. A box with no receipt in time is sent again: retransmission.
+
+**What to know:**
 
 - **Numbers.** Every byte has a sequence number, so the receiver can spot gaps and put bytes in order.
 - **Acknowledgments.** The receiver ACKs the next byte it expects. Early data waits until the gap fills.
@@ -76,6 +84,10 @@ Three messages: SYN, SYN-ACK, ACK. Each side picks a random start number and tel
 The detailed page gives the exact timer and window rules.
 
 ## TCP vs UDP
+
+**Simply:** TCP is like a registered letter: setup and receipts. Every piece arrives in order. UDP is like shouting across a room. No setup or receipts, so a missed message is gone. Use UDP when late is worse than lost.
+
+**What to know:**
 
 | | TCP | UDP |
 |---|---|---|

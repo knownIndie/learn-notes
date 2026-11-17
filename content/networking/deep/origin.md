@@ -58,7 +58,9 @@ The same picture as the quick page. The first box breaks one URL into its parts.
 
 ## How it works, with an example
 
-The same `shop.com` to `api.shop.com` example, now with the raw HTTP and the browser's checks.
+**Simply:** Picture a shop with its front counter at shop.com and its stock room at api.shop.com. Before a page reads data from another address, the browser compares the two addresses part by part. If one part differs, the request is cross-origin, which means it goes to a different origin. The browser adds an `Origin` label that the page cannot change, and it checks the server's reply before the page may read it.
+
+**What to know:** The same `shop.com` to `api.shop.com` example, now with the raw HTTP and the browser's checks.
 
 **Request** (the browser adds `Origin`, your code cannot change it):
 
@@ -102,7 +104,9 @@ The server does the work in every case. The browser only decides what the page m
 
 ## Same origin or not?
 
-The browser compares the three parts after normalizing them: the host is lowercased and the default port is filled in. Then the parts are compared as strings.
+**Simply:** Think of an office building. The domain name (the host) is the building, the scheme (http or https) is the entrance, and the port is the door number. Two addresses are the same origin only if all three match. The room you walk to (the path) does not count.
+
+**What to know:** The browser compares the three parts after normalizing them: the host is lowercased and the default port is filled in. Then the parts are compared as strings.
 
 | Page URL | Other URL | Same origin? | What differs |
 |---|---|---|---|
@@ -120,7 +124,9 @@ Pages opened from `file:` addresses are a special case. Most browsers treat each
 
 ## What the policy blocks and allows
 
-The policy limits **reading**. It does not limit **sending**.
+**Simply:** Think of a postal service. The same-origin policy is the browser's rule that sets these limits. A page can send a letter to another address and can show a picture from another origin, but it cannot read the reply that comes back. The policy limits reading. It does not limit sending.
+
+**What to know:** Here is what is blocked and what is allowed.
 
 **Blocked: page JavaScript cannot read:**
 
@@ -144,7 +150,9 @@ The policy limits **reading**. It does not limit **sending**.
 
 ## Origin vs site
 
-Origin is strict. Site is looser: the scheme plus the registrable domain, with ports ignored. Cookies have their own scope.
+**Simply:** Think of a company with several offices. An origin is one exact office address: scheme, host and port. A site is the whole company, so shop.com and api.shop.com are different origins but the same site. Port numbers do not change the site.
+
+**What to know:** Origin is strict. Site is looser: the scheme plus the registrable domain, with ports ignored. Cookies have their own scope.
 
 | Pair | Same origin? | Same site? | Why |
 |---|---|---|---|

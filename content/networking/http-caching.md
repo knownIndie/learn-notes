@@ -46,7 +46,9 @@ Read it top to bottom. Each yes/no question is one check. A repeat visit usually
 
 ## How it works, with an example
 
-Take `/styles/site.css` on shop.com.
+**Simply:** Your browser keeps a copy of a file, like a recipe card in a kitchen drawer. A fresh copy (new enough) is used with no request. A stale copy (too old) is checked with the server, which may reply `304 Not Modified` to say the copy is still good.
+
+**What to know:** Take `/styles/site.css` on shop.com.
 
 1. The first reply arrives with `Cache-Control: max-age=3600` and `ETag: "7f3a-9c1"`. The browser stores the body and the headers.
 2. Ten minutes later, the copy is fresh (10 minutes old, less than the 3600-second `max-age`). The browser uses it. No request leaves the computer.
@@ -63,7 +65,9 @@ If the file had changed, step 4 would give `200 OK` with the new file and a new 
 
 ## Fresh or stale
 
-A stored copy is **fresh** when its age is less than its `max-age`. Age is how long the copy has been stored. A fresh copy is used with no request. A **stale** copy must be checked with the server before use.
+**Simply:** A copy is fresh while it is young enough to use, and stale once it is too old. The server sets the limit in a header called `Cache-Control`, using `max-age` in seconds.
+
+**What to know:** A stored copy is **fresh** when its age is less than its `max-age`. Age is how long the copy has been stored. A fresh copy is used with no request. A **stale** copy must be checked with the server before use.
 
 `Cache-Control` carries these rules. The main directives:
 
@@ -79,7 +83,9 @@ Example: `Cache-Control: public, max-age=60, s-maxage=3600` means browsers keep 
 
 ## Revalidation and 304
 
-Revalidation happens when a copy is stale. The browser sends a **conditional request**: the same `GET`, plus a validator from the stored copy.
+**Simply:** A stale copy is checked with one question: has this file changed? The browser sends its ETag, a short version label, and the server answers `304 Not Modified` with no file if the label still matches.
+
+**What to know:** Revalidation happens when a copy is stale. The browser sends a **conditional request**: the same `GET`, plus a validator from the stored copy.
 
 - **ETag** is the stronger validator. The browser sends it back as `If-None-Match`.
 - **Last-Modified** is a date. The browser sends it back as `If-Modified-Since`. It is weaker, because it has one-second resolution.
@@ -101,6 +107,10 @@ ETag: "7f3a-9c1"
 ```
 
 ## What to cache
+
+**Simply:** Each kind of file needs its own lifetime. Hashed files, such as `app.3f9a.js`, can be kept for a year, while the HTML page that links to them is checked often. The hash, a code made from the file's content, is in the name, so a changed file gets a new name.
+
+**What to know:**
 
 - **Hashed static files** (`app.3f9a.js`, images): cache for a long time, e.g. `Cache-Control: public, max-age=31536000, immutable` (one year).
 - **HTML pages**: they link to the hashed files and change at each deploy. Use `no-cache` or a short `max-age`, so a new deploy shows up quickly.

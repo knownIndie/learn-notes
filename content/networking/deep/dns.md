@@ -37,7 +37,9 @@ The same eight steps as the quick page. The rest of this page zooms into each bo
 
 ## How it works, with an example
 
-The same `shop.com` example, as the wire format.
+**Simply:** You type `https://shop.com` in your browser. The browser needs an IP address, the number computers use. It asks DNS, the phone book of the internet, through a helper called a recursive resolver.
+
+**What to know:** The same `shop.com` example, as the wire format.
 
 A DNS message has a 12-byte header and then four sections: question, answer, authority and additional. The header holds the transaction ID, a set of flags, and the counts for the other sections.
 
@@ -78,7 +80,9 @@ shop.com.     3600  IN  A  203.0.113.10
 
 ## The lookup step by step
 
-The eight steps of the picture, with the detail for each:
+**Simply:** Your computer checks its notes first. If not, the resolver asks a chain of servers. The root points to the `.com` server, which points to the authoritative name server, the owner of shop.com's records.
+
+**What to know:** The eight steps of the picture, with the detail for each:
 
 1. **Local caches.** The browser checks its own cache, then the operating system's cache (the stub resolver). A valid entry ends the lookup. Each entry is kept for its remaining TTL.
 2. **Query to the resolver.** The stub resolver sends one query with the RD flag set. It asks for an A record (IPv4) or an AAAA record (IPv6). Many systems ask for both at once.
@@ -130,7 +134,9 @@ shop.com.               3600    IN      A       203.0.113.10
 
 ## Record types
 
-The six types from the quick page, with the rules that trip people up:
+**Simply:** DNS stores records, like lines on a contact card. Each record has a type, such as A for an IP address, MX for the mail server, or TXT for plain text.
+
+**What to know:** The six types from the quick page, with the rules that trip people up:
 
 | Type | Holds | Example | Rules and notes |
 |---|---|---|---|
@@ -145,7 +151,9 @@ The six types from the quick page, with the rules that trip people up:
 
 ## Caching and TTL
 
-Caches exist at several layers, and each one follows the TTL:
+**Simply:** Each saved answer has a timer, the TTL (time to live), in seconds. Think of milk with a use-by date. The browser, the operating system and the resolver keep the answer, so most lookups never reach the authoritative server.
+
+**What to know:** Caches exist at several layers, and each one follows the TTL:
 
 - **Browser and OS.** Short-lived caches, shared by programs on the same machine.
 - **Recursive resolver.** The largest shared cache. Many users behind one resolver share its answers.

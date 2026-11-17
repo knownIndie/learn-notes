@@ -34,7 +34,9 @@ The same flow as the quick page. The rest of this page zooms into each box: the 
 
 ## How it works, with an example
 
-The same `shop.com/styles/site.css` example as the quick page.
+**Simply:** Your browser keeps a copy of a file, like a recipe card in a kitchen drawer. A fresh copy (new enough) is used with no request. A stale copy (too old) is checked with the server, which may reply `304 Not Modified` to say the copy is still good.
+
+**What to know:** The same `shop.com/styles/site.css` example as the quick page.
 
 **Step 1, first reply.** The browser asks for the file and gets this:
 
@@ -123,6 +125,10 @@ Two more consequences interviewers like:
 
 ## Fresh or stale
 
+**Simply:** A copy is fresh while it is young enough to use, and stale once it is too old. The server sets the limit in a header called `Cache-Control`, using `max-age` in seconds.
+
+**What to know:**
+
 **The freshness test.** A copy is fresh when:
 
 ```text
@@ -158,6 +164,10 @@ freshness lifetime = max-age (if set), otherwise Expires minus Date
 
 ## Revalidation and 304
 
+**Simply:** A stale copy is checked with one question: has this file changed? The browser sends its ETag, a short version label, and the server answers `304 Not Modified` with no file if the label still matches.
+
+**What to know:**
+
 **The rules for a 304 (RFC 9110 and RFC 9111).** The server:
 
 - must not send a body in a `304`;
@@ -171,6 +181,10 @@ freshness lifetime = max-age (if set), otherwise Expires minus Date
 **ETags in practice.** Some servers build ETags from the file's inode, modification time and size. If two servers behind a load balancer build different ETags for the same file, revalidations miss and return `200`. Use a content hash, or the same rule on every server.
 
 ## What to cache
+
+**Simply:** Each kind of file needs its own lifetime. Hashed files, such as `app.3f9a.js`, can be kept for a year, while the HTML page that links to them is checked often. The hash, a code made from the file's content, is in the name, so a changed file gets a new name.
+
+**What to know:**
 
 **The four kinds of response:**
 

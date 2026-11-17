@@ -51,7 +51,9 @@ The same four steps as the quick page. The rest of this page zooms into each box
 
 ## How it works, with an example
 
-The same `shop.com` → `api.com` example, as the raw HTTP on the wire.
+**Simply:** Picture a shop asking a warehouse for items. The browser adds an `Origin` label, and the warehouse must send that origin back in an `Access-Control-Allow-Origin` header. This is CORS (Cross-Origin Resource Sharing). The page may read the reply only if the origin matches.
+
+**What to know:** The same `shop.com` → `api.com` example, as the raw HTTP on the wire.
 
 **Request** (the browser adds `Origin`, your code can't change it):
 
@@ -89,6 +91,10 @@ Vary: Origin
 
 ## Preflight
 
+**Simply:** Some requests are not simple, such as a `PUT` or a JSON body. The browser first sends a small `OPTIONS` request to ask what is allowed. This check is the preflight, like calling a shop ahead. The real request goes out only after a yes.
+
+**What to know:**
+
 **Exact simple-request rules.** A request skips the preflight only if *all* are true:
 
 - the method is `GET`, `HEAD` or `POST`;
@@ -118,7 +124,9 @@ So `Content-Type: application/json` and `Authorization: Bearer ...` both trigger
 
 ## Cookies across sites
 
-Everything from the quick page, plus:
+**Simply:** Credentials means cookies and other login data. A membership card stays at home by default. To send it, the page must ask, and the server must name one exact origin and allow credentials.
+
+**What to know:** Everything from the quick page, plus:
 
 - **With credentials, no wildcards anywhere.** `Allow-Origin`, `Allow-Headers`, `Allow-Methods` and `Expose-Headers` must all be explicit lists. A `*` is treated as the literal text "*".
 - **The cookie must also be allowed to travel.** For a cross-*site* request, the cookie needs `SameSite=None; Secure`. Chrome treats cookies with no `SameSite` setting as `Lax`, which doesn't send them on cross-site `fetch`. Some browsers also block third-party cookies entirely. So "I set Allow-Credentials and the cookie still isn't sent" is usually a `SameSite` problem, not a CORS one.
@@ -126,6 +134,10 @@ Everything from the quick page, plus:
 - **Tokens instead of cookies.** If the front end sends an `Authorization: Bearer <token>` header instead of cookies, `credentials: "include"` isn't needed, but every request is preflighted (custom header).
 
 ## How to fix a CORS error
+
+**Simply:** Think of a guest list at a door. Fix it on the server, which must name the front end's origin. In development, a proxy passes calls on to the real API.
+
+**What to know:**
 
 **Read the console message first.** It names the missing piece, e.g. "No 'Access-Control-Allow-Origin' header is present" or "Request header field authorization is not allowed by Access-Control-Allow-Headers in preflight response".
 
@@ -169,6 +181,10 @@ export default { server: { proxy: { "/api": "http://localhost:8000" } } };
 - **Browser extensions or disabling web security.** They only change *your* browser. Your users still get the error.
 
 ## CORS is not CSRF protection
+
+**Simply:** CSRF (Cross-Site Request Forgery) is when another site makes your browser send a request you did not mean to send, with your cookies attached. Think of a forged check: the bank pays it, even though the forger never sees the bank's reply.
+
+**What to know:**
 
 **Why CORS can't stop it:** a CSRF attack doesn't need to read the reply. A hidden form on `evil.com` that POSTs to `bank.com/transfer` is a simple request, so there's no preflight. The browser sends it with your cookie (if `SameSite` allows), and the bank moves the money. CORS only hides the reply, which the attacker didn't need.
 

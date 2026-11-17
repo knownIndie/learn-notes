@@ -51,6 +51,7 @@ The data used on the joins, GROUP BY and window pages (the transactions page use
 ## Topic by topic
 
 ### 1. Transactions and concurrency
+- **Simply:** a transaction is all-or-nothing, like a bank transfer. But two transactions running at once can still trip over each other unless you lock the row or use a stricter isolation level.
 - A transaction is **atomic, not isolated**. Two checkouts can both read stock 5, both write 4, and one sale's update is lost (it should be 3).
 - The **earlier** write is the one lost: last writer wins, from a stale copy.
 - `READ COMMITTED` (default) never re-checks a decision made from an earlier read. `REPEATABLE READ` / `SERIALIZABLE` raise **40001**; the backend retries the **whole** transaction from `BEGIN`, and only on errors that can succeed next time (40001, and 40P01 for a deadlock).
@@ -59,6 +60,7 @@ The data used on the joins, GROUP BY and window pages (the transactions page use
 - [[databases/transactions|Quick]] · [[databases/deep/transactions|Detailed]]
 
 ### 2. Joins
+- **Simply:** a join matches rows from two tables, like pairing customers with their orders. An inner join keeps only pairs; a left join keeps every left row, even with no match.
 - **Inner join:** only pairs that match. Arjun (no orders) is dropped by the **join**; cancelled order 103 by the **WHERE**. Two separate filters.
 - **Left join:** keeps every row of the `FROM` table; no partner means NULLs on the joined side.
 - "Who never ordered?" = `FROM customers LEFT JOIN orders ... WHERE orders.id IS NULL` → Arjun. Test the right side's id, never the left's.
@@ -67,6 +69,7 @@ The data used on the joins, GROUP BY and window pages (the transactions page use
 - [[databases/joins|Quick]] · [[databases/deep/joins|Detailed]]
 
 ### 3. Aggregates: GROUP BY and HAVING
+- **Simply:** GROUP BY sorts rows into piles; aggregates such as sum() then give one total per pile. WHERE filters rows before the piles; HAVING filters the piles after.
 - Piles: `GROUP BY r.id, r.name` with `sum(oi.qty * m.price)` → Spice Hub 1350, Dosa Den 360. The multiply happens per row, the add per pile.
 - **Key rule:** group by what you want one row **per**; add every plain selected column; never the aggregate (revenue) or the summed columns (qty, price).
 - After a left join, `count(o.id)` gives Arjun 0; `count(*)` gives 1, because his filler row still exists.
@@ -75,6 +78,7 @@ The data used on the joins, GROUP BY and window pages (the transactions page use
 - [[databases/group-by|Quick]] · [[databases/deep/group-by|Detailed]]
 
 ### 4. Window functions
+- **Simply:** a window function looks at a group of rows but keeps every row, like writing each order's rank next to it instead of collapsing to one total.
 - Same piles as GROUP BY, but every row stays. Runs after GROUP BY and HAVING, so it can't go in WHERE.
 - **Top N per group:** `rank() OVER (PARTITION BY restaurant ORDER BY revenue DESC)` in a CTE, then `WHERE rnk = 1` outside → Paneer Tikka 750, Masala Dosa 360. The count restarts at 1 per restaurant.
 - **Running total:** group by day first, then `sum(revenue) OVER (ORDER BY day)` → 1060, 1460, 1710. `OVER ()` gives 1710 on every row. 10-29 has no row (its only order was cancelled).

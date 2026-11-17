@@ -37,6 +37,10 @@ Dashboards and interviewers ask for totals per group: revenue per restaurant, or
 
 ## How it works, with an example
 
+**Simply:** A SQL query runs its steps in a fixed order, not in the order you type them. Think of a shop counter: first you collect all the bills, then you set aside the bills you do not need with WHERE. Next, GROUP BY sorts the bills into one pile per shop, and aggregates such as sum() write one total on each pile. Last, HAVING keeps only the piles you want.
+
+**What to know:** WHERE filters single rows before any piles exist, so it cannot test a total. GROUP BY makes one pile per key, and each aggregate function runs once per pile. HAVING filters the piles after the totals exist, and ORDER BY only sorts the finished rows.
+
 Every query runs in this order, not in the order you type it:
 
 ```text
@@ -58,7 +62,9 @@ ORDER BY      sort the finished rows (it adds nothing up)
 
 ## GROUP BY: one pile per key
 
-**Plain version:** sort your receipts into one pile per restaurant, then write one total on top of each pile.
+**Simply:** GROUP BY sorts the rows into piles. Picture a box of receipts: you sort them into one pile per restaurant, then write one total on top of each pile. Each row goes into exactly one pile, decided by its key, which is the column named in GROUP BY. An aggregate such as sum() then gives one answer for each pile.
+
+**What to know:** GROUP BY puts each row into the one pile that matches its key value, so the result has one row per pile. Aggregate functions such as sum() and count() then run once for each pile, so the key decides what one output row means.
 
 **Example:** revenue per restaurant, delivered orders only. The revenue of one line is `qty * price`.
 
@@ -115,7 +121,9 @@ Result: Spice Hub 1350, Dosa Den 360. Burger Bay has no pile, because its only l
 
 ## count(*) vs count(column)
 
-**Plain version:** a class register. `count(*)` counts every line, even a blank one. `count(column)` counts only the lines where that column has something written.
+**Simply:** Think of a class register. `count(*)` counts every line on it, even a line with blank boxes. `count(column)` counts only the lines where that one box has something written in it. A LEFT JOIN can add a blank line for a customer with no orders, so you count a column from the right-hand table to leave that line out.
+
+**What to know:** `count(*)` counts rows and never looks at the values inside them. `count(column)` counts only the rows where that column is not NULL, and `count(distinct column)` counts the different non-NULL values. After a LEFT JOIN, count a column from the right-hand table.
 
 **Example:** orders per customer, keeping customers with no orders (a LEFT JOIN, see [[databases/joins|Joins]]).
 
@@ -165,7 +173,9 @@ Arjun has no orders, so the LEFT JOIN gives him one filler row with NULL in `o.i
 
 ## WHERE vs HAVING
 
-**Plain version:** WHERE is the check at the door, applied to each order as it comes in. HAVING is the check after the pile is totalled: "does this customer have at least two deliveries?"
+**Simply:** WHERE is a check at the door. It looks at each row alone, as it comes in, and drops the rows that fail, before any grouping happens. HAVING is a check after the piles are totalled. It looks at each pile's total, such as a customer with at least two deliveries, and drops the piles that fail.
+
+**What to know:** WHERE filters single rows before grouping, so it cannot use an aggregate such as `count()` or `sum()`. HAVING filters the piles after grouping and aggregating, so it can test those totals. A filter on one row's own value goes in WHERE, and a filter on a total goes in HAVING.
 
 **Example:** customers with 2 or more delivered orders.
 
